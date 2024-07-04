@@ -1,0 +1,75 @@
+
+.navigation {
+    background-color: #070F2B; 
+    color: white;
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+}
+
+
+.navigation ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+}
+
+
+.navigation li {
+    margin: 0 10px;
+}
+
+
+.navigation a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 10px 20px;
+    text-decoration: none;
+}
+
+
+.navigation a:hover {
+    background-color: #1B1A55;
+    color: white;
+    border-radius: 10%;
+}
+.navigation .site-title{
+    font-family: "Roboto";
+    font-size: 30px;
+    font-weight: 700;
+}
+.navigation .site-title:hover {
+    background-color: #070F2B
+}
+
+.navigation .UserButtons li{
+    display: flex;
+    background-color: #535C91;
+    text-align: center;
+    border-radius:10%;
+}
+
+.navigation .UserButtons a{
+    padding: 8px 15px;
+}
+
+.navigation .UserButtons a:hover{
+    background-color: #1B1A55;
+    color: white;
+    border-radius: 10%;
+    border-width:inherit;
+}
+
+
+.content {
+    padding-top: 60px; 
+}
