@@ -3,21 +3,35 @@ import './styles/SearchBox.css'; // Stylizacja CSS
 
 const SearchBox = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [expanded, setExpanded] = useState(false); // Stan, który określa, czy pole wyszukiwania jest rozwinięte
+  const [expanded, setExpanded] = useState(false); //expanded - show suggestions
+  const [suggestions, setSuggestions] = useState([]);
+  const [allStocks, setAllStocks] = useState([]);
+  const [selectedSuggestions, setSelectedSuggestions] = useState([]);
   const searchBoxRef = useRef(null);
 
-  const handleInputChange = (e) => {
-    setSearchTerm(e.target.value);
+  const handleInputChange = (event) => {
+    const value = event.target.value;
+    setSearchTerm(value);
+    if (value.length > 0) {
+      setSuggestions(allStocks.filter(stock => stock.name.toLowerCase().includes(value.toLowerCase())));
+    } else {
+      setSuggestions([]);
+    }
   };
 
+  useEffect(() => {
+    // starting values of suggestions
+    setSuggestions(allStocks.slice(0, 5)); // displaying first 5 suggestions
+  }, [allStocks])
+
   const handleInputClick = () => {
-    setExpanded(!expanded); // Przełączanie stanu po kliknięciu
+    setExpanded(!expanded); 
   };
 
   const handleSuggestionClick = (value) => {
-    setSearchTerm(value);
-    setExpanded(false); // Po wybraniu sugestii, zwijamy pasek wyszukiwania
-  };
+    setSearchTerm(value.name);
+    setExpanded(false);
+};
 
   const handleCollapse = () => {
     setExpanded(false);
@@ -46,6 +60,20 @@ const SearchBox = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/test_stock_names.json'); 
+        const data = await response.json();
+        setAllStocks(data);
+      } catch (error) {
+        console.error('Error loading stock data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <div className={`search-box ${expanded ? 'expanded' : ''}`}>
       <input
@@ -55,24 +83,29 @@ const SearchBox = () => {
         onChange={handleInputChange}
         onClick={handleInputClick}
       />
-      <div className="suggestions">
-        {[
-          'JavaScript',
-          'React',
-          'Node.js',
-          'HTML',
-          'CSS',
-          'TypeScript'
-        ].map((suggestion, index) => (
-          <div
-            key={index}
-            className="suggestion"
-            onClick={() => handleSuggestionClick(suggestion)}
-          >
-            {suggestion}
-          </div>
-        ))}
-      </div>
+      {suggestions.length > 0 && (
+        <div className="suggestions">
+          {suggestions.map(suggestion => (
+            <div
+              key={suggestion.id}
+              className="suggestion-item"
+              onClick={() => handleSuggestionClick(suggestion)}
+            >
+              {suggestion.name}
+            </div>
+          ))}
+        </div>
+      )}
+      {selectedSuggestions.length > 0 && (
+        <div className="selected-suggestions">
+          <h4>Selected Suggestions:</h4>
+          {selectedSuggestions.map(suggestion => (
+            <div key={suggestion.id} className="selected-suggestion-item">
+              {suggestion.name}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
