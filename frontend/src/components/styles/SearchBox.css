@@ -1,0 +1,76 @@
+.search-box {
+    width: 20vw;
+    position: relative; /* Ustawienie domyślne */
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.8s ease,width 0.8s ease;
+    z-index: 1; /* Domyślne z-index, aby był pod tytułami */
+  }
+  
+  .search-box.expanded {
+    position: fixed; /* Po rozwinięciu, przesuwamy na wierzch i fixujemy na stronie */
+    z-index: 1000; /* Upewnienie się, że jest na wierzchu */
+    position: relative; /* Niewymagane, można usunąć */
+    width: 40vw;    
+    transition: transform 0.8s ease,width 0.8s ease;
+    transform: translate(0, -25vh);
+  }
+  
+  @-webkit-keyframes floatBubble {
+    0% {
+      top: 0px; /* Początkowa pozycja, tutaj możesz ustawić aktualne top */
+    }
+    100% {
+        transform: translate(0, -50vh); /* Przesunięcie do 25% wysokości widoku */
+    }
+  }
+  
+  @keyframes floatBubble {
+    0% {
+      top: 0px; /* Początkowa pozycja, tutaj możesz ustawić aktualne top */
+    }
+    100% {
+        transform: translate(0, -50vh); /* Przesunięcie do 25% wysokości widoku */
+    }
+  }
+  
+  input[type='text'] {
+    width: calc(100% - 20px); /* Szerokość input minus padding */
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    outline: none;
+  }
+  
+  .suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-top: none;
+    border-radius: 0 0 5px 5px;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1);
+    visibility: hidden; /* Ukrywamy sugestie na początku */
+    opacity: 0;
+    transition: visibility 0s, opacity 0.3s ease;
+  }
+  
+  .search-box.expanded .suggestions {
+    visibility: visible; /* Pokazujemy sugestie po rozwinięciu */
+    opacity: 1;
+  }
+  
+  .suggestion {
+    padding: 10px;
+    cursor: pointer;
+  }
+  
+  .suggestion:hover {
+    background-color: #f0f0f0;
+  }
+  

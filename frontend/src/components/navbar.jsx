@@ -1,30 +1,31 @@
 import "./styles/NavBar.css"
+import { Link } from "react-router-dom"
 
 function NavBar(){
     return (
         <nav className="navigation">
-            <a href="/" className="site-title">StockSense</a>
+            <Link to="/" className="site-title">StockSense</Link>
             <ul>
                 <li>
-                    <a href="/analysis">analysis</a>
+                    <Link to="/analysis">analysis</Link>
                 </li>
                 <li>
-                    <a href="/news">news</a>
+                    <Link to="/news">news</Link>
                 </li>
                 <li>
-                    <a href="/calendar">calendar</a>
+                    <Link to="/calendar">calendar</Link>
                 </li>
                 <li>
-                    <a href="/about">about</a>
+                    <Link to="/about">about</Link>
                 </li>
                 
             </ul>
             <ul className="UserButtons">
                 <li>
-                <a href="/signup">sign up</a>
+                <Link to="/signup">sign up</Link>
                 </li>
                 <li>
-                <a href="/signin">sign in</a>
+                <Link to="/signin">sign in</Link>
                 </li>
             </ul>
         </nav>

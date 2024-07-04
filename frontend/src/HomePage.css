@@ -3,9 +3,11 @@ body{
     background-image: url("assets/bg.jpg");
 }
 .homepage {
+    width: 100vw;
     text-align: center;
     font-family: Arial, sans-serif;
     background: transparent;
+    z-index: 0;
 }
 
 .homepage-header {
@@ -47,3 +49,8 @@ body{
 .cta button:hover {
     background-color: #21a1f1;
 }
+
+.search-container {
+    position: relative;
+    display: inline-block;
+  }
