@@ -2,11 +2,12 @@ import React from 'react';
 import './styles/StockInfoBox.css';
 
 const StockInfoBox = ({ name, price, change }) => {
+  const textColor = change >=0 ? '#3ae307' : 'red';
   return (
     <div className="stock-info-box">
-      <h3>{name}</h3>
-      <p>Price: ${price}</p>
-      <p>Change: {change}%</p>
+      <h3 style = {{color: textColor}}>{name}</h3>
+      <p style = {{color: textColor}}>Price: ${price}</p>
+      <p style = {{color: textColor}}>Change: {change}%</p>
     </div>
   );
 };
