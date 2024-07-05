@@ -1,0 +1,10 @@
+.stock-section {
+    margin: 20px 0;
+  }
+  
+  .stock-list {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+  }
+  

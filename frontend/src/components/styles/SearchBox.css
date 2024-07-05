@@ -15,26 +15,9 @@
     position: relative; /* Niewymagane, można usunąć */
     width: 40vw;    
     transition: transform 0.8s ease,width 0.8s ease;
-    transform: translate(0, -25vh);
+    transform: translate(-10vw, -25vh);
   }
   
-  @-webkit-keyframes floatBubble {
-    0% {
-      top: 0px; /* Początkowa pozycja, tutaj możesz ustawić aktualne top */
-    }
-    100% {
-        transform: translate(0, -50vh); /* Przesunięcie do 25% wysokości widoku */
-    }
-  }
-  
-  @keyframes floatBubble {
-    0% {
-      top: 0px; /* Początkowa pozycja, tutaj możesz ustawić aktualne top */
-    }
-    100% {
-        transform: translate(0, -50vh); /* Przesunięcie do 25% wysokości widoku */
-    }
-  }
   
   input[type='text'] {
     width: calc(100% - 20px); /* Szerokość input minus padding */
