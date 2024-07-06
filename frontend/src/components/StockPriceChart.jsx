@@ -26,7 +26,7 @@ const data = [
 
 const StockChart = () => {
   return (
-    <ResponsiveContainer width="100%" height={400}>
+    <ResponsiveContainer width="100%" height={250}>
       <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#fff"/>
         <XAxis dataKey="date" stroke="#fff"/>
@@ -34,7 +34,7 @@ const StockChart = () => {
         <Tooltip />
         <Legend />
         <Line type="monotone" dataKey="price" stroke="#009127" strokeWidth={5}/>
-        <Line type="monotone" dataKey="predicted" stroke="#0008a8" strokeDasharray="5 5" strokeWidth={5}/>
+        <Line type="monotone" dataKey="predicted" stroke="#FF8042" strokeDasharray="5 5" strokeWidth={5}/>
         <Area type="monotone" dataKey="upperBound" stroke="none" fill="#82ca9d" fillOpacity={0.2} />
         <Area type="monotone" dataKey="lowerBound" stroke="none" fill="#82ca9d" fillOpacity={0.2} />
       </LineChart>
