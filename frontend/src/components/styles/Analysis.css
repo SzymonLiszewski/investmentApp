@@ -1,0 +1,25 @@
+body{
+    background: rgb(0, 0, 0);
+}
+
+.grid-container{
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(3, 1fr);
+    width: 80vw;
+    gap: 20px
+}
+
+.grid-item{
+    background-color: #535C91;
+    border-radius: 40px;
+    width: 80vw;
+    margin-left:10vw;
+    text-align: center;
+    padding-top: 20px;
+}
+
+.grid-item:nth-child(1){
+    grid-column: span 1;
+    grid-row: span 1;
+}
