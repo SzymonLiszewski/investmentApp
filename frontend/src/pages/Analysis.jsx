@@ -25,7 +25,7 @@ function Analysis() {
                     </div>
                 </div>
                 <div className="div3">
-                    qwee
+                    <StockPriceChart/>
                 </div>
             </div>
         </div>
