@@ -11,7 +11,7 @@ import Analysis2 from './pages/Analysis2';
 const App = () => {
     return (
         <Fragment>
-            
+            <NavBar/>
             <div className='container'>
                 <Routes>
                     <Route path='/' element={<HomePage/>}/>

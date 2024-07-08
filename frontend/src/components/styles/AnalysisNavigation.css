@@ -1,0 +1,39 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    width: 100;
+  }
+  
+  .navbar {
+    overflow: hidden;
+    width: 100%;
+    margin-left: 5vw;
+    font-size: 130%
+  }
+  
+  .navbar ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+  }
+  
+  .navbar li {
+    padding: 14px 20px;
+  }
+  
+  .navbar li a {
+    color: white;
+    text-decoration: none;
+  }
+  
+  .navbar li.active a {
+    border-bottom: 2px solid #fff;
+  }
+  
+  .navbar a:hover{
+    background-color: #686D76;
+    padding: 10px;
+    border-radius: 40px;
+  }

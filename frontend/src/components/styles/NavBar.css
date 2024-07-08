@@ -1,6 +1,6 @@
 
 .navigation {
-    background-color: #070F2B; 
+    background-color: #373A40; 
     color: white;
     width: 100vw;
     position: fixed;
@@ -11,6 +11,8 @@
     align-items: center;
     justify-content: space-between;
     height: 60px;
+    border-bottom: 2px solid #686D76;
+    font-size: 125%;
 }
 
 
@@ -38,7 +40,7 @@
 
 
 .navigation a:hover {
-    background-color: #1B1A55;
+    background-color: #686D76;
     color: white;
     border-radius: 10%;
 }
@@ -48,12 +50,14 @@
     font-weight: 700;
 }
 .navigation .site-title:hover {
-    background-color: #070F2B
+    background-color: #373A40;
+    padding-bottom: 0;
+    padding-top: 0;
 }
 
 .navigation .UserButtons li{
     display: flex;
-    background-color: #535C91;
+    background-color: #686D76;
     text-align: center;
     border-radius:10px;
 }
@@ -62,8 +66,12 @@
     padding: 8px 15px;
 }
 
+.navigation .UserButtons{
+    margin-right: 1vw;
+}
+
 .navigation .UserButtons a:hover{
-    background-color: #1B1A55;
+    background-color: #4b4f55;
     color: white;
     border-radius: 10px;
     border-width:inherit;

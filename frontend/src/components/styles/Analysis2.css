@@ -6,6 +6,7 @@
     grid-row-gap: 0px;
     background-color: #373A40;
     height: 100vh;
+    padding-top: 60px;
     }
     
 .stock-name { 
@@ -36,4 +37,8 @@
 }
 .stock-analysis { 
     grid-area: 2 / 1 / 5 / 2; 
+}
+
+#AnalysisNavigation{
+    margin-left: 5vw;
 }

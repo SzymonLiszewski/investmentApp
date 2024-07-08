@@ -1,5 +1,6 @@
 import "../components/styles/Analysis2.css"
 import FundamentalAnalysis from "../components/FundamentalAnalysis"
+import AnalysisNavigation from "../components/AnalysisNavigation"
 function Analysis2(){
     return (
         <div className="analysis-container">
@@ -12,6 +13,7 @@ function Analysis2(){
                 </div>
             </div>
             <div className="stock-analysis">
+                <AnalysisNavigation id="AnalysisNavigation"/>
                 <FundamentalAnalysis/>
             </div>
         </div>
