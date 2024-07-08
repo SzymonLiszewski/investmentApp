@@ -1,6 +1,8 @@
 import "../components/styles/Analysis2.css"
 import FundamentalAnalysis from "../components/FundamentalAnalysis"
 import AnalysisNavigation from "../components/AnalysisNavigation"
+import {Route, Routes} from 'react-router-dom';
+import ForecastView from "../components/ForecastView";
 function Analysis2(){
     return (
         <div className="analysis-container">
@@ -13,8 +15,11 @@ function Analysis2(){
                 </div>
             </div>
             <div className="stock-analysis">
-                <AnalysisNavigation id="AnalysisNavigation"/>
-                <FundamentalAnalysis/>
+            <AnalysisNavigation/>
+            <Routes>
+                    <Route path='/' element={<ForecastView/>}/>
+                    <Route path='/fundamental' element={<FundamentalAnalysis/>}/>
+                </Routes>
             </div>
         </div>
     )

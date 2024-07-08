@@ -7,6 +7,7 @@ import HomePage from './pages/HomePage';
 import News from './pages/News';
 import FundamentalAnalysis from './components/FundamentalAnalysis';
 import Analysis2 from './pages/Analysis2';
+import ForecastView from './components/ForecastView';
 
 const App = () => {
     return (
@@ -17,8 +18,7 @@ const App = () => {
                     <Route path='/' element={<HomePage/>}/>
                     <Route path='/news' element={<News/>}/>
                     <Route path='/analysis' element={<Analysis/>}/>
-                    <Route path='/analysis/fundamental' element={<FundamentalAnalysis/>}/>
-                    <Route path='/analysis2' element={<Analysis2/>}/>
+                    <Route path='/analysis2/*' element={<Analysis2/>}/>
                 </Routes>
             </div>
         </Fragment>

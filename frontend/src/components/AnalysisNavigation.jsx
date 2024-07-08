@@ -13,16 +13,16 @@ const AnalysisNavigation = () => {
     <nav className="navbar">
       <ul>
         <li className={location.pathname === '/analysis2' ? 'active' : ''}>
-          <Link to="/overwiev">overview</Link>
+          <Link to="">overview</Link>
         </li>
-        <li className={location.pathname === '/fundamental' ? 'active' : ''}>
-          <Link to="/fundamental">fundamental analysis</Link>
+        <li className={location.pathname === '/analysis2/fundamental' ? 'active' : ''}>
+          <Link to="fundamental">fundamental analysis</Link>
         </li>
         <li className={location.pathname === '/technical' ? 'active' : ''}>
-          <Link to="/technical">technical analysis</Link>
+          <Link to="technical">technical analysis</Link>
         </li>
         <li className={location.pathname === '/news' ? 'active' : ''}>
-          <Link to="/news">news</Link>
+          <Link to="news">news</Link>
         </li>
       </ul>
     </nav>

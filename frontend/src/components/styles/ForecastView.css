@@ -1,0 +1,28 @@
+.ForecastContainer {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    grid-template-rows: 1fr;
+    grid-column-gap: 2cap;
+    grid-row-gap: 20px;
+    background-color: #373A40;
+    width:90vw;
+    height: 60vh;
+    margin-top: 0px;
+    padding-top: 0vh;
+    padding-left: 5vw;
+    padding-right: 5vw;
+    
+    }
+    
+.chart { 
+    grid-area: 1 / 1 / 2 / 2; 
+    background-color: #686D76;
+    border-radius: 40px;
+    padding-top: 20px;
+}
+.description { 
+    grid-area: 1 / 2 / 2 / 3; 
+    background-color: #686D76;
+    border-radius: 40px;
+    padding-top: 20px;
+}
