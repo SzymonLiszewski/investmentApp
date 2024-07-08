@@ -7,7 +7,7 @@ function FundamentalAnalysis(){
             <div className="FundamentalAnalysisContainer">
                 <div className="FundamentalContainer" id="MarketCap"> 
                     <h3>Market Capitalization</h3>
-                    <h1>40.5B USDT</h1>
+                    <h1>40.5B USD</h1>
                 </div>
                 <div className="FundamentalContainer" id="pe"> 
                      <h3>P/E ratio</h3>
@@ -22,9 +22,11 @@ function FundamentalAnalysis(){
                     <h1>6.46 USD</h1> 
                 </div>
                 <div className="FundamentalContainer" id="Dividends">
+                    <h3>Dividends</h3>
                     <DividendChart/> 
                 </div>
                 <div className="FundamentalContainer" id="Earnings"> 
+                    <h3>Revenue</h3>
                     <RevenueChart/>
                 </div>
             </div>

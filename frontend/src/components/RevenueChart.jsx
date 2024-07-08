@@ -12,7 +12,7 @@ const data = [
 
 const RevenueChart = () => {
   return (
-    <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer width="100%" height="92%">
       <BarChart
         layout="vertical"
         data={data}
@@ -25,7 +25,7 @@ const RevenueChart = () => {
       >
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis xAxisId="top" type="number"  orientation='top' stroke="#8884d8"/>
-        <XAxis xAxisId="bottom" type="number"  orientation='bottom' stroke="#8884d8"/>
+        <XAxis xAxisId="bottom" type="number"  orientation='bottom' stroke="#82ca9d"/>
         <YAxis type="category" dataKey="name" stroke="#fff"/>
         <Tooltip />
         <Legend />

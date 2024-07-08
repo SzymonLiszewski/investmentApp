@@ -1,7 +1,7 @@
 .bx{
     background-color: #373A40;
     width:100vw;
-    height: 100vh;
+    height: 100%;
     margin-top: 0;
 }
 .FundamentalAnalysisContainer {
@@ -12,7 +12,7 @@
     grid-row-gap: 20px;
     background-color: #373A40;
     width: 90vw;
-    height: 90vh;
+    height: 100%;
     margin-left: 5vw;
     margin-right: 5vw;
 
@@ -34,7 +34,7 @@
 }
 #MarketCap h1{
     align-self: center;
-    font-size: 80px;
+    font-size: 70px;
 }
 #pe { 
     grid-area: 1 / 4 / 2 / 5; 
@@ -58,7 +58,9 @@
 }
 #Dividends { 
     grid-area: 3 / 1 / 5 / 7; 
+    text-align: center;
 }
 #Earnings { 
     grid-area: 1 / 7 / 5 / 9; 
+    text-align: center;
 }
