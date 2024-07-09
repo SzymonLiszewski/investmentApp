@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.linear_model import LinearRegression
 import yfinance as yf
@@ -47,22 +46,3 @@ def create_dataset(data, time_step=1):
         X.append(data[i:(i + time_step), 0])
         y.append(data[i + time_step, 0])
     return np.array(X), np.array(y)
-
-
-#* use example
-'''ticker = "^GSPC"  
-start_date = "2020-01-01"
-end_date = "2023-12-31"
-
-#* generating future dates
-format_string = "%Y-%m-%d"
-last_date = datetime.strptime(end_date, format_string)
-future_dates = [last_date + timedelta(days=i) for i in range(1, 300 + 1)]
-
-future_predictions = linear_regression_predict(ticker,start_date,end_date,300)
-
-#* plotting results
-plt.figure(figsize=(10, 6))
-plt.plot(future_dates, future_predictions, label='Przewidywane ceny (przyszłość)')
-plt.legend()
-plt.show()'''
