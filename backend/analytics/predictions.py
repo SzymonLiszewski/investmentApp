@@ -7,7 +7,7 @@ from datetime import timedelta
 from datetime import datetime
 
 
-def linear_regression_predict(ticker, start_date, end_date, predicted_days):
+def linear_regression_predict(ticker, start_date, end_date, predicted_days=30):
     data = yf.download(ticker, start=start_date, end=end_date)
     data = data['Close']
 
@@ -36,7 +36,15 @@ def linear_regression_predict(ticker, start_date, end_date, predicted_days):
         last_sequence = np.append(last_sequence[1:], next_pred, axis=0)
 
     future_predictions = scaler.inverse_transform(np.array(future_predictions).reshape(-1, 1))
-    return future_predictions
+    
+    format_string = "%Y-%m-%d"
+    last_date = datetime.strptime(end_date, format_string)
+    future_dates = [(last_date + timedelta(days=i)).strftime(format_string) for i in range(1, predicted_days + 1)]
+    data_dict = {}
+
+    for i in range(len(future_dates)):
+        data_dict[future_dates[i]] = future_predictions[i][0]
+    return data_dict
 
 
 #* prepare time series for regression

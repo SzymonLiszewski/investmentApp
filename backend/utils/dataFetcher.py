@@ -1,28 +1,33 @@
 import yfinance as yf
 
 def getStockPrice(ticker, start_date, end_date):
-    data = yf.download(ticker, start=start_date ,end=end_date)
-    price = data['Close']
-    return price
+    data = yf.download(ticker, start=start_date, end=end_date)
+    data.index = data.index.strftime('%Y-%m-%d')  # Convert datetime index to string
+    price_dict = data['Close'].to_dict()
+    return price_dict
+
+import yfinance as yf
 
 def getFundamentalAnalysis(ticker):
     stock = yf.Ticker(ticker)
     info = stock.info
-   
+    
     dividends = stock.dividends
     if not dividends.empty:
-        dividends_yearly = dividends.resample('YE').sum().to_dict()
+        dividends_yearly = dividends.resample('YE').sum()
+        dividends_yearly.index = dividends_yearly.index.year.astype(str)
+        dividends_yearly = dividends_yearly.to_dict()
     else:
         dividends_yearly = 'N/A'
-    
     
     financials = stock.financials
     if not financials.empty:
         revenue_history = financials.loc['Total Revenue']
-        revenue_yearly = revenue_history.resample('YE').sum().to_dict()
+        revenue_yearly = revenue_history.resample('YE').sum()
+        revenue_yearly.index = revenue_yearly.index.year.astype(str)
+        revenue_yearly = revenue_yearly.to_dict()
     else:
         revenue_yearly = 'N/A'
-    
     
     ps_ratio = info.get('priceToSalesTrailing12Months', 'N/A')
     if ps_ratio == 'N/A':
@@ -44,3 +49,33 @@ def getFundamentalAnalysis(ticker):
         'Revenue History': revenue_yearly
     }
     return stock_data
+
+def getBasicStockInfo(ticker):
+    stock = yf.Ticker(ticker)
+    info = stock.info
+    
+    current_price = info.get('currentPrice', 'N/A')
+    
+    hist = stock.history(period='4d')
+    
+    if len(hist) < 2:
+        return {
+            'Company Name': info.get('shortName', 'N/A'),
+            'Current Price': current_price,
+            'Price Change': 'N/A',
+            'Percent Change': 'N/A'
+        }
+    
+    last_close = hist['Close'].iloc[-1]
+    previous_close = hist['Close'].iloc[-2]
+    
+    price_change = last_close - previous_close
+    percent_change = (price_change / previous_close) * 100
+    
+    basic_info = {
+        'Company Name': info.get('shortName', 'N/A'),
+        'Current Price': current_price,
+        'Price Change': round(price_change, 2),
+        'Percent Change': round(percent_change, 2)
+    }
+    return basic_info
