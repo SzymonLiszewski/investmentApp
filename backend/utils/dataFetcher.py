@@ -56,7 +56,7 @@ def getBasicStockInfo(ticker):
     
     current_price = info.get('currentPrice', 'N/A')
     
-    hist = stock.history(period='4d')
+    hist = stock.history(period='5d')
     
     if len(hist) < 2:
         return {
