@@ -1,8 +1,8 @@
-import React from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   Area
 } from 'recharts';
+import React, {useState, useEffect} from "react";
 
 // Przykładowe dane
 const data = [
@@ -78,10 +78,27 @@ const data = [
 
 ];
 
-const StockChart = () => {
+const StockChart = ({startDate, endDate, ticker, predictedDays}) => {
+
+  let [PriceHistory, setPriceHistory] = useState()
+
+    useEffect(()=>{
+        getData()
+    },[])
+
+    let getData = async () =>{
+      let response = await fetch(`/api/stockData/${ticker}/?start=2022-01-01&end=2024-01-01`)
+      let data = await response.json()
+      const history = Object.keys(data).map(year => ({
+        date: year,
+        price: data[year]
+      }));
+      setPriceHistory(history)
+    }
+
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+      <LineChart data={PriceHistory} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#fff"/>
         <XAxis dataKey="date" stroke="#fff"/>
         <YAxis stroke="#fff"/>

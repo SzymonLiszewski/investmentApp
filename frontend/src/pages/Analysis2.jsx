@@ -7,6 +7,8 @@ import React, {useState, useEffect} from "react";
 
 function Analysis2(){
 
+    let ticker = "TSLA"
+
     let [CompanyName, setCompanyName] = useState('')
     let [CurrentPrice, setCurrentPrice] = useState()
     let [PriceChange, setPriceChange] = useState()
@@ -16,14 +18,15 @@ function Analysis2(){
     }, [])
 
     let getData = async () =>{
-        let response = await fetch('http://127.0.0.1:8000/api/basic/NVDA/')
+        let response = await fetch(`/api/basic/${ticker}/`)
         let data = await response.json()
-        console.log('data:', data)
+        //console.log('data:', data)
         setCompanyName(data['Company Name'])
         setCurrentPrice(data['Current Price'])
         setPriceChange(data['Percent Change'])
     }
 
+    
     return (
         <div className="analysis-container">
             <div className="stock-name">
@@ -37,8 +40,8 @@ function Analysis2(){
             <div className="stock-analysis">
             <AnalysisNavigation/>
             <Routes>
-                    <Route path='/' element={<ForecastView/>}/>
-                    <Route path='/fundamental' element={<FundamentalAnalysis/>}/>
+                    <Route path='/' element={<ForecastView ticker={ticker}/>}/>
+                    <Route path='/fundamental' element={<FundamentalAnalysis ticker={ticker}/>}/>
                 </Routes>
             </div>
         </div>

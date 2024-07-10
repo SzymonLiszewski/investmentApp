@@ -2,9 +2,15 @@ import yfinance as yf
 
 def getStockPrice(ticker, start_date, end_date):
     data = yf.download(ticker, start=start_date, end=end_date)
-    data.index = data.index.strftime('%Y-%m-%d')  # Convert datetime index to string
-    price_dict = data['Close'].to_dict()
-    return price_dict
+    
+    # Przetwórz dane na słownik data:cena zamknięcia
+    closing_prices = {}
+    for index, row in data.iterrows():
+        date_str = index.strftime('%Y-%m-%d')  # Konwersja daty do stringa w formacie 'YYYY-MM-DD'
+        closing_price = row['Close']  # Cena zamknięcia
+        closing_prices[date_str] = closing_price
+    
+    return closing_prices
 
 import yfinance as yf
 
