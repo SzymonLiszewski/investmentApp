@@ -7,7 +7,7 @@ import React, {useState, useEffect} from "react";
 
 function Analysis2(){
 
-    let ticker = "TSLA"
+    let ticker = "AMZN"
 
     let [CompanyName, setCompanyName] = useState('')
     let [CurrentPrice, setCurrentPrice] = useState()

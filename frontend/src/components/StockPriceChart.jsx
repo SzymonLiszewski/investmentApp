@@ -80,10 +80,14 @@ const data = [
 
 const StockChart = ({startDate, endDate, ticker, predictedDays}) => {
 
-  let [PriceHistory, setPriceHistory] = useState()
+  let [PriceHistory, setPriceHistory] = useState([])
+  let [Predicted, setPredicted] = useState([])
+  let [FullArray, setFullArray] = useState([])
 
     useEffect(()=>{
         getData()
+        getPrediction()
+        //join()
     },[])
 
     let getData = async () =>{
@@ -94,18 +98,48 @@ const StockChart = ({startDate, endDate, ticker, predictedDays}) => {
         price: data[year]
       }));
       setPriceHistory(history)
+      setFullArray(prev => [...prev, ...history])
+      console.log("full", FullArray)
+    }
+    
+    let getPrediction = async () =>{
+      let response = await fetch(`/api/predict/${ticker}/?start=2022-01-01&end=2024-01-01`)
+      let data = await response.json()
+      console.log("predictions", data)
+      const history = Object.keys(data).map(year => ({
+        date: year,
+        predicted: data[year]
+      }));
+      setPredicted(history)
+      setFullArray(prev => [...prev, ...history])
+      console.log("full", FullArray)
+    }
+
+    let join = async () =>{
+      try {
+        const [data1, data2, data3] = await Promise.all([
+          getData(),
+          getPrediction()
+        ]);
+        const arr = [...PriceHistory, ...Predicted]
+      setFullArray(arr)
+      console.log("full", FullArray)
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+      
     }
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <LineChart data={PriceHistory} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+      <LineChart data={FullArray} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#fff"/>
         <XAxis dataKey="date" stroke="#fff"/>
         <YAxis stroke="#fff"/>
         <Tooltip />
         <Legend />
-        <Line type="monotone" dataKey="price" stroke="#8884d8" strokeWidth={5}/>
-        <Line type="monotone" dataKey="predicted" stroke="#82ca9d" strokeDasharray="5 5" strokeWidth={5}/>
+        <Line type="monotone" dataKey="price" stroke="#8884d8" strokeWidth={5} dot={false}/>
+        <Line type="monotone" dataKey="predicted" stroke="#82ca9d" strokeDasharray="5 5" strokeWidth={5} dot={false}/>
         <Area type="monotone" dataKey="upperBound" stroke="none" fill="#82ca9d" fillOpacity={0.2} />
         <Area type="monotone" dataKey="lowerBound" stroke="none" fill="#82ca9d" fillOpacity={0.2} />
       </LineChart>
