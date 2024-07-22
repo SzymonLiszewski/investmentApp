@@ -1,6 +1,9 @@
 /* src/HomePage.css */
 body{
-    background-image: url("assets/bg.jpg");
+    background-image: url("assets/background.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 .homepage {
     width: 100vw;
@@ -10,57 +13,51 @@ body{
     z-index: 0;
     justify-content: space-between;
     display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
-.homepage-header {
-    padding: 20px;
-    color: white;
-}
-
-.features {
+.mainItem{
+    width: 100vw;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    background: transparent;
+    z-index: 0;
+    justify-content: space-between;
     display: flex;
-    justify-content: space-around;
-    margin: 20px 0;
+    align-items: flex-start;
 }
 
-.feature {
-    width: 30%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #1cb03c;
+img{
+    width: 600px;
+    height: 400px;
 }
 
-.feature h2 {
-    color: #282c34;
+h1, h3, h4{
+    color: black;
+}
+h1{
+    font-size: 41px;
+}
+h3{
+    font-size: 32px;
+}
+h4{
+    font-size: 26px;
+    width: 80%;
+    margin-left: 10%;
 }
 
-.cta {
-    margin: 20px 0;
-}
-
-.cta button {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #61dafb;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.cta button:hover {
-    background-color: #21a1f1;
-}
 
 .search-container {
     position: relative;
     display: inline-block;
-    width: 60%;
-    top: 10vh;
+    width: 50%;
+    margin-left: 5vw;
   }
 
   .search-container .search-box{
-    left:20vw;
+    left:30%;
   }
 
 
@@ -71,7 +68,7 @@ body{
 .stock-info-container{
     display: flex;
     flex-direction: column;
-    width: 40%
+    width: 90%
 }
 
   .stock-section .stock-list{

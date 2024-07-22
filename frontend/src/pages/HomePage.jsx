@@ -13,8 +13,8 @@ function HomePage (){
     const stocks = [
         { name: 'Apple', price: 150, change: 1.2 },
         { name: 'Google', price: 2800, change: -0.5 },
-        { name: 'Amazon', price: 3400, change: 2.0 },
-        
+        { name: 'Bitcoin', price: 45000, change: 5 },
+        { name: 'Ethereum', price: 3000, change: 3 },
       ];
 
       const cryptos = [
@@ -28,20 +28,26 @@ function HomePage (){
         { name: 'Silver', price: 25, change: 2.1 },
         { name: 'Oil', price: 70, change: -0.5 }
       ];
+      //<div className='stock-info-container'>
       //<StockSection stocks={stocks} />
+      //<StockSection stocks={cryptos} />
+      //<StockSection stocks={commodities} />
+      // </div>
     return (
         <div className="homepage">
-            
-            <div className="search-container">
-                <h1>StockSense</h1>
-                <h3>Unlock the power of investment insights</h3>
-                <SearchBox />
+            <div className="mainItem">
+              <div className="search-container">
+                  <h1>StockSense</h1>
+                  <h3>Unlock the power of investment insights</h3>
+                  <h4>Choose Interesting stocks, discover our analysis and invest confidently </h4>
+                  <SearchBox />
+              </div>
+              <img src="../src/assets/image1.png"></img>
             </div>
             <div className='stock-info-container'>
-                <StockSection stocks={stocks} />
-                <StockSection stocks={cryptos} />
-                <StockSection stocks={commodities} />
+              <StockSection stocks={stocks} />
             </div>
+            
         </div>
     )
 }

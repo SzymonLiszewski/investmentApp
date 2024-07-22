@@ -22,10 +22,10 @@ function NavBar(){
             </ul>
             <ul className="UserButtons">
                 <li>
-                <Link to="/signup">sign up</Link>
+                <Link to="/signup" id="signup">sign up</Link>
                 </li>
                 <li>
-                <Link to="/signin">sign in</Link>
+                <Link to="/signin" id="signin">sign in</Link>
                 </li>
             </ul>
         </nav>
