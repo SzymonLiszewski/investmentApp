@@ -1,10 +1,10 @@
+
 .analysis-container {
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: 1fr 5fr;
+    grid-template-rows: 20vh 70vh auto;
     grid-column-gap: 0px;
     grid-row-gap: 0px;
-    background-color: #373A40;
     height: 100vh;
     padding-top: 60px;
     }
@@ -13,30 +13,36 @@
     grid-area: 1 / 1 / 2 / 2; 
     margin-left: 5vw;
     margin-right: 5vw;
-    margin-top: 1%;
+    margin-top: 0%;
     display: grid;
     grid-template-columns: 1fr 4fr 1fr;
-    grid-template-rows: 1fr;
+    grid-template-rows: 1fr 0.1fr;
     grid-column-gap: 0px;
     grid-row-gap: 0px;
 }
 #name{
     grid-area: 1 / 2 / 2 / 3;
+    font-size: 40px;
+    margin-bottom: 0%;
 }
 #logo{
     grid-area: 1 / 1 / 2 / 2;
 }
 #price{
     grid-area: 1 / 3 / 2 / 4;
+    font-size: 40px;
+    margin-bottom: 0%;
 }
 #priceChange{
-    grid-area: 1 / 3 / 2 / 4;
+    grid-area: 2 / 3 / 3 / 4;
     text-align: right;
     color: #82ca9d;
+    margin: 0%;
+    padding: 0%;
     font-size: 200%;
 }
 .stock-analysis { 
-    grid-area: 2 / 1 / 5 / 2; 
+    grid-area: 2 / 1 / 3 / 2; 
 }
 
 #AnalysisNavigation{

@@ -40,7 +40,6 @@ function FundamentalAnalysis({ticker}){
     }
 
     return(
-        <div className="bx">
             <div className="FundamentalAnalysisContainer">
                 <div className="FundamentalContainer" id="MarketCap"> 
                     <h3>Market Capitalization</h3>
@@ -66,7 +65,6 @@ function FundamentalAnalysis({ticker}){
                     <h3>Revenue</h3>
                     <RevenueChart/>
                 </div>
-            </div>
             </div>
     )
 }
