@@ -25,18 +25,44 @@
 }
 #marketCap h3{
     align-self: start;
+    grid-area: 1 / 1 / 2 / 2;
+    margin-bottom: 0;
 }
 #MarketCap h1{
+    margin-top: 0;
     align-self: center;
     font-size: 70px;
 }
 #pe { 
     grid-area: 1 / 4 / 2 / 5; 
     text-align: center;
+    z-index: 0;
+}
+
+#pe h3{
+    margin-top: 10px;
+    margin-bottom: 0;
+}
+#pe h1{
+    z-index: 1000;
+    align-self: center;
+    font-size: 30px;
+    margin-top: 0;
 }
 #ps { 
     grid-area: 2 / 4 / 3 / 5; 
     text-align: center;
+    z-index: 0;
+}
+#ps h3{
+    margin-top: 10px;
+    margin-bottom: 0;
+}
+#ps h1{
+    z-index: 1000;
+    align-self: center;
+    font-size: 30px;
+    margin-top: 0;
 }
 #eps { 
     grid-area: 1 / 5 / 3 / 7; 
@@ -49,12 +75,21 @@
 }
 #eps h1{
     align-self: center;
+    z-index: 1000;
 }
 #Dividends { 
     grid-area: 3 / 1 / 5 / 7; 
     text-align: center;
 }
+#Dividends h3{
+    margin-top: 5px;
+    margin-bottom: 0;
+}
 #Earnings { 
     grid-area: 1 / 7 / 5 / 9; 
     text-align: center;
+}
+#Earnings h3{
+    margin-top: 5px;
+    margin-bottom: 0;
 }

@@ -86,9 +86,9 @@ const StockChart = ({startDate, endDate, ticker, predictedDays}) => {
 
     useEffect(()=>{
         getData()
-        getPrediction()
+        //getPrediction()
         //join()
-    },[])
+    },[ticker])
 
     let getData = async () =>{
       let response = await fetch(`/api/stockData/${ticker}/?start=2022-01-01&end=2024-01-01`)
@@ -98,8 +98,11 @@ const StockChart = ({startDate, endDate, ticker, predictedDays}) => {
         price: data[year]
       }));
       setPriceHistory(history)
-      setFullArray(prev => [...prev, ...history])
+      const sortedData = history.sort((a, b) => new Date(a.date) - new Date(b.date));
+      setFullArray(sortedData);
+      //setFullArray(prev => [...prev, ...history])
       console.log("full", FullArray)
+      
     }
     
     let getPrediction = async () =>{

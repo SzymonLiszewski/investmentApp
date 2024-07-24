@@ -1,10 +1,9 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Link, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Link, useLocation, NavLink } from 'react-router-dom';
 import './styles/AnalysisNavigation.css';
+import { styled } from '@mui/system';
 
-const Home = () => <div>Home</div>;
-const About = () => <div>About</div>;
-const Contact = () => <div>Contact</div>;
+
 
 const AnalysisNavigation = () => {
   const location = useLocation();
@@ -12,17 +11,17 @@ const AnalysisNavigation = () => {
   return (
     <nav className="navbar">
       <ul>
-        <li className={location.pathname === '/analysis2' ? 'active' : ''}>
-          <Link to="">overview</Link>
+        <li className="">
+          <NavLink end to="" activeclassname="active">overview</NavLink>
         </li>
-        <li className={location.pathname === '/analysis2/fundamental' ? 'active' : ''}>
-          <Link to="fundamental">fundamental analysis</Link>
+        <li>
+          <NavLink to="fundamental" activeclassname="active">fundamental analysis</NavLink>
         </li>
-        <li className={location.pathname === '/technical' ? 'active' : ''}>
-          <Link to="technical">technical analysis</Link>
+        <li>
+          <NavLink to="technical" activeclassname="active">technical analysis</NavLink>
         </li>
-        <li className={location.pathname === '/news' ? 'active' : ''}>
-          <Link to="news">news</Link>
+        <li>
+          <NavLink to="news" activeclassname="active">news</NavLink>
         </li>
       </ul>
     </nav>
