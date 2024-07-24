@@ -1,6 +1,7 @@
 import "../components/styles/Analysis2.css"
 import FundamentalAnalysis from "../components/FundamentalAnalysis"
 import AnalysisNavigation from "../components/AnalysisNavigation"
+import TechnicalAnalysis from "../components/TechnicalAnalysis";
 import {Route, Routes, useParams, Link} from 'react-router-dom';
 import ForecastView from "../components/ForecastView";
 import React, {useState, useEffect} from "react";
@@ -78,6 +79,7 @@ function Analysis2(){
             <Routes>
                     <Route path='/' element={<ForecastView ticker={ticker}/>}/>
                     <Route path='/fundamental/' element={<FundamentalAnalysis ticker={ticker}/>}/>
+                    <Route path="/technical/" element={<TechnicalAnalysis ticker={ticker}/>}/>
                 </Routes>
             </div>
         </div>
