@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view
 from utils.dataFetcher import getStockPrice, getFundamentalAnalysis, getBasicStockInfo
 from analytics.predictions import linear_regression_predict
 from analytics.technical_indicators import get_technical_indicators
+from utils.economicCalendar import getEarnings, getIPO
 
 # Create your views here.
 
@@ -34,4 +35,14 @@ def basicInfoView(request, ticker):
 @api_view(['GET'])
 def technicalAnalysisView(request, ticker):
     data = get_technical_indicators(ticker)
+    return Response(data)
+
+@api_view(['GET'])
+def CalendarEarningsView(request):
+    data = getEarnings()
+    return Response(data)
+
+@api_view(['GET'])
+def CalendarIPOView(request):
+    data = getIPO()
     return Response(data)
