@@ -8,6 +8,7 @@ import News from './pages/News';
 import FundamentalAnalysis from './components/FundamentalAnalysis';
 import Analysis2 from './pages/Analysis2';
 import ForecastView from './components/ForecastView';
+import EventsCalendar from './components/EventsCalendar';
 
 const App = () => {
     return (
@@ -19,6 +20,7 @@ const App = () => {
                     <Route path='/news' element={<News/>}/>
                     <Route path='/analysis' element={<Analysis/>}/>
                     <Route path='/analysis2/:ticker/*' element={<Analysis2/>}/>
+                    <Route path='calendar' element={<EventsCalendar/>}/>
                 </Routes>
             </div>
         </Fragment>
