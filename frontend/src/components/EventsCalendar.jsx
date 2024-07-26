@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import Modal from 'react-modal';
@@ -11,21 +11,36 @@ const localizer = momentLocalizer(moment);
 Modal.setAppElement('#root'); // Set the app root for accessibility
 
 const EventsCalendar = () => {
-  const [events, setEvents] = useState([
-    {
-      title: 'Apple Q2 Earnings',
-      start: new Date(2024, 7, 1, 10, 0),
-      end: new Date(2024, 7, 1, 12, 0),
+  const [events, setEvents] = useState([]);
+
+const addHours = (date, hours) => {
+  const newDate = new Date(date);
+  newDate.setHours(newDate.getHours() + hours);
+  return newDate;
+};
+
+
+  useEffect(()=>{
+    getData()
+  },[])
+
+  let getData = async() =>{
+    let response = await fetch('/api/calendar/IPO')
+    let data = await response.json()
+    let transformed = await data.map(item=>({
+      symbol: item[0],
+      title: item[1],
+      ipoDate: new Date(item[2]),
+      endDate: addHours(new Date(item[2]), 2),
+      priceRangeLow: item[3],
+      priceRangeHigh: item[4],
+      currency: item[5],
+      exchange: item[6],
       allDay: false,
-    },
-    {
-      title: 'Google Dividend Payout',
-      start: new Date(2024, 7, 2, 14, 0),
-      end: new Date(2024, 7, 2, 15, 0),
-      allDay: false,
-    },
-    // Dodaj więcej wydarzeń
-  ]);
+    }))
+    setEvents(transformed)
+    console.log(events)
+  }
 
   const [selectedEvent, setSelectedEvent] = useState(null);
 
@@ -39,13 +54,17 @@ const EventsCalendar = () => {
 
   return (
     <div>
-      <h1>Financial Events Calendar</h1>
+      <h1 style={{textAlign: 'center', marginTop: '50px'}}>Financial Events Calendar</h1>
       <Calendar
         localizer={localizer}
         events={events}
-        startAccessor="start"
-        endAccessor="end"
-        style={{ height: 500, margin: '50px' }}
+        startAccessor="ipoDate"
+        endAccessor="endDate"
+        style={{ height: '75vh',
+           marginLeft: '5vw',
+           marginRight: '5vw',
+           width: '90vw',
+          color: 'black'  }}
         onSelectEvent={handleEventClick}
       />
       {selectedEvent && (
@@ -54,12 +73,12 @@ const EventsCalendar = () => {
           onRequestClose={closeModal}
           contentLabel="Event Details"
         >
-          <h2>{selectedEvent.title}</h2>
-          <p>
-            St    art: {selectedEvent.start.toLocaleString()}
+          <h2 style={{color: 'black'}}>{selectedEvent.title}</h2>
+          <p style={{color: 'black'}}>
+            Start: {selectedEvent.ipoDate.toLocaleString()}
           </p>
-          <p>
-            End: {selectedEvent.end.toLocaleString()}
+          <p style={{color: 'black'}}>
+            End: {selectedEvent.endDate.toLocaleString()}
           </p>
           <button onClick={closeModal}>Close</button>
         </Modal>

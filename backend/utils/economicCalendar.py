@@ -11,7 +11,7 @@ def getEarnings():
         decoded_content = download.content.decode('utf-8')
         cr = csv.reader(decoded_content.splitlines(), delimiter=',')
         my_list = list(cr)
-        return my_list
+        return my_list[1:]
 
 def getIPO():
     CSV_URL = f'https://www.alphavantage.co/query?function=IPO_CALENDAR&apikey={API_KEY}'
@@ -20,4 +20,4 @@ def getIPO():
         decoded_content = download.content.decode('utf-8')
         cr = csv.reader(decoded_content.splitlines(), delimiter=',')
         my_list = list(cr)
-        return my_list
+        return my_list[1:]
