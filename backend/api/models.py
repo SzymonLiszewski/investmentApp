@@ -13,18 +13,22 @@ class Stock(models.Model):
         return self.ticker
 
 class UserStock(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="owndedStocks")
     ownedStock = models.ForeignKey(Stock, on_delete=models.CASCADE)
-    quantity = models.BigIntegerField()
+    quantity = models.FloatField()
 
 class Transactions(models.Model):
     class transaction_type(models.TextChoices):
         BUY = 'B', 'buy'
         SELL = 'S', 'sell'
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="transactions")
     product = models.ForeignKey(Stock, on_delete=models.CASCADE)
     transactionType = models.CharField(
         max_length=2,
         choices=transaction_type.choices,
         default=transaction_type.BUY
     )
+    quantity = models.FloatField(default=0.0)
+    price = models.FloatField(default=0.0)
+    date = models.DateField(default='2024-01-01')
+    

@@ -15,5 +15,8 @@ urlpatterns = [
     path('user/register/', views.CreateUserView.as_view(), name="register"),
     path('token/', TokenObtainPairView.as_view(), name="get_token"),
     path('token/refresh/', TokenRefreshView.as_view(), name="refresh"),
-    path("auth/", include("rest_framework.urls"))
+    path("auth/", include("rest_framework.urls")),
+    path('userStock/', views.CreateUserStock.as_view(), name="stock_list"),
+    path('userStock/delete/<int:pk>/', views.UserStockDelete.as_view(), name="delete_stock"),
+    path('stocks/', views.StockCreate.as_view(), name="stocks"),
 ]

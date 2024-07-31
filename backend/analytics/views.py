@@ -8,6 +8,8 @@ from utils.economicCalendar import getEarnings, getIPO
 
 # Create your views here.
 
+#* Analysis views
+
 @api_view(['GET'])
 def stockDataView(request, ticker):
     start_date = request.GET.get('start')
@@ -36,6 +38,8 @@ def basicInfoView(request, ticker):
 def technicalAnalysisView(request, ticker):
     data = get_technical_indicators(ticker)
     return Response(data)
+
+#* Calendar views
 
 @api_view(['GET'])
 def CalendarEarningsView(request):
