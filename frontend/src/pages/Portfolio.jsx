@@ -1,5 +1,6 @@
 import "../components/styles/Portfolio.css"
-import UserEarningsChart from "../components/UserEarningsChart"
+import UserEarningsChart from "../components/portfolio/UserEarningsChart"
+import UserStocksChart from "../components/portfolio/UserStocksChart"
 
 function Portfolio(){
     return (
@@ -8,7 +9,7 @@ function Portfolio(){
                 <h1><UserEarningsChart/></h1>
             </div>
             <div className="portfolioDiv" id="composition">
-                <h1>composition</h1>
+                <h1><UserStocksChart/></h1>
             </div>
             <div className="portfolioDiv" id="indicators">
                 <h1>indicators</h1>

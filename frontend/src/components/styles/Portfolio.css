@@ -15,9 +15,13 @@
 }
 #return { 
     grid-area: 1 / 1 / 2 / 2; 
+
 }
 #composition { 
     grid-area: 2 / 1 / 3 / 2; 
+    height: 100%;
+    width: 100%;
+    padding: 0;
 }
 #indicators {
      grid-area: 1 / 2 / 3 / 3; 
