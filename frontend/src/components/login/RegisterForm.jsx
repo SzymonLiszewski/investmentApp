@@ -10,7 +10,6 @@ const RegisterForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Logika rejestracji
     if (password === confirmPassword) {
         const result = await registerUser(email, password, confirmPassword);
     } else {

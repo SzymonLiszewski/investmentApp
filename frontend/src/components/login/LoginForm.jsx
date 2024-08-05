@@ -1,16 +1,43 @@
 import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Box } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-  const handleSubmit = (e) => {
+    const navigate = useNavigate();
+    
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Logika logowania
-    console.log('Email:', email);
-    console.log('Password:', password);
+    const result = await loginUser(email, password);
+    console.log(result);
+    localStorage.setItem('access', result.access);
+    localStorage.setItem('refresh', result.refresh);
   };
+
+  const loginUser = async (email, password) =>{
+    try{
+        const response = await fetch('api/token/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: email,
+                password: password
+            })
+        })
+        const data = await response.json();
+        if (!response.ok){
+            throw new Error(data.username || 'Network response was not ok');
+        }
+        alert('login successful');
+       // navigate('/');
+        return data;
+    }catch (error){
+        alert(error);
+    }
+  }
 
   return (
     <Container maxWidth="xs">
