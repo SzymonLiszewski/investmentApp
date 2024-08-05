@@ -7,7 +7,7 @@ function NavBar(){
             <Link to="/" className="site-title">StockSense</Link>
             <ul>
                 <li>
-                    <Link to="/analysis">analysis</Link>
+                    <Link to="/analysis2/aapl">analysis</Link>
                 </li>
                 <li>
                     <Link to="/news">news</Link>

@@ -25,4 +25,5 @@
 }
 #indicators {
      grid-area: 1 / 2 / 3 / 3; 
+     text-align: center;
     }
