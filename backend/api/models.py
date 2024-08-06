@@ -13,7 +13,7 @@ class Stock(models.Model):
         return self.ticker
 
 class UserStock(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="owndedStocks")
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="ownedStocks")
     ownedStock = models.ForeignKey(Stock, on_delete=models.CASCADE)
     quantity = models.FloatField()
 

@@ -20,7 +20,7 @@ class CreateUserStock(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        user = self.request.user
+        user = self.request.user.id
         return UserStock.objects.filter(owner = user)
     
     def perform_create(self, serializer):

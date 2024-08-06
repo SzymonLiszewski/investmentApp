@@ -2,6 +2,7 @@ import React from 'react';
 import {
   PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { useState, useEffect } from 'react';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -12,6 +13,47 @@ function UserStocksChart(){
         { name: 'Produkt C', value: 300 },
         { name: 'Produkt D', value: 200 },
       ];
+      const [userStock, setUserStock] = useState([]);
+
+    useEffect(()=>{
+      const getUserStock = async () => {
+        try {
+            const stockData = await fetchUserStock();
+            setUserStock(stockData);
+        } catch (error) {
+            console.log(error.message);
+        }
+    };
+
+    getUserStock();
+    },[]);
+
+    const fetchUserStock = async () => {
+      try {
+          const token = localStorage.getItem('access');
+
+          const response = await fetch('api/userStock/', {
+              method: 'GET',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
+              }
+          });
+
+          if (!response.ok) {
+              throw new Error('Network response was not ok');
+          }
+
+          const data = await response.json();
+          console.log(data);
+          return data;
+      } catch (error) {
+          console.error('There has been a problem with your fetch operation:', error);
+          throw error;
+      }
+  };
+
+
       return (
         <ResponsiveContainer width="100%" height={400}>
           <PieChart>
