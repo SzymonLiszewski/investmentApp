@@ -32,7 +32,7 @@ const LoginForm = () => {
             throw new Error(data.username || 'Network response was not ok');
         }
         alert('login successful');
-       // navigate('/');
+        navigate('/');
         return data;
     }catch (error){
         alert(error);
