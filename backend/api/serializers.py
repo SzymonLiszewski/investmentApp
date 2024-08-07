@@ -14,8 +14,8 @@ class UserSerializer(serializers.ModelSerializer):
 class UserStockSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserStock
-        fields = ["id", "user", "ownedStock", "quantity"]
-        extra_kwargs = {"user": {"read_only": True}}
+        fields = ["id", "owner", "ownedStock", "quantity"]
+        extra_kwargs = {"owner": {"read_only": True}}
     
 class StockSerializer(serializers.ModelSerializer):
     class Meta:
