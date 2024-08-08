@@ -17,6 +17,7 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name="refresh"),
     path("auth/", include("rest_framework.urls")),
     path('userStock/', views.CreateUserStock.as_view(), name="stock_list"),
+    path('transactions/', views.CreateTransaction.as_view(), name="transactions"),
     path('userStock/delete/<int:pk>/', views.UserStockDelete.as_view(), name="delete_stock"),
     path('stocks/', views.StockCreate.as_view(), name="stocks"),
     path('portfolio/profit', profitView, name="profit")

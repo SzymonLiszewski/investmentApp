@@ -29,6 +29,30 @@ class CreateUserStock(generics.ListCreateAPIView):
         else:
             print(serializer.errors)
 
+class CreateTransaction(generics.ListCreateAPIView):
+    serializer_class = TransactionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user.id
+        return Transactions.objects.filter(owner = user)
+    
+    def perform_create(self, serializer):
+        if serializer.is_valid():
+            transaction = serializer.save(owner=self.request.user)
+            # update userStock
+            user_product, created = UserStock.objects.get_or_create(
+                owner=transaction.owner,
+                ownedStock=transaction.product
+            )
+            if created:
+                user_product.quantity = transaction.quantity
+            else:
+                user_product.quantity += transaction.quantity
+            user_product.save()
+        else:
+            print(serializer.errors)
+
 class UserStockDelete(generics.DestroyAPIView):
     serializer_class = UserStockSerializer
     permission_classes = [IsAuthenticated]

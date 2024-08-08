@@ -5,6 +5,10 @@ import { useNavigate } from 'react-router-dom';
 const AddStocks = () => {
   const [stock, setStock] = useState('');
   const [count, setCount] = useState('');
+  const [type, setType] = useState('');
+  const [_price, setPrice] = useState('');
+  const [_date, setDate] = useState('');
+
     const navigate = useNavigate();
     
   const handleSubmit = async (e) => {
@@ -16,15 +20,18 @@ const AddStocks = () => {
   const loginUser = async (stock, count) =>{
     try{
         const token = localStorage.getItem('access');
-        const response = await fetch('api/userStock/', {
+        const response = await fetch('api/transactions/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({
-                ownedStock: stock,
-                quantity: count
+                product: stock,
+                quantity: count,
+                transactionType: type,
+                price: _price,
+                date: _date
             })
         })
         const data = await response.json();
@@ -68,6 +75,33 @@ const AddStocks = () => {
             fullWidth
             value={count}
             onChange={(e) => setCount(e.target.value)}
+          />
+          <TextField
+            label="type"
+            type="count"
+            variant="outlined"
+            margin="normal"
+            fullWidth
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+          />
+          <TextField
+            label="_price"
+            type="count"
+            variant="outlined"
+            margin="normal"
+            fullWidth
+            value={_price}
+            onChange={(e) => setPrice(e.target.value)}
+          />
+          <TextField
+            label="_date"
+            type="count"
+            variant="outlined"
+            margin="normal"
+            fullWidth
+            value={_date}
+            onChange={(e) => setDate(e.target.value)}
           />
           <Button
             type="submit"
