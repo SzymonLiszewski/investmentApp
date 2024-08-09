@@ -4,11 +4,11 @@ import numpy as np
 
 def calculateProfit(portfolio):
     #* downloading historical data
-    tickers = [stock['ticker'] for stock in portfolio]
+    tickers = [stock.product.ticker for stock in portfolio]
     tickers.append('XD')
     #* finding first transaction date
-    earliest_purchase_date = min(pd.to_datetime(stock['purchase_date']) for stock in portfolio)
-    data = yf.download(tickers, start=earliest_purchase_date, end='2023-01-01')['Adj Close']
+    earliest_purchase_date = min(pd.to_datetime(stock.date) for stock in portfolio)
+    data = yf.download(tickers, start=earliest_purchase_date, end='2024-01-01')['Adj Close']
 
     portfolio_value = pd.Series(index=data.index, dtype=np.float64)
     initial_value = 0
@@ -17,13 +17,13 @@ def calculateProfit(portfolio):
     money_spent = pd.Series(0, index=data.index, dtype=np.float64)
 
     for stock in portfolio:
-        ticker = stock['ticker']
-        quantity = stock['quantity']
-        purchase_date = pd.to_datetime(stock['purchase_date'])
+        ticker = stock.product.ticker
+        quantity = stock.quantity
+        purchase_date = pd.to_datetime(stock.date)
         
         #* getting price (given by user or get via yfinance)
-        if 'purchase_price' in stock:
-            purchase_price = stock['purchase_price']
+        if stock.price>0:
+            purchase_price = stock.price
         else:
             purchase_price = data[ticker].loc[purchase_date]
 
@@ -44,7 +44,9 @@ def calculateProfit(portfolio):
 
     #* downloading benchmark data (s&P500)
     benchmark_ticker = '^GSPC'
-    benchmark_data = yf.download(benchmark_ticker, start=earliest_purchase_date, end='2023-01-01')['Adj Close']
+    #! change end date
+    #todo: change end date
+    benchmark_data = yf.download(benchmark_ticker, start=earliest_purchase_date, end='2024-01-01')['Adj Close']
 
     #* simulating investment in benchmark (purchasing in same days and same value as real investments)
     previous_value = 0

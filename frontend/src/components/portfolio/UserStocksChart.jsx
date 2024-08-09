@@ -20,7 +20,6 @@ function UserStocksChart(){
         try {
             const stockData = await fetchUserStock();
             setUserStock(stockData);
-            console.log("userStock: ", stockData)
         } catch (error) {
             console.log(error.message);
         }
@@ -46,7 +45,6 @@ function UserStocksChart(){
           }
 
           const data = await response.json();
-          console.log(data);
           const transformedData = data.map(item => ({
             name: item.ownedStock, 
             value: item.quantity 

@@ -1,13 +1,14 @@
 from django.shortcuts import render, get_object_or_404
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from utils.dataFetcher import getStockPrice, getFundamentalAnalysis, getBasicStockInfo
 from analytics.predictions import linear_regression_predict
 from analytics.technical_indicators import get_technical_indicators
 from analytics.portfolioAnalysis import calculateProfit, calculateIndicators
 from utils.economicCalendar import getEarnings, getIPO
-from django.contrib.auth.decorators import login_required
+from rest_framework.permissions import IsAuthenticated
 from api.models import Transactions
+from django.http import JsonResponse
 # Create your views here.
 
 #* Analysis views
@@ -55,8 +56,10 @@ def CalendarIPOView(request):
 
 #* portfolio analysis views
 
-@login_required
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def profitView(request):
-    userTransactions = get_object_or_404(Transactions, owner = request.user)
-    profit = calculateProfit(userTransactions) #! or profit = calculateProfit(userTransactions.eg)
-    return profit
+    userTransactions = Transactions.objects.filter(owner = request.user)
+    profit, benchmark = calculateProfit(userTransactions) #! or profit = calculateProfit(userTransactions.eg)
+    profit = profit.to_json(orient='index')
+    return JsonResponse({'calculated_data': profit})

@@ -2,6 +2,7 @@ import React from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import { useEffect } from 'react';
 
 
 const UserEarningsChart = () => {
@@ -19,6 +20,46 @@ const UserEarningsChart = () => {
         { date: '2023-11-01', profit: 600, benchmark: 570 },
         { date: '2023-12-01', profit: 650, benchmark: 620 },
       ];
+      useEffect(()=>{
+        const getUserStock = async () => {
+          try {
+              const stockData = await fetchUserProfit();
+              console.log("userProfit: ", stockData)
+          } catch (error) {
+              console.log(error.message);
+          }
+      };
+  
+      getUserStock();
+      },[]);
+      const fetchUserProfit = async () => {
+        try {
+            const token = localStorage.getItem('access');
+  
+            const response = await fetch('api/portfolio/profit', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+  
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+  
+            const data = await response.json();
+            console.log(data);
+            const transformedData = data.map(item => ({
+              name: item.ownedStock, 
+              value: item.quantity 
+            }));
+            return transformedData;
+        } catch (error) {
+            console.error('There has been a problem with your fetch operation:', error);
+            throw error;
+        }
+    };
 
   return (
     <ResponsiveContainer width="100%" height={400}>
