@@ -20,6 +20,7 @@ function UserStocksChart(){
         try {
             const stockData = await fetchUserStock();
             setUserStock(stockData);
+            console.log("userStock: ", stockData)
         } catch (error) {
             console.log(error.message);
         }
@@ -46,7 +47,11 @@ function UserStocksChart(){
 
           const data = await response.json();
           console.log(data);
-          return data;
+          const transformedData = data.map(item => ({
+            name: item.ownedStock, 
+            value: item.quantity 
+          }));
+          return transformedData;
       } catch (error) {
           console.error('There has been a problem with your fetch operation:', error);
           throw error;
@@ -58,7 +63,7 @@ function UserStocksChart(){
         <ResponsiveContainer width="100%" height={400}>
           <PieChart>
             <Pie
-              data={data}
+              data={userStock}
               cx="40%"
               cy="50%"
               labelLine={false}

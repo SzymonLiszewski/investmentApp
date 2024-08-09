@@ -15,7 +15,7 @@ class Stock(models.Model):
 class UserStock(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="ownedStocks")
     ownedStock = models.ForeignKey(Stock, on_delete=models.CASCADE)
-    quantity = models.FloatField()
+    quantity = models.FloatField(default=0)
 
 class Transactions(models.Model):
     class transaction_type(models.TextChoices):
