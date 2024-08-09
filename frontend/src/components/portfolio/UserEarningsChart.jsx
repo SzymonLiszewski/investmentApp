@@ -2,29 +2,17 @@ import React from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { format } from 'date-fns';
 
 
 const UserEarningsChart = () => {
-    const data = [
-        { date: '2023-01-01', profit: 100, benchmark: 90 },
-        { date: '2023-02-01', profit: 150, benchmark: 130 },
-        { date: '2023-03-01', profit: 200, benchmark: 180 },
-        { date: '2023-04-01', profit: 250, benchmark: 220 },
-        { date: '2023-05-01', profit: 300, benchmark: 270 },
-        { date: '2023-06-01', profit: 350, benchmark: 320 },
-        { date: '2023-07-01', profit: 400, benchmark: 370 },
-        { date: '2023-08-01', profit: 450, benchmark: 420 },
-        { date: '2023-09-01', profit: 500, benchmark: 470 },
-        { date: '2023-10-01', profit: 550, benchmark: 520 },
-        { date: '2023-11-01', profit: 600, benchmark: 570 },
-        { date: '2023-12-01', profit: 650, benchmark: 620 },
-      ];
+    const [profit, setProfit] = useState([])
       useEffect(()=>{
         const getUserStock = async () => {
           try {
               const stockData = await fetchUserProfit();
-              console.log("userProfit: ", stockData)
+              console.log("userProfit: ", profit)
           } catch (error) {
               console.log(error.message);
           }
@@ -49,12 +37,22 @@ const UserEarningsChart = () => {
             }
   
             const data = await response.json();
-            console.log(data);
-            const transformedData = data.map(item => ({
-              name: item.ownedStock, 
-              value: item.quantity 
-            }));
-            return transformedData;
+
+            const rawCalculatedData = data.calculated_data;
+        
+        const jsonString = rawCalculatedData.replace(/^"(.+)"$/, '$1');
+
+        const parsedData = JSON.parse(jsonString);
+
+        console.log('Parsed Data:', parsedData);
+
+            const formattedData = Object.entries(parsedData).map(([unixTime, price]) => ({
+              date: format(new Date(Number(unixTime)), 'yyyy-MM-dd'),
+              price: price
+          }));
+        console.log("raz", formattedData);
+        setProfit(formattedData);
+            return formattedData;
         } catch (error) {
             console.error('There has been a problem with your fetch operation:', error);
             throw error;
@@ -64,17 +62,17 @@ const UserEarningsChart = () => {
   return (
     <ResponsiveContainer width="100%" height={400}>
       <LineChart
-        data={data}
+        data={profit}
         margin={{
           top: 20, right: 30, left: 20, bottom: 5,
         }}
       >
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="date" tick={{ fontSize: 20 }} />
+        <XAxis dataKey="date" tick={{ fontSize: 20 }} interval={50}/>
         <YAxis tick={{ fontSize: 20 }} />
         <Tooltip contentStyle={{ fontSize: 16 }} />
         <Legend wrapperStyle={{ fontSize: 16 }} />
-        <Line type="monotone" dataKey="profit" stroke="#8884d8" activeDot={{ r: 8 }} />
+        <Line type="monotone" dataKey="price" stroke="#8884d8" activeDot={{ r: 8 }} />
         <Line type="monotone" dataKey="benchmark" stroke="#82ca9d" />
       </LineChart>
     </ResponsiveContainer>

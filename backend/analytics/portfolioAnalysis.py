@@ -8,7 +8,7 @@ def calculateProfit(portfolio):
     tickers.append('XD')
     #* finding first transaction date
     earliest_purchase_date = min(pd.to_datetime(stock.date) for stock in portfolio)
-    data = yf.download(tickers, start=earliest_purchase_date, end='2024-01-01')['Adj Close']
+    data = yf.download(tickers, start='2023-05-06', end='2024-05-06')['Adj Close']
 
     portfolio_value = pd.Series(index=data.index, dtype=np.float64)
     initial_value = 0
@@ -45,8 +45,8 @@ def calculateProfit(portfolio):
     #* downloading benchmark data (s&P500)
     benchmark_ticker = '^GSPC'
     #! change end date
-    #todo: change end date
-    benchmark_data = yf.download(benchmark_ticker, start=earliest_purchase_date, end='2024-01-01')['Adj Close']
+    #todo: change end date, and try to change start date to earliest purchase
+    benchmark_data = yf.download(benchmark_ticker, start='2023-05-06', end='2024-05-06')['Adj Close']
 
     #* simulating investment in benchmark (purchasing in same days and same value as real investments)
     previous_value = 0
