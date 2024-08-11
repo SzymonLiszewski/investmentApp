@@ -61,5 +61,6 @@ def CalendarIPOView(request):
 def profitView(request):
     userTransactions = Transactions.objects.filter(owner = request.user)
     profit, benchmark = calculateProfit(userTransactions) #! or profit = calculateProfit(userTransactions.eg)
+    sharpe, sortino, alpha = calculateIndicators(profit, benchmark)
     profit = profit.to_json(orient='index')
-    return JsonResponse({'calculated_data': profit})
+    return JsonResponse({'calculated_data': profit, 'sharpe': sharpe, 'sortino': sortino, 'alpha': alpha})

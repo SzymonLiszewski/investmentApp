@@ -50,7 +50,7 @@ const UserEarningsChart = () => {
               date: format(new Date(Number(unixTime)), 'yyyy-MM-dd'),
               price: price
           }));
-        console.log("raz", formattedData);
+        console.log("raz", data.alpha);
         setProfit(formattedData);
             return formattedData;
         } catch (error) {
