@@ -86,5 +86,4 @@ def calculateIndicators(portfolio_value, benchmark_data):
     #* calculating alpha (CAPM)
     beta, alpha = np.polyfit(benchmark_returns, portfolio_returns, 1)
     alpha = alpha * 252  #* yearly alpha rate
-    print(downside_returns)
     return sharpe_ratio, sortino_ratio, alpha

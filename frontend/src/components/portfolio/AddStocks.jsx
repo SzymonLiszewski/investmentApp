@@ -6,7 +6,7 @@ const AddStocks = () => {
   const [stock, setStock] = useState('');
   const [count, setCount] = useState('');
   const [type, setType] = useState('');
-  const [_price, setPrice] = useState('');
+  const [_price, setPrice] = useState();
   const [_date, setDate] = useState('');
 
     const navigate = useNavigate();
