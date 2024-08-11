@@ -2,11 +2,65 @@ import "../components/styles/Portfolio.css"
 import UserEarningsChart from "../components/portfolio/UserEarningsChart"
 import UserStocksChart from "../components/portfolio/UserStocksChart"
 import IndicatorsGaugeChart from "../components/portfolio/IndicatorsGaugeChart"
+import { useEffect, useState } from 'react';
+import { format } from 'date-fns';
 
 function Portfolio(){
-    const sharpeRatio = 1.5;
-    const sortinoRatio = 1.2;
-    const alpha = 0.05;
+    const [sharpeRatio, setSharpeRatio] = useState(0)
+    const [sortinoRatio, setSortinoRatio] = useState(0)
+    const [alpha, setAlpha] = useState(0)
+    const [profit, setProfit] = useState([])
+      useEffect(()=>{
+        const getUserStock = async () => {
+          try {
+              const stockData = await fetchUserProfit();
+          } catch (error) {
+              console.log(error.message);
+          }
+      };
+  
+      getUserStock();
+      },[]);
+      const fetchUserProfit = async () => {
+        try {
+            const token = localStorage.getItem('access');
+  
+            const response = await fetch('api/portfolio/profit', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+  
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+  
+            const data = await response.json();
+
+            const rawCalculatedData = data.calculated_data;
+        
+        const jsonString = rawCalculatedData.replace(/^"(.+)"$/, '$1');
+
+        const parsedData = JSON.parse(jsonString);
+
+        console.log('Parsed Data:', parsedData);
+
+            const formattedData = Object.entries(parsedData).map(([unixTime, price]) => ({
+              date: format(new Date(Number(unixTime)), 'yyyy-MM-dd'),
+              price: price
+          }));
+        setSharpeRatio(data.sharpe)
+        setSortinoRatio(data.sortino)
+        setAlpha(data.alpha)
+        setProfit(formattedData);
+            return formattedData;
+        } catch (error) {
+            console.error('There has been a problem with your fetch operation:', error);
+            throw error;
+        }
+    };
 
     //  value interpretation
     const interpretSharpe = sharpeRatio < 1 ? "Low return relative to its risk."
@@ -24,7 +78,7 @@ function Portfolio(){
     return (
         <div className="portfolio">
             <div className="portfolioDiv" id="return">
-                <h1><UserEarningsChart/></h1>
+                <h1><UserEarningsChart profit={profit}/></h1>
             </div>
             <div className="portfolioDiv" id="composition">
                 <h1><UserStocksChart/></h1>
