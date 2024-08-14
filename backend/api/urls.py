@@ -1,6 +1,6 @@
 from django.urls import path, include
 from . import views
-from analytics.views import stockDataView, predictView, fundamentalAnalysisView, basicInfoView, technicalAnalysisView, CalendarEarningsView, CalendarIPOView, profitView
+from analytics.views import stockDataView, predictView, fundamentalAnalysisView, basicInfoView, technicalAnalysisView, CalendarEarningsView, CalendarIPOView, profitView, updateTransactions
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
@@ -20,5 +20,6 @@ urlpatterns = [
     path('transactions/', views.CreateTransaction.as_view(), name="transactions"),
     path('userStock/delete/<int:pk>/', views.UserStockDelete.as_view(), name="delete_stock"),
     path('stocks/', views.StockCreate.as_view(), name="stocks"),
-    path('portfolio/profit', profitView, name="profit")
+    path('portfolio/profit', profitView, name="profit"),
+    path('portfolio/update', updateTransactions, name="updateTransactions")
 ]

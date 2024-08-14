@@ -9,6 +9,8 @@ from utils.economicCalendar import getEarnings, getIPO
 from rest_framework.permissions import IsAuthenticated
 from api.models import Transactions
 from django.http import JsonResponse
+from utils.xtb_integration import getTransactions_xtb
+from api.serializers import TransactionSerializer
 # Create your views here.
 
 #* Analysis views
@@ -60,7 +62,18 @@ def CalendarIPOView(request):
 @permission_classes([IsAuthenticated])
 def profitView(request):
     userTransactions = Transactions.objects.filter(owner = request.user)
-    profit, benchmark = calculateProfit(userTransactions) #! or profit = calculateProfit(userTransactions.eg)
+    profit, benchmark = calculateProfit(userTransactions)
     sharpe, sortino, alpha = calculateIndicators(profit, benchmark)
     profit = profit.to_json(orient='index')
     return JsonResponse({'calculated_data': profit, 'sharpe': sharpe, 'sortino': sortino, 'alpha': alpha})
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def updateTransactions(request):
+    userId = request.POST.get("userId")
+    password = request.POST.get("password")
+    xtb_transactions = getTransactions_xtb(userId, password)
+    for i in xtb_transactions:
+        serializer = TransactionSerializer(owner=request.user, product=i['symbol'], transactionType="B", quantity=i['volume'], price=i['price'], date=i['date'])
+        serializer.save()
+    return JsonResponse({'status': 'OK'})
