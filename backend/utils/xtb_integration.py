@@ -274,7 +274,7 @@ def loginCommand(userId, password, appName=''):
     return baseCommand('login', dict(userId=userId, password=password, appName=appName))
 
 def getOpenedTrades():
-    return baseCommand('getTrades', dict(openedOnly=False))
+    return baseCommand('getTrades', dict(openedOnly=True))
 
 # example function for processing ticks from Streaming socket
 def procTickExample(msg): 
@@ -301,8 +301,10 @@ def procNewsExample(msg):
     print("NEWS: ", msg)
     
 
-def getTransactions_xtb(userId, password):
+def getTransactions_xtb(_userId, _password):
 
+    userId = _userId
+    password = _password
     # create & connect to RR socket
     client = APIClient()
     
@@ -320,7 +322,7 @@ def getTransactions_xtb(userId, password):
     
     # getting trades
     tradesResponse = client.execute(getOpenedTrades())
-    history = [{}]
+    history = []
     counter = 0
     for i in tradesResponse['returnData']:
         history.append({})
@@ -330,6 +332,7 @@ def getTransactions_xtb(userId, password):
         history[counter]['close_price'] = i['close_price']
         history[counter]['open_price'] = i['open_price']
         history[counter]['date'] = datetime.utcfromtimestamp(int(i['open_time'])/1000).strftime('%Y-%m-%d')
+        history[counter]['order'] = i['order']
         counter+=1
     
     

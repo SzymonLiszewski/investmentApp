@@ -7,7 +7,7 @@ from analytics.technical_indicators import get_technical_indicators
 from analytics.portfolioAnalysis import calculateProfit, calculateIndicators
 from utils.economicCalendar import getEarnings, getIPO
 from rest_framework.permissions import IsAuthenticated
-from api.models import Transactions
+from api.models import Transactions, UserStock
 from django.http import JsonResponse
 from utils.xtb_integration import getTransactions_xtb
 from api.serializers import TransactionSerializer
@@ -64,16 +64,35 @@ def profitView(request):
     userTransactions = Transactions.objects.filter(owner = request.user)
     profit, benchmark = calculateProfit(userTransactions)
     sharpe, sortino, alpha = calculateIndicators(profit, benchmark)
-    profit = profit.to_json(orient='index')
+    if profit!=None:
+        profit = profit.to_json(orient='index')
     return JsonResponse({'calculated_data': profit, 'sharpe': sharpe, 'sortino': sortino, 'alpha': alpha})
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def updateTransactions(request):
-    userId = request.POST.get("userId")
-    password = request.POST.get("password")
+    userId = request.headers.get("userId")
+    password = request.headers.get("password")
     xtb_transactions = getTransactions_xtb(userId, password)
-    for i in xtb_transactions:
-        serializer = TransactionSerializer(owner=request.user, product=i['symbol'], transactionType="B", quantity=i['volume'], price=i['price'], date=i['date'])
-        serializer.save()
+    if xtb_transactions!=None:
+        for i in xtb_transactions:
+            if i != {}:
+                #* add transaction if it does not exists in database
+                isTransactionCreated = Transactions.objects.filter(external_id=i['order']).first()
+                if isTransactionCreated==None:
+                    serializer = TransactionSerializer(data={'product': i['symbol'], 'transactionType': "B", 'quantity': i['volume'], 'price': i['open_price'], 'date': i['date'], 'external_id': i['order']})
+                    if serializer.is_valid():
+                        transaction = serializer.save(owner=request.user)
+                        #* if USER_STOCK does not exits in db create new object, otherwise add value of owned shares
+                        user_product, created = UserStock.objects.get_or_create(
+                            owner=transaction.owner,
+                            ownedStock=transaction.product
+                        )
+                        if created:
+                            user_product.quantity = transaction.quantity
+                        else:
+                            user_product.quantity += transaction.quantity
+                        user_product.save()
+                    else:
+                        print(serializer.errors)
     return JsonResponse({'status': 'OK'})

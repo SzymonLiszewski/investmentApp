@@ -18,6 +18,7 @@ class UserStock(models.Model):
     quantity = models.FloatField(default=0)
 
 class Transactions(models.Model):
+    id = models.AutoField(primary_key=True)
     class transaction_type(models.TextChoices):
         BUY = 'B', 'buy'
         SELL = 'S', 'sell'
@@ -31,4 +32,5 @@ class Transactions(models.Model):
     quantity = models.FloatField(default=0.0)
     price = models.FloatField(default=0.0)
     date = models.DateField(default='2024-01-01')
+    external_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
     

@@ -25,5 +25,5 @@ class StockSerializer(serializers.ModelSerializer):
 class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transactions
-        fields = ["owner", "product", "transactionType", "quantity", "price", "date"]
-        extra_kwargs = {"owner": {"read_only": True}, "price": {"required": False}}
+        fields = ["owner", "product", "transactionType", "quantity", "price", "date", "external_id"]
+        extra_kwargs = {"owner": {"read_only": True}, "price": {"required": False}, "external_id": {"required": False}}

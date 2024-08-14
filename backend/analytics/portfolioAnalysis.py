@@ -4,6 +4,8 @@ import numpy as np
 
 def calculateProfit(portfolio):
     #* downloading historical data
+    if True:
+        return None, None
     tickers = [stock.product.ticker for stock in portfolio]
     tickers.append('XD')
     #* finding first transaction date
@@ -69,6 +71,8 @@ def calculateProfit(portfolio):
     return portfolio_value, benchmark_value
 
 def calculateIndicators(portfolio_value, benchmark_data):
+    if portfolio_value==None or benchmark_data ==None:
+        return None, None, None
     risk_free_rate = 0.01  #* assuming rate of return 1%
     
     portfolio_returns = portfolio_value
