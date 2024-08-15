@@ -276,6 +276,11 @@ def loginCommand(userId, password, appName=''):
 def getOpenedTrades():
     return baseCommand('getTrades', dict(openedOnly=True))
 
+def getPrices(ticker):
+    return baseCommand('getChartLastRequest', dict(info={"period": 1440,
+	"start": 1692117917000,
+	"symbol": ticker}))
+
 # example function for processing ticks from Streaming socket
 def procTickExample(msg): 
     print("TICK: ", msg)
@@ -340,3 +345,32 @@ def getTransactions_xtb(_userId, _password):
     client.disconnect()
     return history
 
+def getPriceHistory(_userId, _password, _ticker):
+    userId = _userId
+    password = _password
+    # create & connect to RR socket
+    client = APIClient()
+    
+    # connect to RR socket, login
+    loginResponse = client.execute(loginCommand(userId=userId, password=password))
+    logger.info(str(loginResponse)) 
+
+    # check if user logged in correctly
+    if(loginResponse['status'] == False):
+        print('Login failed. Error code: {0}'.format(loginResponse['errorCode']))
+        return
+
+    # get ssId from login response
+    ssid = loginResponse['streamSessionId']
+    
+    # getting history
+    rsp = client.execute(getPrices(_ticker))
+    dig = rsp['returnData']['digits']
+    
+    prices = [{'date': datetime.utcfromtimestamp(int(i['ctm'])/1000).strftime('%Y-%m-%d'), 'price': (i['open']+i['close'])/(10**dig)} for i in rsp['returnData']['rateInfos']]
+
+    
+    
+    # gracefully close RR socket
+    client.disconnect()
+    return prices

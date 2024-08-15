@@ -1,17 +1,39 @@
 import yfinance as yf
 import pandas as pd
 import numpy as np
+from utils.xtb_integration import getPriceHistory
 
 def calculateProfit(portfolio):
     #* downloading historical data
-    if True:
+    if portfolio==None:
         return None, None
     tickers = [stock.product.ticker for stock in portfolio]
-    tickers.append('XD')
+    #tickers.append('XD')
+   
     #* finding first transaction date
     earliest_purchase_date = min(pd.to_datetime(stock.date) for stock in portfolio)
-    data = yf.download(tickers, start='2023-05-06', end='2024-05-06')['Adj Close']
+    
+    #* split between yfinance and xtb stocks
+    available_tickers = []
+    unavailable_tickers = []
 
+    for ticker in tickers:
+        if check_ticker_availability(ticker):
+            available_tickers.append(ticker)
+        else:
+            unavailable_tickers.append(ticker)
+ 
+    if available_tickers:
+        data_yf = yf.download(available_tickers, start='2023-05-06', end='2024-05-06')['Adj Close']
+    if unavailable_tickers:
+        external_data = get_data_from_external_source(unavailable_tickers)
+    if available_tickers and unavailable_tickers:
+        data = pd.concat([data_yf, external_data], axis=1)
+    elif available_tickers:
+        data = data_yf
+    else:
+        data = external_data
+        
     portfolio_value = pd.Series(index=data.index, dtype=np.float64)
     initial_value = 0
 
@@ -71,8 +93,8 @@ def calculateProfit(portfolio):
     return portfolio_value, benchmark_value
 
 def calculateIndicators(portfolio_value, benchmark_data):
-    if portfolio_value==None or benchmark_data ==None:
-        return None, None, None
+    '''if portfolio_value==None or benchmark_data ==None:'''
+    return None, None, None
     risk_free_rate = 0.01  #* assuming rate of return 1%
     
     portfolio_returns = portfolio_value
@@ -91,3 +113,27 @@ def calculateIndicators(portfolio_value, benchmark_data):
     beta, alpha = np.polyfit(benchmark_returns, portfolio_returns, 1)
     alpha = alpha * 252  #* yearly alpha rate
     return sharpe_ratio, sortino_ratio, alpha
+
+def get_data_from_external_source(tickers):
+    external_data = {}
+    for ticker in tickers:
+        #TODO test
+        #todo: get id and passwd from request
+        hist = getPriceHistory(_id,passwd,ticker)
+        df = pd.DataFrame(hist)
+        df['date'] = pd.to_datetime(df['date'])  
+        df.set_index('date', inplace=True)       
+        external_data[ticker] = df['price']
+    combined_external_df = pd.DataFrame(external_data)
+    return combined_external_df
+
+def check_ticker_availability(ticker):
+    try:
+        data = yf.Ticker(ticker)
+        hist = data.history(period="1d")
+        if not hist.empty:
+            return True
+        else:
+           return False
+    except:
+        return False

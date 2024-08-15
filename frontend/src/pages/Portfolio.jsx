@@ -13,13 +13,13 @@ function Portfolio(){
       useEffect(()=>{
         const getUserStock = async () => {
           try {
-              //const stockData = await fetchUserProfit();
+              const stockData = await fetchUserProfit();
           } catch (error) {
               console.log(error.message);
           }
       };
       updateTransactions();
-      //getUserStock();
+      getUserStock();
       },[]);
       const fetchUserProfit = async () => {
         try {

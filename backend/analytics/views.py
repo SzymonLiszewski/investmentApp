@@ -64,8 +64,7 @@ def profitView(request):
     userTransactions = Transactions.objects.filter(owner = request.user)
     profit, benchmark = calculateProfit(userTransactions)
     sharpe, sortino, alpha = calculateIndicators(profit, benchmark)
-    if profit!=None:
-        profit = profit.to_json(orient='index')
+    profit = profit.to_json(orient='index')
     return JsonResponse({'calculated_data': profit, 'sharpe': sharpe, 'sortino': sortino, 'alpha': alpha})
 
 @api_view(['POST'])
