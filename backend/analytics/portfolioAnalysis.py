@@ -121,11 +121,8 @@ def calculateIndicators(portfolio_value, benchmark_data):
     #* caluclating Sortino ratio
     downside_returns = portfolio_returns[portfolio_returns < 0]
     sortino_ratio = (portfolio_returns.mean() - risk_free_rate / 252) / downside_returns.std()
-    if len(downside_returns) == 0:
-        sortino_ratio = 5
     if np.isnan(sortino_ratio):
         sortino_ratio = 5
-        print("lol")
 
     #* calculating alpha (CAPM)
     beta, alpha = np.polyfit(benchmark_returns, portfolio_returns, 1)
