@@ -24,12 +24,15 @@ function Portfolio(){
       const fetchUserProfit = async () => {
         try {
             const token = localStorage.getItem('access');
-  
+            const id = localStorage.getItem('id');
+            const pwd = localStorage.getItem('pwd')
             const response = await fetch('api/portfolio/profit', {
-                method: 'GET',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'userId': id,
+                    'password': pwd
                 }
             });
   

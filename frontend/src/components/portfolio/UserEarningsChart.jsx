@@ -17,7 +17,7 @@ const UserEarningsChart = ({profit}) => {
         }}
       >
         <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="date" tick={{ fontSize: 20 }} interval={50}/>
+        <XAxis dataKey="date" tick={{ fontSize: 20 }} interval={7}/>
         <YAxis tick={{ fontSize: 20 }} />
         <Tooltip contentStyle={{ fontSize: 16 }} />
         <Legend wrapperStyle={{ fontSize: 16 }} />

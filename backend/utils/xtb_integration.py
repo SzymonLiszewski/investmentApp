@@ -276,9 +276,17 @@ def loginCommand(userId, password, appName=''):
 def getOpenedTrades():
     return baseCommand('getTrades', dict(openedOnly=True))
 
+from datetime import datetime, timedelta
+import time
+def timeMonthAgo():
+    now = datetime.now()
+    one_month_ago = now - timedelta(days=30)  
+    unix_time = int(time.mktime(one_month_ago.timetuple()))*1000
+    return unix_time
+
 def getPrices(ticker):
     return baseCommand('getChartLastRequest', dict(info={"period": 1440,
-	"start": 1692117917000,
+	"start": timeMonthAgo(),
 	"symbol": ticker}))
 
 # example function for processing ticks from Streaming socket

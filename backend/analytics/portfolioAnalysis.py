@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from utils.xtb_integration import getPriceHistory
 
-def calculateProfit(portfolio):
+def calculateProfit(portfolio, userID, passwd):
     #* downloading historical data
     if portfolio==None:
         return None, None
@@ -26,7 +26,7 @@ def calculateProfit(portfolio):
     if available_tickers:
         data_yf = yf.download(available_tickers, start='2023-05-06', end='2024-05-06')['Adj Close']
     if unavailable_tickers:
-        external_data = get_data_from_external_source(unavailable_tickers)
+        external_data = get_data_from_external_source(unavailable_tickers, userID, passwd)
     if available_tickers and unavailable_tickers:
         data = pd.concat([data_yf, external_data], axis=1)
     elif available_tickers:
@@ -114,12 +114,11 @@ def calculateIndicators(portfolio_value, benchmark_data):
     alpha = alpha * 252  #* yearly alpha rate
     return sharpe_ratio, sortino_ratio, alpha
 
-def get_data_from_external_source(tickers):
+def get_data_from_external_source(tickers, userID, passwd):
     external_data = {}
     for ticker in tickers:
-        #TODO test
         #todo: get id and passwd from request
-        hist = getPriceHistory(_id,passwd,ticker)
+        hist = getPriceHistory(userID,passwd,ticker)
         df = pd.DataFrame(hist)
         df['date'] = pd.to_datetime(df['date'])  
         df.set_index('date', inplace=True)       

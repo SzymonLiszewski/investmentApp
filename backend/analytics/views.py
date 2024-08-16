@@ -67,11 +67,13 @@ def CalendarIPOView(request):
 
 #* portfolio analysis views
 
-@api_view(['GET'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def profitView(request):
     userTransactions = Transactions.objects.filter(owner = request.user)
-    profit, benchmark = calculateProfit(userTransactions)
+    userId = request.headers.get("userId")
+    password = request.headers.get("password")
+    profit, benchmark = calculateProfit(userTransactions, userId, password)
     sharpe, sortino, alpha = calculateIndicators(profit, benchmark)
     profit = profit.to_json(orient='index')
     return JsonResponse({'calculated_data': profit, 'sharpe': sharpe, 'sortino': sortino, 'alpha': alpha})
