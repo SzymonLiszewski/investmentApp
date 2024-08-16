@@ -2,8 +2,12 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 from utils.xtb_integration import getPriceHistory
+from datetime import datetime, timedelta
+import time
 
 def calculateProfit(portfolio, userID, passwd):
+    now = datetime.now()- timedelta(days=1)
+    one_month_ago = now - timedelta(days=30)
     #* downloading historical data
     if portfolio==None:
         return None, None
@@ -24,7 +28,7 @@ def calculateProfit(portfolio, userID, passwd):
             unavailable_tickers.append(ticker)
  
     if available_tickers:
-        data_yf = yf.download(available_tickers, start='2023-05-06', end='2024-05-06')['Adj Close']
+        data_yf = yf.download(available_tickers, start=str(one_month_ago.strftime('%Y-%m-%d')), end=str(now.strftime('%Y-%m-%d')))['Adj Close']
     if unavailable_tickers:
         external_data = get_data_from_external_source(unavailable_tickers, userID, passwd)
     if available_tickers and unavailable_tickers:
@@ -70,7 +74,8 @@ def calculateProfit(portfolio, userID, passwd):
     benchmark_ticker = '^GSPC'
     #! change end date
     #todo: change end date, and try to change start date to earliest purchase
-    benchmark_data = yf.download(benchmark_ticker, start='2023-05-06', end='2024-05-06')['Adj Close']
+    
+    benchmark_data = yf.download(benchmark_ticker, start=str(one_month_ago.strftime('%Y-%m-%d')), end=str(now.strftime('%Y-%m-%d')))['Adj Close']
 
     #* simulating investment in benchmark (purchasing in same days and same value as real investments)
     previous_value = 0
@@ -90,11 +95,21 @@ def calculateProfit(portfolio, userID, passwd):
     benchmark_value = benchmark_quantity * benchmark_data
     
     benchmark_value = benchmark_value - money_spent
+    #*create full dates dataframe
+    full_index = pd.date_range(start=str(one_month_ago.strftime('%Y-%m-%d')), 
+                           end=str(now.strftime('%Y-%m-%d')), freq='D')
+    #* reindexing dataframes
+    portfolio_value = portfolio_value.reindex(full_index)
+    benchmark_value = benchmark_value.reindex(full_index)
+
+    #*fill missing values using forward fill
+    portfolio_value = portfolio_value.ffill()
+    benchmark_value = benchmark_value.ffill()
     return portfolio_value, benchmark_value
 
 def calculateIndicators(portfolio_value, benchmark_data):
     '''if portfolio_value==None or benchmark_data ==None:'''
-    return None, None, None
+    #return None, None, None
     risk_free_rate = 0.01  #* assuming rate of return 1%
     
     portfolio_returns = portfolio_value
@@ -108,6 +123,9 @@ def calculateIndicators(portfolio_value, benchmark_data):
     sortino_ratio = (portfolio_returns.mean() - risk_free_rate / 252) / downside_returns.std()
     if len(downside_returns) == 0:
         sortino_ratio = 5
+    if np.isnan(sortino_ratio):
+        sortino_ratio = 5
+        print("lol")
 
     #* calculating alpha (CAPM)
     beta, alpha = np.polyfit(benchmark_returns, portfolio_returns, 1)
