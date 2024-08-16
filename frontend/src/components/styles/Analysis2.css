@@ -1,5 +1,8 @@
 body, html{
     background-color: aqua;
+    background-attachment: fixed;
+    height:100%;
+
 }
 .analysis-container {
     display: grid;

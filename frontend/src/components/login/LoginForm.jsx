@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { TextField, Button, Container, Typography, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../AuthContext';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const { isLoggedIn, login } = useAuth();
     
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,6 +18,7 @@ const LoginForm = () => {
   };
 
   const loginUser = async (email, password) =>{
+    
     try{
         const response = await fetch('api/token/', {
             method: 'POST',
@@ -32,6 +35,7 @@ const LoginForm = () => {
             throw new Error(data.username || 'Network response was not ok');
         }
         alert('login successful');
+        login()
         navigate('/');
         return data;
     }catch (error){

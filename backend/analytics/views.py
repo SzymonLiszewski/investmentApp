@@ -6,7 +6,7 @@ from analytics.predictions import linear_regression_predict
 from analytics.technical_indicators import get_technical_indicators
 from analytics.portfolioAnalysis import calculateProfit, calculateIndicators
 from utils.economicCalendar import getEarnings, getIPO
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from api.models import Transactions, UserStock
 from django.http import JsonResponse
 from utils.xtb_integration import getTransactions_xtb
@@ -15,14 +15,18 @@ from api.serializers import TransactionSerializer
 
 #* Analysis views
 
+
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def stockDataView(request, ticker):
     start_date = request.GET.get('start')
     end_date = request.GET.get('end')
     data = getStockPrice(ticker, start_date, end_date)
     return Response(data)
 
+
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def predictView(request, ticker):
     start_date = request.GET.get('start')
     end_date = request.GET.get('end')
@@ -30,16 +34,19 @@ def predictView(request, ticker):
     return Response(prediction)
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def fundamentalAnalysisView(request, ticker):
     data = getFundamentalAnalysis(ticker)
     return Response(data)
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def basicInfoView(request, ticker):
     data = getBasicStockInfo(ticker)
     return Response(data)
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def technicalAnalysisView(request, ticker):
     data = get_technical_indicators(ticker)
     return Response(data)
@@ -47,11 +54,13 @@ def technicalAnalysisView(request, ticker):
 #* Calendar views
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def CalendarEarningsView(request):
     data = getEarnings()
     return Response(data)
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def CalendarIPOView(request):
     data = getIPO()
     return Response(data)

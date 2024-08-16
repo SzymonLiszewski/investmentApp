@@ -13,24 +13,27 @@ import Portfolio from './pages/Portfolio';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage'
 import AddStocks from './components/portfolio/AddStocks';
+import { AuthProvider } from './AuthContext';
 
 const App = () => {
     return (
         <Fragment>
-            <NavBar/>
-            <div className='container'>
-                <Routes>
-                    <Route path='/' element={<HomePage/>}/>
-                    <Route path='/news' element={<News/>}/>
-                    <Route path='/analysis' element={<Analysis/>}/>
-                    <Route path='/analysis2/:ticker/*' element={<Analysis2/>}/>
-                    <Route path='/calendar' element={<EventsCalendar/>}/>
-                    <Route path='/portfolio' element={<Portfolio/>}/>
-                    <Route path='/login' element={<LoginPage/>}/>
-                    <Route path='/register' element={<RegisterPage/>}/>
-                    <Route path='/addStock' element={<AddStocks/>}/>
-                </Routes>
-            </div>
+            <AuthProvider>
+                <NavBar isLoggedIn={true}/>
+                <div className='container'>
+                    <Routes>
+                        <Route path='/' element={<HomePage/>}/>
+                        <Route path='/news' element={<News/>}/>
+                        <Route path='/analysis' element={<Analysis/>}/>
+                        <Route path='/analysis2/:ticker/*' element={<Analysis2/>}/>
+                        <Route path='/calendar' element={<EventsCalendar/>}/>
+                        <Route path='/portfolio' element={<Portfolio/>}/>
+                        <Route path='/login' element={<LoginPage/>}/>
+                        <Route path='/register' element={<RegisterPage/>}/>
+                        <Route path='/addStock' element={<AddStocks/>}/>
+                    </Routes>
+                </div>
+            </AuthProvider>
         </Fragment>
             
     );
