@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import './styles/SearchBox.css'; // Stylizacja CSS
+import './styles/SearchBox.css';
+import { useNavigate } from "react-router-dom";
 
 const SearchBox = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -8,12 +9,13 @@ const SearchBox = () => {
   const [allStocks, setAllStocks] = useState([]);
   const [selectedSuggestions, setSelectedSuggestions] = useState([]);
   const searchBoxRef = useRef(null);
+  const navigate = useNavigate();
 
   const handleInputChange = (event) => {
     const value = event.target.value;
     setSearchTerm(value);
     if (value.length > 0) {
-      setSuggestions(allStocks.filter(stock => stock.name.toLowerCase().includes(value.toLowerCase())));
+      setSuggestions(allStocks.filter(stock => stock.name.toLowerCase().includes(value.toLowerCase())).slice(0, 10));
     } else {
       setSuggestions([]);
     }
@@ -21,7 +23,7 @@ const SearchBox = () => {
 
   useEffect(() => {
     // starting values of suggestions
-    setSuggestions(allStocks.slice(0, 5)); // displaying first 5 suggestions
+    setSuggestions(allStocks.slice(0, 10)); // displaying first 10 suggestions
   }, [allStocks])
 
   const handleInputClick = () => {
@@ -30,6 +32,7 @@ const SearchBox = () => {
 
   const handleSuggestionClick = (value) => {
     setSearchTerm(value.name);
+    navigate(`/analysis2/${value.Symbol}`)
     setExpanded(false);
 };
 

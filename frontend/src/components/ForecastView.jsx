@@ -5,8 +5,9 @@ import StockChart from "./StockPriceChart";
 function ForecastView({ticker}){
     const today = new Date();
     const threeYearsAgo = new Date();
-    threeYearsAgo.setFullYear(today.getFullYear() - 3);
+    threeYearsAgo.setFullYear(today.getFullYear() - 1);
     const todayString = today.toISOString().split('T')[0];
+    console.log(todayString)
     const threeYearsAgoString = threeYearsAgo.toISOString().split('T')[0];
     return (
         <div className="ForecastContainer">

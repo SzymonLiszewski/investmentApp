@@ -3,18 +3,20 @@ import React, {useState} from 'react';
 import SearchBox from '../components/SearchBox';
 import StockSection from '../components/StockSection';
 
+
 function HomePage (){
     const [showSearchBox, setShowSearchBox] = useState(false);
+    
 
     const toggleSearchBox = () => {
       setShowSearchBox(!showSearchBox);
     };
 
     const stocks = [
-        { name: 'Apple', price: 150, change: 1.2 },
-        { name: 'Google', price: 2800, change: -0.5 },
-        { name: 'Bitcoin', price: 45000, change: 5 },
-        { name: 'Ethereum', price: 3000, change: 3 },
+        { name: 'Apple', price: 150, change: 1.2, ticker: 'AAPL'},
+        { name: 'Google', price: 2800, change: -0.5, ticker: 'GOOGL' },
+        { name: 'Microsoft', price: 45000, change: 5, ticker: 'MSFT' },
+        { name: 'Tesla', price: 3000, change: 3, ticker: 'TSLA' },
       ];
 
       const cryptos = [
@@ -42,7 +44,7 @@ function HomePage (){
                   <h4>Choose Interesting stocks, discover our analysis and invest confidently </h4>
                   <SearchBox />
               </div>
-              <img src="../src/assets/image1.png"></img>
+              <img src="assets/image1.png"></img>
             </div>
             <div className='stock-info-container'>
               <StockSection stocks={stocks} />

@@ -91,7 +91,7 @@ const StockChart = ({startDate, endDate, ticker, predictedDays}) => {
     },[ticker])
 
     let getData = async () =>{
-      let response = await fetch(`/api/stockData/${ticker}/?start=2022-01-01&end=2024-01-01`)
+      let response = await fetch(`/api/stockData/${ticker}/?start=${startDate}&end=${endDate}`)
       let data = await response.json()
       const history = Object.keys(data).map(year => ({
         date: year,

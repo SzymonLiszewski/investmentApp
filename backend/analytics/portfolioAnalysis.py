@@ -125,8 +125,11 @@ def calculateIndicators(portfolio_value, benchmark_data):
         sortino_ratio = 5
 
     #* calculating alpha (CAPM)
-    beta, alpha = np.polyfit(benchmark_returns, portfolio_returns, 1)
-    alpha = alpha * 252  #* yearly alpha rate
+    try:
+        beta, alpha = np.polyfit(benchmark_returns, portfolio_returns, 1)
+        alpha = alpha * 252  #* yearly alpha rate
+    except:
+        alpha = 0
     return sharpe_ratio, sortino_ratio, alpha
 
 def get_data_from_external_source(tickers, userID, passwd):

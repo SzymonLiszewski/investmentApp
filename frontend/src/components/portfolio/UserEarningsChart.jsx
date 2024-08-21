@@ -21,7 +21,7 @@ const UserEarningsChart = ({profit}) => {
         <YAxis tick={{ fontSize: 20 }} />
         <Tooltip contentStyle={{ fontSize: 16 }} />
         <Legend wrapperStyle={{ fontSize: 16 }} />
-        <Line type="monotone" dataKey="price" stroke="#8884d8" activeDot={{ r: 8 }} />
+        <Line type="monotone" dataKey="price" stroke="#8884d8" strokeWidth={4} activeDot={{ r: 8 }} />
         <Line type="monotone" dataKey="benchmark" stroke="#82ca9d" />
       </LineChart>
     </ResponsiveContainer>
