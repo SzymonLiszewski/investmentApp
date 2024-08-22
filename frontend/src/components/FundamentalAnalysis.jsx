@@ -63,7 +63,7 @@ function FundamentalAnalysis({ticker}){
                 </div>
                 <div className="FundamentalContainer" id="Earnings"> 
                     <h3>Revenue</h3>
-                    <RevenueChart/>
+                    <RevenueChart data={Revenue}/>
                 </div>
             </div>
     )

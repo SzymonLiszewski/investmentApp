@@ -1,21 +1,18 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const data = [
-  { name: '2019', uv: 4000, pv: 2400 },
-  { name: '2020', uv: 3000, pv: 1398 },
-  { name: '2021', uv: 2000, pv: 9800 },
-  { name: '2022', uv: 2780, pv: 3908 },
-  { name: '2023', uv: 1890, pv: 4800 },
 
-];
-
-const RevenueChart = () => {
+const RevenueChart = ({data}) => {
+  const history = Object.keys(data).map(year => ({
+    name: year,
+    pv: data[year]
+  }));
+  console.log("tr:",history)
   return (
     <ResponsiveContainer width="100%" height="92%">
       <BarChart
         layout="vertical"
-        data={data}
+        data={history}
         margin={{
           top: 20,
           right: 50,
