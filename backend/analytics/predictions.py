@@ -44,7 +44,7 @@ def linear_regression_predict(ticker, start_date, end_date, predicted_days=30):
 
     for i in range(len(future_dates)):
         data_dict[future_dates[i]] = future_predictions[i][0]
-    return data_dict
+    return {list(data_dict.keys())[-1]:list(data_dict.values())[-1]}
 
 
 #* prepare time series for regression

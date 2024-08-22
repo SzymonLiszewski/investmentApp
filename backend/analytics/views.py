@@ -30,8 +30,9 @@ def stockDataView(request, ticker):
 def predictView(request, ticker):
     start_date = request.GET.get('start')
     end_date = request.GET.get('end')
+    data = getStockPrice(ticker, start_date, end_date)
     prediction = linear_regression_predict(ticker, start_date, end_date)
-    return Response(prediction)
+    return Response(data | prediction)
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
