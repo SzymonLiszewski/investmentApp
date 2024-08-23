@@ -4,8 +4,6 @@ import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 
 const StockInfoBox = ({ name, price, change, ticker }) => {
-  const textColor = change >=0 ? '#3ae307' : 'red';
-  const trendIcon = change >=0 ? 'assets/uptrend.png' : 'assets/downtrend.png';
   let [CurrentPrice, setCurrentPrice] = useState(0)
     let [PriceChange, setPriceChange] = useState(0)
 
@@ -22,10 +20,10 @@ const StockInfoBox = ({ name, price, change, ticker }) => {
   return (
     <Link to={`/analysis2/${ticker}`} className="stock-info-box">
 
-      <h3 style = {{color: textColor}}>{name}</h3>
-      <p style = {{color: textColor}}>Price: ${CurrentPrice.toFixed(2)}</p>
-      <p style = {{color: textColor}} id="change">Change: {PriceChange.toFixed(2)}%</p>
-      <img src={trendIcon} id='trendIcon'></img>
+      <h3 style = {{color: parseFloat(PriceChange) >=0 ? '#3ae307' : 'red'}}>{name}</h3>
+      <p style = {{color: parseFloat(PriceChange) >=0 ? '#3ae307' : 'red'}}>Price: ${CurrentPrice.toFixed(2)}</p>
+      <p style = {{color: parseFloat(PriceChange) >=0 ? '#3ae307' : 'red'}} id="change">Change: {PriceChange.toFixed(2)}%</p>
+      <img src={parseFloat(PriceChange) >=0 ? 'assets/uptrend.png' : 'assets/downtrend.png'} id='trendIcon'></img>
 
     </Link>
   );
