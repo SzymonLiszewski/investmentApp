@@ -40,7 +40,7 @@ const StockChart = ({startDate, endDate, ticker, predictedDays}) => {
       setLoading(false)
       console.log("predicted", Predicted)
       history[history.length-1] = {date: history[history.length-1].date, predicted: history[history.length-1].price};
-      history[history.length-2] = {date: history[history.length-2].date, predicted: history[history.length-2].price};
+      history[history.length-2] = {date: history[history.length-2].date, price: history[history.length-2].price,predicted: history[history.length-2].price};
       const historyData = history.filter(item => !item.isPredicted);
       const predictionData = history.filter(item => item.isPredicted);
       setPredicted(predictionData)
