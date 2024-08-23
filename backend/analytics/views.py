@@ -9,7 +9,7 @@ from utils.economicCalendar import getEarnings, getIPO
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from api.models import Transactions, UserStock
 from django.http import JsonResponse
-from utils.xtb_integration import getTransactions_xtb
+from utils.xtb_integration import getTransactions_xtb, login_to_xtb
 from api.serializers import TransactionSerializer
 # Create your views here.
 
@@ -107,3 +107,11 @@ def updateTransactions(request):
                     else:
                         print(serializer.errors)
     return JsonResponse({'status': 'OK'})
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def xtbLogin(request):
+    userId = request.headers.get("userId")
+    password = request.headers.get("password")
+    response = login_to_xtb(userId, password)
+    return JsonResponse({'status': response})

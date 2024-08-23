@@ -382,3 +382,14 @@ def getPriceHistory(_userId, _password, _ticker):
     # gracefully close RR socket
     client.disconnect()
     return prices
+
+def login_to_xtb(_userId, _password):
+    userId = int(_userId)
+    password = _password
+    # create & connect to RR socket
+    client = APIClient()
+    
+    # connect to RR socket, login
+    loginResponse = client.execute(loginCommand(userId=userId, password=password))
+    logger.info(str(loginResponse)) 
+    return loginResponse['status']
