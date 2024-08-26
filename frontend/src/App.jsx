@@ -15,6 +15,7 @@ import RegisterPage from './pages/RegisterPage'
 import AddStocks from './components/portfolio/AddStocks';
 import { AuthProvider } from './AuthContext';
 import XtbLoginPage from './pages/XtbLoginPage';
+import ConnectedAccounts from './components/portfolio/ConnectAccounts';
 
 const App = () => {
     return (
@@ -33,6 +34,7 @@ const App = () => {
                         <Route path='/register' element={<RegisterPage/>}/>
                         <Route path='/addStock' element={<AddStocks/>}/>
                         <Route path='/xtbLogin' element={<XtbLoginPage/>}/>
+                        <Route path='/connectAccounts' element={<ConnectedAccounts/>}/>
                     </Routes>
                 </div>
             </AuthProvider>

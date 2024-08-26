@@ -31,3 +31,15 @@ body,html{
      grid-area: 1 / 2 / 3 / 3; 
      text-align: center;
     }
+
+    .connectedAccountsButton{
+        background-color: gray;
+        margin-left: 5vw;
+        margin-bottom: 10px;
+        border-radius: 40px;
+    }
+
+    .connectedAccountsButton:hover{
+        background-color: rgb(204, 204, 204);
+    }
+  

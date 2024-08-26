@@ -2,8 +2,9 @@ import "../components/styles/Portfolio.css"
 import UserEarningsChart from "../components/portfolio/UserEarningsChart"
 import UserStocksChart from "../components/portfolio/UserStocksChart"
 import IndicatorsGaugeChart from "../components/portfolio/IndicatorsGaugeChart"
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { format } from 'date-fns';
+import { Link } from "react-router-dom"
 
 function Portfolio(){
     const [sharpeRatio, setSharpeRatio] = useState(0)
@@ -105,6 +106,8 @@ function Portfolio(){
     : "Outperforms the benchmark after adjusting for market risk.";
 
     return (
+        <Fragment>
+        <button className="connectedAccountsButton"><Link to="/connectAccounts" style={{color: "white"}}>connected accounts</Link></button>
         <div className="portfolio">
             <div className="portfolioDiv" id="return">
                 <h1><UserEarningsChart profit={profit}/></h1>
@@ -123,6 +126,7 @@ function Portfolio(){
                 <IndicatorsGaugeChart data={alpha} range={[-0.05, 0.05]} name="Alpha" interpretation={interpretAlpha}/>
             </div>
         </div>
+        </Fragment>
     )
 }
     

@@ -1,0 +1,23 @@
+.accountsList{
+    width: 100%;
+    margin-left: 115%;
+    margin-top: -300px;
+}
+
+.accountsList ul {
+    align-items: center;
+    text-align: center;
+}
+
+.accountsList ul li{
+    list-style-type: none;
+    color: black;
+    padding: 5px;
+    margin-left: -40px;
+    border-top: solid 2px;
+    border-bottom: solid 2px;
+}
+
+.accountsList ul li:hover{
+    background-color: rgb(158, 158, 158);
+}
