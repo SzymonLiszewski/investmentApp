@@ -7,6 +7,11 @@ import {
 
 const UserEarningsChart = ({profit}) => {
     
+  if (profit.length==0){
+    return(
+      <p>Loading...</p>
+    )
+  }
 
   return (
     <ResponsiveContainer width="100%" height={400}>

@@ -7,9 +7,9 @@ import { format } from 'date-fns';
 import { Link } from "react-router-dom"
 
 function Portfolio(){
-    const [sharpeRatio, setSharpeRatio] = useState(0)
-    const [sortinoRatio, setSortinoRatio] = useState(0)
-    const [alpha, setAlpha] = useState(0)
+    const [sharpeRatio, setSharpeRatio] = useState(-100)
+    const [sortinoRatio, setSortinoRatio] = useState(-100)
+    const [alpha, setAlpha] = useState(-100)
     const [profit, setProfit] = useState([])
       useEffect(()=>{
         const getUserStock = async () => {

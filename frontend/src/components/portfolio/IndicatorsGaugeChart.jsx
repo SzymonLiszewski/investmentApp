@@ -7,6 +7,11 @@ const IndicatorsGaugeChart = ({ data, range, name, interpretation }) => {
     { name, value, fill: '#8884d8' },
     { name: 'Remaining', value: range[1] - value, fill: '#e0e0e0' },
   ];
+  if (data==-100){
+    return(
+      <p>Loading...</p>
+    )
+  }
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '10px' }}>
