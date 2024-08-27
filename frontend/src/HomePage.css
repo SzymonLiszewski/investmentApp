@@ -1,14 +1,18 @@
 /* src/HomePage.css */
-body{
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%; /* Ustawia wysokość na 100% okna przeglądarki */
+}
+body, html{
     background-image: url("assets/background.png");
     background-attachment: fixed;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    height:100%;
 }
 .homepage {
-    width: 100vw;
+    width: 90vw;
     text-align: center;
     font-family: Arial, sans-serif;
     background: transparent;
@@ -17,10 +21,11 @@ body{
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    margin-left: 5vw;
 }
 
 .mainItem{
-    width: 100vw;
+    width: 90vw;
     text-align: center;
     font-family: Arial, sans-serif;
     background: transparent;
@@ -28,6 +33,7 @@ body{
     justify-content: space-between;
     display: flex;
     align-items: flex-start;
+    margin-right: 5vw;
 }
 
 img{
@@ -71,9 +77,44 @@ h4{
     display: flex;
     flex-direction: column;
     width: 90%
+
 }
 
   .stock-section .stock-list{
     display: flex;
     flex-direction: row;
   }
+  @media (max-width: 1000px) {
+    .homepage {
+        margin-top: 100vh;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .mainItem{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .stock-section .stock-list{
+        display: flex;
+        flex-direction: column;
+    }
+    .search-container .search-box{
+        left: 30%;
+        width: 50%;
+      }
+      .search-container {
+        width: 100%;
+        margin-left: 0vw;
+      }
+      img{
+        width: 390px;
+        height: 260px;
+    }
+    .stock-section .stock-list .stock-info-box{
+        width: 70%;
+        margin: 5px;
+    }
+    
+    }

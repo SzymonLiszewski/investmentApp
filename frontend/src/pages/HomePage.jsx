@@ -44,7 +44,7 @@ function HomePage (){
                   <h4>Choose Interesting stocks, discover our analysis and invest confidently </h4>
                   <SearchBox />
               </div>
-              <img src="assets/image1.png"></img>
+              <img src="src/assets/image1.png"></img>
             </div>
             <div className='stock-info-container'>
               <StockSection stocks={stocks} />
