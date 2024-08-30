@@ -23,9 +23,8 @@ const AboutPage = () => {
             <div className="team-section">
                 <div className="team-info">
                     <div className="team-member">
-                        <h3>John Doe</h3>
+                        <h3>Name</h3>
                         <p><strong>Role:</strong> Lead Developer</p>
-                        <p>Specialist in machine learning and financial analysis.</p>
                     </div>
                 </div>
             </div>
