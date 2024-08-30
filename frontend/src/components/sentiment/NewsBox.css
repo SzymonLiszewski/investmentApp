@@ -1,0 +1,50 @@
+.newsBox{
+    background-color: grey;
+    border-radius: 40px;
+}
+
+.newsLeft{
+    grid-area: 1 / 1 / 2 / 2;
+}
+
+.newsBox h3, p{
+    padding-left: 20px;
+}
+
+.newsLink{
+    padding-left: 20px;
+    color: white;
+}
+
+.newsLink:hover{
+    color: blue;
+}
+
+
+.newsList{
+    margin-left: 1vw;
+    position: absolute;
+    padding-top: 0;
+    margin-top: 100px;
+    top:0;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: 1fr;
+    grid-column-gap: 10px;
+    grid-row-gap: 10px;
+}
+
+.sentimentChart{
+    grid-area: 1 / 2 / 2 / 3;
+    display: flex; 
+    flex-direction: row;
+    align-items: flex-start; 
+    justify-content: flex-start;
+    margin-top: 0;
+    padding-top: 0;
+}
+
+.searchNews{
+    margin-top: -200px;
+    margin-left: 70vw;
+}

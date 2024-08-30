@@ -12,7 +12,7 @@ function NavBar(){
                     <Link to="/analysis2/aapl">analysis</Link>
                 </li>
                 <li>
-                    <Link to="/news">news</Link>
+                    <Link to="/news/aapl">news</Link>
                 </li>
                 <li>
                     <Link to="/calendar">calendar</Link>

@@ -28,7 +28,6 @@ def get_newsdata_news(query, count=5, language="en"):
 
 def analize_sentiment(data):
     score = 0
-    print(data)
     for i in data:
         sentiment = classifier(i['title'])
         if sentiment[0]['label']=='POSITIVE':
@@ -44,6 +43,5 @@ def getAllNews(_query, _count):
     newsdataNews = get_newsdata_news(_query, count=_count)
     news = news + yahooNews
     news = news + newsdataNews
-    print("news: ", news)
     sentiment = analize_sentiment(news)
     return {"sentiment": sentiment ,"news":news}

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './styles/SearchBox.css';
 import { useNavigate } from "react-router-dom";
 
-const SearchBox = () => {
+const SearchBox = ({navigation}) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [expanded, setExpanded] = useState(false); //expanded - show suggestions
   const [suggestions, setSuggestions] = useState([]);
@@ -32,7 +32,7 @@ const SearchBox = () => {
 
   const handleSuggestionClick = (value) => {
     setSearchTerm(value.name);
-    navigate(`/analysis2/${value.Symbol}`)
+    navigate(`/${navigation}/${value.Symbol}`)
     setExpanded(false);
 };
 

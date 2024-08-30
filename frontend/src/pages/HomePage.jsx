@@ -42,7 +42,7 @@ function HomePage (){
                   <h1>StockSense</h1>
                   <h3>Unlock the power of investment insights</h3>
                   <h4>Choose Interesting stocks, discover our analysis and invest confidently </h4>
-                  <SearchBox />
+                  <SearchBox navigation={'analysis2'}/>
               </div>
               <img src="src/assets/image1.png"></img>
             </div>
