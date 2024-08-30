@@ -1,0 +1,82 @@
+.about-container {
+    margin: 0 auto;
+    padding: 20px;
+    margin-top: 0px;
+    border-radius: 8px;
+    top:0;
+}
+
+.about-container h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.app-description {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.app-image {
+    max-width: 40%;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.app-description p {
+    max-width: 55%;
+    text-align: justify;
+    color: #555;
+    font-size: 1.1em;
+}
+
+.about-container h2 {
+    color: #444;
+    margin-top: 30px;
+}
+
+.about-container ul {
+    list-style-type: disc;
+    margin-left: 20px;
+    font-size: 1.1em;
+    color: #666;
+}
+
+.team-section {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.team-image {
+    max-width: 40%;
+    border-radius: 8px;
+    margin-right: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.team-info {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.team-member {
+    background-color: #fff;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.team-member h3 {
+    margin-top: 0;
+    color: #222;
+}
+
+.team-member p {
+    margin: 5px 0;
+    color: #555;
+}

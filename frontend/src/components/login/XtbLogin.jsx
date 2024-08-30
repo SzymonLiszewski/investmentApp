@@ -65,7 +65,7 @@ const XtbLogin = () => {
         </Typography>
         <form onSubmit={handleSubmit}>
           <TextField
-            label="Email"
+            label="id"
             variant="outlined"
             margin="normal"
             fullWidth
