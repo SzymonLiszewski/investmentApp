@@ -11,6 +11,7 @@ from api.models import Transactions, UserStock
 from django.http import JsonResponse
 from utils.xtb_integration import getTransactions_xtb, login_to_xtb
 from api.serializers import TransactionSerializer
+from utils.news import getAllNews
 # Create your views here.
 
 #* Analysis views
@@ -115,3 +116,9 @@ def xtbLogin(request):
     password = request.headers.get("password")
     response = login_to_xtb(userId, password)
     return JsonResponse({'status': response})
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def getNews(request):
+    data = getAllNews(request.GET.get('ticker'),5)
+    return Response(data)

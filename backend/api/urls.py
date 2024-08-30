@@ -1,6 +1,6 @@
 from django.urls import path, include
 from . import views
-from analytics.views import stockDataView, predictView, fundamentalAnalysisView, basicInfoView, technicalAnalysisView, CalendarEarningsView, CalendarIPOView, profitView, updateTransactions, xtbLogin
+from analytics.views import stockDataView, predictView, fundamentalAnalysisView, basicInfoView, technicalAnalysisView, CalendarEarningsView, CalendarIPOView, profitView, updateTransactions, xtbLogin, getNews
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
@@ -22,5 +22,6 @@ urlpatterns = [
     path('stocks/', views.StockCreate.as_view(), name="stocks"),
     path('portfolio/profit', profitView, name="profit"),
     path('portfolio/update', updateTransactions, name="updateTransactions"),
-    path('integration/xtb/login/', xtbLogin, name="xtblogin")
+    path('integration/xtb/login/', xtbLogin, name="xtblogin"),
+    path('news/', getNews, name="news")
 ]
