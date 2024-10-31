@@ -11,3 +11,8 @@ tensorflow_intel
 yfinance
 transformers
 scikit_learn
+ta
+python-decouple
+feedparser
+newsdataapi
+tf-keras
