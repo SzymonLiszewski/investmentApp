@@ -1,0 +1,16 @@
+# Dockerfile.django
+
+# Wybieramy bazowy obraz z Pythonem
+FROM python:3.9
+
+# Ustawiamy katalog roboczy w kontenerze na /app
+WORKDIR /app
+
+# Kopiujemy wszystkie pliki z projektu do katalogu roboczego w kontenerze
+COPY . /app
+
+# Instalujemy zależności z pliku requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Uruchamiamy aplikację Django za pomocą Gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "backend.backend.wsgi:application"]

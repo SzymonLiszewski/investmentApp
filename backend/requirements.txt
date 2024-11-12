@@ -16,3 +16,4 @@ python-decouple
 feedparser
 newsdataapi
 tf-keras
+gunicorn
