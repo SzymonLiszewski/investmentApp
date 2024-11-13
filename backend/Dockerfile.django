@@ -1,7 +1,7 @@
 # Dockerfile.django
 
 # Wybieramy bazowy obraz z Pythonem
-FROM python:3.9
+FROM tensorflow/tensorflow:2.8.0
 
 # Ustawiamy katalog roboczy w kontenerze na /app
 WORKDIR /app
@@ -13,4 +13,4 @@ COPY . /app
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Uruchamiamy aplikację Django za pomocą Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "backend.backend.wsgi:application"]
+CMD cd backend && gunicorn --bind 0.0.0.0:8000 backend.wsgi:application

@@ -3,11 +3,8 @@ django-cors-headers
 djangorestframework
 djangorestframework-simplejwt
 PyJWT
-keras
 numpy
 pandas
-tensorflow
-tensorflow_intel
 yfinance
 transformers
 scikit_learn
@@ -15,5 +12,7 @@ ta
 python-decouple
 feedparser
 newsdataapi
-tf-keras
 gunicorn
+tensorflow==2.8.0
+tf-keras
+typing-extensions>=4.0.0
