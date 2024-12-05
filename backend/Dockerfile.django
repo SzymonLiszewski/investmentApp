@@ -1,7 +1,7 @@
 # Dockerfile.django
 
 # Wybieramy bazowy obraz z Pythonem
-FROM tensorflow/tensorflow:2.8.0
+FROM python:3.9
 
 # Ustawiamy katalog roboczy w kontenerze na /app
 WORKDIR /app

@@ -7,6 +7,7 @@ services:
     volumes:
       - .:/app
     environment:
+      - PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
       - DEBUG=1
     expose:
       - "8000"

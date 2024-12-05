@@ -6,10 +6,13 @@ PyJWT
 numpy<2
 pandas
 yfinance
+transformers
 scikit_learn
 ta
 python-decouple
 feedparser
 newsdataapi
 gunicorn
+tensorflow==2.8.0
+tf-keras
 typing-extensions>=4.0.0

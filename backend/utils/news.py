@@ -1,8 +1,8 @@
 import feedparser
 from newsdataapi import NewsDataApiClient
-from transformers import pipeline
+#from transformers import pipeline
 
-classifier = pipeline('sentiment-analysis')
+#classifier = pipeline('sentiment-analysis')
 
 from decouple import config
 
@@ -28,13 +28,13 @@ def get_newsdata_news(query, count=5, language="en"):
 
 def analize_sentiment(data):
     score = 0
-    for i in data:
+    '''for i in data:
         sentiment = classifier(i['title'])
         if sentiment[0]['label']=='POSITIVE':
             score+=sentiment[0]['score']
         elif sentiment[0]['label']=='NEGATIVE':
             score-=sentiment[0]['score']
-    score = score/len(data)
+    score = score/len(data)'''
     return score
 
 def getAllNews(_query, _count):
