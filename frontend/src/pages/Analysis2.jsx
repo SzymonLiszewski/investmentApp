@@ -43,7 +43,7 @@ function Analysis2(){
         <div className="analysis-container">
             <div className="topAnalysisNavigation">
                 <Box display="flex" alignItems="center" p={2}>
-                    <SearchBar />
+                    <SearchBar navigation={'analysis2'}/>
                     {stocks.map(stock => (
                         <Link to={`/analysis2/${stock.symbol}/`}>
                         <StockBubble key={stock.symbol} logo={stock.logo} symbol={stock.symbol} />
