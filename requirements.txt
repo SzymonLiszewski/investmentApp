@@ -3,7 +3,7 @@ django-cors-headers
 djangorestframework
 djangorestframework-simplejwt
 PyJWT
-keras
+keras>=2.15.0
 numpy
 pandas
 tensorflow
