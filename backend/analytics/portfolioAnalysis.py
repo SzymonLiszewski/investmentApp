@@ -28,7 +28,7 @@ def calculateProfit(portfolio, userID, passwd):
             unavailable_tickers.append(ticker)
  
     if available_tickers:
-        data_yf = yf.download(available_tickers, start=str(one_month_ago.strftime('%Y-%m-%d')), end=str(now.strftime('%Y-%m-%d')))['Adj Close']
+        data_yf = yf.download(available_tickers, start=str(one_month_ago.strftime('%Y-%m-%d')), end=str(now.strftime('%Y-%m-%d')))['Close']
     if unavailable_tickers:
         external_data = get_data_from_external_source(unavailable_tickers, userID, passwd)
     if available_tickers and unavailable_tickers:
@@ -75,7 +75,7 @@ def calculateProfit(portfolio, userID, passwd):
     #! change end date
     #todo: change end date, and try to change start date to earliest purchase
     
-    benchmark_data = yf.download(benchmark_ticker, start=str(one_month_ago.strftime('%Y-%m-%d')), end=str(now.strftime('%Y-%m-%d')))['Adj Close']
+    benchmark_data = yf.download(benchmark_ticker, start=str(one_month_ago.strftime('%Y-%m-%d')), end=str(now.strftime('%Y-%m-%d')))['Close']
 
     #* simulating investment in benchmark (purchasing in same days and same value as real investments)
     previous_value = 0
@@ -116,7 +116,10 @@ def calculateIndicators(portfolio_value, benchmark_data):
     benchmark_returns = benchmark_data
 
     #* calculating sharpe ratio
-    sharpe_ratio = (portfolio_returns.mean() - risk_free_rate / 252) / portfolio_returns.std()
+    if portfolio_returns.std() == 0:
+        sharpe_ratio = 0
+    else:
+        sharpe_ratio = (portfolio_returns.mean() - risk_free_rate / 252) / portfolio_returns.std()
 
     #* caluclating Sortino ratio
     downside_returns = portfolio_returns[portfolio_returns < 0]

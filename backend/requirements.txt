@@ -13,3 +13,4 @@ feedparser
 newsdataapi
 gunicorn
 typing-extensions>=4.0.0
+statsmodels>=0.14.2

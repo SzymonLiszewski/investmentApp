@@ -5,6 +5,7 @@ from sklearn.linear_model import LinearRegression
 import yfinance as yf
 from datetime import timedelta
 from datetime import datetime
+from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 
 def linear_regression_predict(ticker, start_date, end_date, predicted_days=30):
@@ -45,6 +46,31 @@ def linear_regression_predict(ticker, start_date, end_date, predicted_days=30):
     for i in range(len(future_dates)):
         data_dict[future_dates[i]] = future_predictions[i][0]
     return {list(data_dict.keys())[-1]:list(data_dict.values())[-1]}
+
+def sarima(ticker, start_date, end_date, predicted_days=30):
+    data = yf.download(ticker, start=start_date, end=end_date)
+    close_prices = data['Close']
+
+    #* Preparing SARIMA model
+    model = SARIMAX(close_prices, order=(1, 1, 1), seasonal_order=(1, 1, 1, 12))
+    model_fit = model.fit(disp=False)
+
+    #* Prediction
+    future_steps = predicted_days
+    future_predictions = model_fit.get_forecast(steps=future_steps)
+    forecast_ci = future_predictions.conf_int()
+    forecast_values = future_predictions.predicted_mean
+
+    format_string = "%Y-%m-%d"
+    last_date = datetime.strptime(end_date, format_string)
+    future_dates = [(last_date + timedelta(days=i)).strftime(format_string) for i in range(1, predicted_days + 1)]
+
+    # Tworzenie słownika dat i prognozowanych cen
+    data_dict = {date: price for date, price in zip(future_dates[-2:-1], forecast_values[-2:-1])}
+    print(data_dict)
+
+    return data_dict
+
 
 
 #* prepare time series for regression

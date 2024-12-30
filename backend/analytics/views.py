@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from utils.dataFetcher import getStockPrice, getFundamentalAnalysis, getBasicStockInfo
-from analytics.predictions import linear_regression_predict
+from analytics.predictions import linear_regression_predict, sarima
 from analytics.technical_indicators import get_technical_indicators
 from analytics.portfolioAnalysis import calculateProfit, calculateIndicators
 from utils.economicCalendar import getEarnings, getIPO
