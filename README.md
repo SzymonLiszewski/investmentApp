@@ -49,16 +49,17 @@ The project is built using:
    ```
 
 3. Set environment variables for API keys:
-  Linux:
-   ```bash
-   export ALPHAVANTAGE_API_KEY=your_api_key
-   export NEWSDATA_API_KEY=your_api_key
-   ```
-   Windows:
-   ```bash
-   set ALPHAVANTAGE_API_KEY=your_api_key
-   set NEWSDATA_API_KEY=your_api_key
-   ```
+
+    Linux:
+     ```bash
+     export ALPHAVANTAGE_API_KEY=your_api_key
+     export NEWSDATA_API_KEY=your_api_key
+     ```
+     Windows:
+     ```bash
+     set ALPHAVANTAGE_API_KEY=your_api_key
+     set NEWSDATA_API_KEY=your_api_key
+     ```
 
 1. Run the application:
    ```bash
