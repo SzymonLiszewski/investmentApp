@@ -64,6 +64,8 @@ The project is built using:
 1. Run the application:
    ```bash
    cd backend
+   python manage.py makemigrations
+   python manage.py migrate
    python manage.py runserver
    ```
 
