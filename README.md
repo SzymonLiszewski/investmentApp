@@ -1,7 +1,7 @@
 # StockSense
 
 StockSense is a hobby project aimed at providing stock market data, designed for finance enthusiasts and investors. The application allows you to track stock quotes, analyze key financial indicators, make simple predictions, access news with sentiment analysis, and connect with XTB for basic portfolio analysis.
-You can access the live version of the application hosted on AWS EC2 here: http://ec2-54-175-92-99.compute-1.amazonaws.com/
+
 
 ## Features
 
