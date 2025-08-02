@@ -2,6 +2,8 @@ import React from 'react';
 import './styles/StockInfoBox.css';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import downtrend from '../assets/downtrend.png';
+import uptrend from '../assets/uptrend.png';
 
 const StockInfoBox = ({ name, price, change, ticker }) => {
   let [CurrentPrice, setCurrentPrice] = useState(0)
@@ -23,7 +25,7 @@ const StockInfoBox = ({ name, price, change, ticker }) => {
       <h3 style = {{color: parseFloat(PriceChange) >=0 ? '#3ae307' : 'red'}}>{name}</h3>
       <p style = {{color: parseFloat(PriceChange) >=0 ? '#3ae307' : 'red'}}>Price: ${CurrentPrice.toFixed(2)}</p>
       <p style = {{color: parseFloat(PriceChange) >=0 ? '#3ae307' : 'red'}} id="change">Change: {PriceChange.toFixed(2)}%</p>
-      <img src={parseFloat(PriceChange) >=0 ? 'assets/uptrend.png' : 'assets/downtrend.png'} id='trendIcon'></img>
+      <img src={parseFloat(PriceChange) >=0 ? uptrend : downtrend} id='trendIcon'></img>
 
     </Link>
   );

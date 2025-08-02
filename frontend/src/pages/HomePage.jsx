@@ -2,7 +2,7 @@ import '../HomePage.css';
 import React, {useState} from 'react';
 import SearchBox from '../components/SearchBox';
 import StockSection from '../components/StockSection';
-
+import homePageImage from '../assets/image1.png'
 
 function HomePage (){
     const [showSearchBox, setShowSearchBox] = useState(false);
@@ -44,7 +44,7 @@ function HomePage (){
                   <h4>Choose Interesting stocks, discover our analysis and invest confidently </h4>
                   <SearchBox navigation={'analysis2'}/>
               </div>
-              <img src="src/assets/image1.png"></img>
+              <img src={homePageImage}></img>
             </div>
             <div className='stock-info-container'>
               <StockSection stocks={stocks} />

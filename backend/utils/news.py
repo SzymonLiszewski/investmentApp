@@ -6,7 +6,7 @@ classifier = pipeline('sentiment-analysis')
 
 from decouple import config
 
-API_KEY = config('NEWSDATA_API_KEY')
+API_KEY = config('NEWSDATA_API_KEY', default="default_api_key")
 
 def get_yahoo_finance_news(query, count=5):
     rss_url = f"https://finance.yahoo.com/rss/headline?s={query}"

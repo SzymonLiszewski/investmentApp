@@ -2,7 +2,7 @@ import csv
 import requests
 from decouple import config
 
-API_KEY = config('ALPHAVANTAGE_API_KEY')
+API_KEY = config('ALPHAVANTAGE_API_KEY', default="default_api_key")
 
 def getEarnings():
     CSV_URL = f'https://www.alphavantage.co/query?function=EARNINGS_CALENDAR&horizon=3month&apikey={API_KEY}'

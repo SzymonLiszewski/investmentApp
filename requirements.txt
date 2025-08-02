@@ -17,3 +17,4 @@ feedparser
 newsdataapi
 tf-keras
 statsmodels>=0.14.2
+torch
