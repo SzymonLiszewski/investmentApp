@@ -14,9 +14,9 @@ function Analysis2(){
 
     //example stocks (in future user can chose preffered stocks in front page)
     const stocks = [
-        { symbol: 'AAPL', logo: 'https://logo.clearbit.com/apple.com' },
-        { symbol: 'NVDA', logo: 'https://logo.clearbit.com/nvidia.com' },
-        { symbol: 'MSFT', logo: 'https://logo.clearbit.com/microsoft.com' },
+        { symbol: 'AAPL', logo: 'https://img.logo.dev/apple.com?token=pk_F06zMPFbR5yUJmwRi1Y-Jg' },
+        { symbol: 'NVDA', logo: 'https://img.logo.dev/nvidia.com?token=pk_F06zMPFbR5yUJmwRi1Y-Jg' },
+        { symbol: 'MSFT', logo: 'https://img.logo.dev/microsoft.com?token=pk_F06zMPFbR5yUJmwRi1Y-Jg' },
     ];
 
     const {ticker} = useParams();
@@ -69,7 +69,7 @@ function Analysis2(){
             </div>
            
             <div className="stock-name">
-                <img id="logo" src={`https://logo.clearbit.com/${CompanyName.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(" ")[0]}.com`}/>
+                <img id="logo" src={`https://img.logo.dev/${CompanyName.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(" ")[0]}.com?token=pk_F06zMPFbR5yUJmwRi1Y-Jg`}/>
                 <h1 id="name">{CompanyName}</h1>
                 <h1 id="price">{CurrentPrice.toFixed(2)} USD</h1>
                 <p id="priceChange">{PriceChange.toFixed(2)} %</p>
