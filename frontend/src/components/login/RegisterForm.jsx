@@ -42,13 +42,12 @@ const RegisterForm = () => {
   }
 
   return (
-    <Container maxWidth="xs">
+    <Container maxWidth="xs" sx={{ width: '100%' }}>
       <Box
         display="flex"
         flexDirection="column"
         justifyContent="center"
         alignItems="center"
-        minHeight="100vh"
       >
         <Typography variant="h4" component="h1" gutterBottom>
           Register
