@@ -1,6 +1,14 @@
 .newsBox{
-    background-color: grey;
+    background-color: #ffffff;
     border-radius: 40px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    color: #000000;
+}
+
+.newsBox h1,
+.newsBox h3,
+.newsBox p {
+    color: #000000;
 }
 
 .newsLeft{
@@ -13,7 +21,7 @@
 
 .newsLink{
     padding-left: 20px;
-    color: white;
+    color: #000000;
 }
 
 .newsLink:hover{

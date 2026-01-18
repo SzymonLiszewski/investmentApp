@@ -11,7 +11,7 @@ const StockBubble = ({ logo, symbol }) => {
             boxShadow={3}
             p={1}
             m={1}
-            bgcolor="white"
+            bgcolor="#ffffff"
             sx={{
                 '&:hover': {
             bgcolor: '#b8b8b8',

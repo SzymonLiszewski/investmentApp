@@ -57,13 +57,13 @@ const StockChart = ({startDate, endDate, ticker, predictedDays}) => {
   return (
     <ResponsiveContainer width="100%" height="100%">
       <LineChart data={FullArray} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#fff"/>
+        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0"/>
         <XAxis dataKey="date" 
         type="number"
         domain={['auto', 'auto']}
         tickFormatter={formatDate}
-        stroke="#fff"/>
-        <YAxis stroke="#fff"/>
+        stroke="#000000"/>
+        <YAxis stroke="#000000"/>
         <Tooltip />
         <Legend />
         <Line type="monotone" dataKey="price" stroke="#8884d8" strokeWidth={5} dot={false}/>

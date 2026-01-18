@@ -107,7 +107,7 @@ function Portfolio(){
 
     return (
         <Fragment>
-        <button className="connectedAccountsButton"><Link to="/connectAccounts" style={{color: "white"}}>connected accounts</Link></button>
+        <button className="connectedAccountsButton"><Link to="/connectAccounts" style={{color: "#000000"}}>connected accounts</Link></button>
         <div className="portfolio">
             <div className="portfolioDiv" id="return">
                 <h1><UserEarningsChart profit={profit}/></h1>

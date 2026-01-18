@@ -54,7 +54,7 @@ function Analysis2(){
                         boxShadow={3}
                         p={1}
                         m={1}
-                        bgcolor="white"
+                        bgcolor="#ffffff"
                         width={48}
                         height={48}
                         sx={{
