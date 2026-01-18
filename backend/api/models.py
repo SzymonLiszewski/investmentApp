@@ -3,18 +3,37 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 
-class Stock(models.Model):
-    ticker = models.CharField(max_length=10, unique=True, primary_key=True)
-    companyName = models.TextField()
-    sector = models.TextField()
-    industry = models.TextField()
+class Asset(models.Model):
+    class AssetType(models.TextChoices):
+        STOCKS = 'stocks', 'Stocks'
+        BONDS = 'bonds', 'Bonds'
+        CRYPTOCURRENCIES = 'cryptocurrencies', 'Cryptocurrencies'
+    
+    id = models.AutoField(primary_key=True)
+    symbol = models.CharField(max_length=50, unique=True, null=True, blank=True)  # Required for stocks, optional for others
+    name = models.CharField(max_length=255)  # Required for all
+    asset_type = models.CharField(
+        max_length=20,
+        choices=AssetType.choices,
+        default=AssetType.STOCKS
+    )
 
     def __str__(self):
-        return self.ticker
+        if self.symbol:
+            return self.symbol
+        return self.name or str(self.id)
+    
+    def clean(self):
+        from django.core.exceptions import ValidationError
+        # Validation based on asset_type
+        if self.asset_type == self.AssetType.STOCKS:
+            if not self.symbol:
+                raise ValidationError({'symbol': 'Symbol is required for stocks'})
+        # Bonds and cryptocurrencies can have optional symbol
 
-class UserStock(models.Model):
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="ownedStocks")
-    ownedStock = models.ForeignKey(Stock, on_delete=models.CASCADE)
+class UserAsset(models.Model):
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="ownedAssets")
+    ownedAsset = models.ForeignKey(Asset, on_delete=models.CASCADE)
     quantity = models.FloatField(default=0)
 
 class Transactions(models.Model):
@@ -23,7 +42,7 @@ class Transactions(models.Model):
         BUY = 'B', 'buy'
         SELL = 'S', 'sell'
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="transactions")
-    product = models.ForeignKey(Stock, on_delete=models.CASCADE)
+    product = models.ForeignKey(Asset, on_delete=models.CASCADE)
     transactionType = models.CharField(
         max_length=2,
         choices=transaction_type.choices,

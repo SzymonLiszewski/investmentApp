@@ -7,7 +7,7 @@ from analytics.technical_indicators import get_technical_indicators
 from analytics.portfolioAnalysis import calculateProfit, calculateIndicators
 from utils.economicCalendar import getEarnings, getIPO
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from api.models import Transactions, UserStock
+from api.models import Transactions, UserAsset
 from django.http import JsonResponse
 from utils.xtb_integration import getTransactions_xtb, login_to_xtb
 from api.serializers import TransactionSerializer
@@ -95,10 +95,10 @@ def updateTransactions(request):
                     serializer = TransactionSerializer(data={'product': i['symbol'], 'transactionType': "B", 'quantity': i['volume'], 'price': i['open_price'], 'date': i['date'], 'external_id': i['order']})
                     if serializer.is_valid():
                         transaction = serializer.save(owner=request.user)
-                        #* if USER_STOCK does not exits in db create new object, otherwise add value of owned shares
-                        user_product, created = UserStock.objects.get_or_create(
+                        #* if USER_ASSET does not exits in db create new object, otherwise add value of owned shares
+                        user_product, created = UserAsset.objects.get_or_create(
                             owner=transaction.owner,
-                            ownedStock=transaction.product
+                            ownedAsset=transaction.product
                         )
                         if created:
                             user_product.quantity = transaction.quantity

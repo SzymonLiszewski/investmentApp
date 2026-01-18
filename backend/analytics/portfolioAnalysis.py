@@ -11,7 +11,7 @@ def calculateProfit(portfolio, userID, passwd):
     #* downloading historical data
     if portfolio==None:
         return None, None
-    tickers = [stock.product.ticker for stock in portfolio]
+    tickers = [stock.product.symbol for stock in portfolio if stock.product.symbol]
     #tickers.append('XD')
    
     #* finding first transaction date
@@ -45,7 +45,7 @@ def calculateProfit(portfolio, userID, passwd):
     money_spent = pd.Series(0, index=data.index, dtype=np.float64)
 
     for stock in portfolio:
-        ticker = stock.product.ticker
+        ticker = stock.product.symbol
         quantity = stock.quantity
         purchase_date = pd.to_datetime(stock.date)
         

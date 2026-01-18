@@ -12,15 +12,15 @@ function Portfolio(){
     const [alpha, setAlpha] = useState(-100)
     const [profit, setProfit] = useState([])
       useEffect(()=>{
-        const getUserStock = async () => {
+        const getUserAsset = async () => {
           try {
-              const stockData = await fetchUserProfit();
+              const assetData = await fetchUserProfit();
           } catch (error) {
               console.log(error.message);
           }
       };
       updateTransactions();
-      getUserStock();
+      getUserAsset();
       },[]);
       const fetchUserProfit = async () => {
         try {
@@ -107,7 +107,10 @@ function Portfolio(){
 
     return (
         <Fragment>
-        <button className="connectedAccountsButton"><Link to="/connectAccounts" style={{color: "#000000"}}>connected accounts</Link></button>
+        <div style={{display: 'flex', gap: '10px', marginLeft: '5vw', marginBottom: '10px'}}>
+            <button className="connectedAccountsButton"><Link to="/connectAccounts" style={{color: "#000000"}}>connected accounts</Link></button>
+            <button className="connectedAccountsButton"><Link to="/addStock" style={{color: "#000000"}}>add assets</Link></button>
+        </div>
         <div className="portfolio">
             <div className="portfolioDiv" id="return">
                 <h1><UserEarningsChart profit={profit}/></h1>
