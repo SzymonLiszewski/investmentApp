@@ -22,8 +22,8 @@ function Analysis2(){
     const {ticker} = useParams();
 
     let [CompanyName, setCompanyName] = useState('')
-    let [CurrentPrice, setCurrentPrice] = useState(0)
-    let [PriceChange, setPriceChange] = useState(0)
+    let [CurrentPrice, setCurrentPrice] = useState(null)
+    let [PriceChange, setPriceChange] = useState(null)
 
     useEffect(()=>{
         getData()
@@ -71,8 +71,16 @@ function Analysis2(){
             <div className="stock-name">
                 <img id="logo" src={`https://img.logo.dev/${CompanyName.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(" ")[0]}.com?token=pk_F06zMPFbR5yUJmwRi1Y-Jg`}/>
                 <h1 id="name">{CompanyName}</h1>
-                <h1 id="price">{CurrentPrice.toFixed(2)} USD</h1>
-                <p id="priceChange">{PriceChange.toFixed(2)} %</p>
+                <h1 id="price">
+                    {CurrentPrice === 'N/A' || CurrentPrice === null || isNaN(Number(CurrentPrice)) 
+                        ? 'N/A' 
+                        : `${Number(CurrentPrice).toFixed(2)} USD`}
+                </h1>
+                <p id="priceChange">
+                    {PriceChange === 'N/A' || PriceChange === null || isNaN(Number(PriceChange)) 
+                        ? 'N/A' 
+                        : `${Number(PriceChange).toFixed(2)} %`}
+                </p>
             </div>
             <div className="stock-analysis">
             <AnalysisNavigation/>
