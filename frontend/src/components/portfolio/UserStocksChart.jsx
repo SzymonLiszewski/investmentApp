@@ -96,7 +96,10 @@ function UserStocksChart(){
                 userAsset.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)
               }
             </Pie>
-            <Tooltip contentStyle={{ fontSize: 12 }} />
+            <Tooltip 
+              contentStyle={{ fontSize: 12 }} 
+              formatter={(value, name) => [typeof value === 'number' ? value.toFixed(2) : value, name]}
+            />
             <Legend wrapperStyle={{ fontSize: 12 } } layout="vertical" verticalAlign="middle" align="right" />
           </PieChart>
         </ResponsiveContainer>
