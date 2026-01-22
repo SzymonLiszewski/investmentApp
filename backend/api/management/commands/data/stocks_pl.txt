@@ -1,0 +1,368 @@
+Ticker               yfinance Ticker           Name
+----------------------------------------------------------------------------------------------------
+06N                  06N.WA                    Magna Polonia S.A.
+08N                  08N.WA                    NFI Octava S.A.
+11B                  11B.WA                    11 bit studios S.A.
+1AT                  1AT.WA                    Atal S.A.
+3RG                  3RG.WA                    3R Games S.A.
+4MS                  4MS.WA                    4MASS
+AAT                  AAT.WA                    Alta S.A.
+ABE                  ABE.WA                    AB S.A.
+ABS                  ABS.WA                    Asseco Business Solutions S.A.
+ACG                  ACG.WA                    AC Spólka Akcyjna
+ACP                  ACP.WA                    Asseco Poland S.A.
+ACT                  ACT.WA                    Action S.A.
+ADV                  ADV.WA                    Adiuvo Investments S.A.
+AGO                  AGO.WA                    Agora S.A.
+AGT                  AGT.WA                    Agroton Public Limited
+ALE                  ALE.WA                    Allegro.eu S.A.
+ALG                  ALG.WA                    All in! Games S.A.
+ALI                  ALI.WA                    Altus S.A.
+ALL                  ALL.WA                    Ailleron S.A.
+ALR                  ALR.WA                    Alior Bank S.A.
+AMB                  AMB.WA                    Ambra S.A.
+AMC                  AMC.WA                    Amica S.A.
+ANR                  ANR.WA                    Answear.com S.A.
+APE                  APE.WA                    APS Energia SA
+APL                  APL.WA                    LC Spólka Akcyjna
+APN                  APN.WA                    Aplisens S.A.
+APR                  APR.WA                    Auto Partner SA
+APT                  APT.WA                    Apator S.A.
+ARH                  ARH.WA                    Archicom S.A.
+ARL                  ARL.WA                    Arlen S.A.
+ART                  ART.WA                    Artifex Mundi S.A.
+ASB                  ASB.WA                    ASBISc Enterprises Plc
+ASE                  ASE.WA                    Asseco South Eastern Europe S.A.
+ASM                  ASM.WA                    ASM Group S.A.
+AST                  AST.WA                    Astarta Holding PLC
+ATC                  ATC.WA                    Arctic Paper S.A.
+ATD                  ATD.WA                    Atende S.A.
+ATG                  ATG.WA                    ATM Grupa S.A.
+ATP                  ATP.WA                    Atlanta Poland S.A.
+ATR                  ATR.WA                    Atrem S.A.
+ATS                  ATS.WA                    Atlantis SE
+ATT                  ATT.WA                    Grupa Azoty S.A.
+AWM                  AWM.WA                    Airway Medix S.A.
+B24                  B24.WA                    Brand 24 S.A.
+BBD                  BBD.WA                    BBI Development S.A.
+BBT                  BBT.WA                    BoomBit S.A.
+BCM                  BCM.WA                    Betacom S.A.
+BCS                  BCS.WA                    Big Cheese Studio Spolka Akcyjna
+BCX                  BCX.WA                    Bioceltix S.A.
+BDX                  BDX.WA                    Budimex SA
+BFT                  BFT.WA                    Benefit Systems S.A.
+BHW                  BHW.WA                    Bank Handlowy w Warszawie S.A.
+BIO                  BIO.WA                    BIOTON S.A.
+BIP                  BIP.WA                    Bio Planet S.A.
+BLO                  BLO.WA                    Bloober Team SA
+BMC                  BMC.WA                    Bumech S.A.
+BMX                  BMX.WA                    BioMaxima S.A.
+BNP                  BNP.WA                    BNP Paribas Bank Polska S.A.
+BOS                  BOS.WA                    Bank Ochrony Srodowiska S.A.
+BOW                  BOW.WA                    Bowim S.A.
+BRS                  BRS.WA                    Boryszew S.A.
+BST                  BST.WA                    BEST S.A.
+CAP                  CAP.WA                    Capitea S.A.
+CAR                  CAR.WA                    Inter Cars S.A.
+CAV                  CAV.WA                    Cavatina Holding Spólka Akcyjna
+CBF                  CBF.WA                    Cyber_Folks S.A.
+CCC                  CCC.WA                    CCC S.A.
+CDL                  CDL.WA                    CDRL S.A.
+CDR                  CDR.WA                    CD Projekt S.A.
+CEZ                  CEZ.WA                    CEZ, a. s.
+CFI                  CFI.WA                    CFI Holding S.A.
+CIG                  CIG.WA                    CI Games SE
+CLC                  CLC.WA                    Columbus Energy S.A.
+CLD                  CLD.WA                    Cloud Technologies S.A.
+CLE                  CLE.WA                    Coal Energy S.A.
+CLN                  CLN.WA                    Celon Pharma S.A.
+CMP                  CMP.WA                    Comp S.A.
+COG                  COG.WA                    Cognor Holding S.A.
+CPA                  CPA.WA                    Capital Partners S.A.
+CPD                  CPD.WA                    CPD S.A.
+CPI                  CPI.WA                    CPIEUROPE
+CPL                  CPL.WA                    Comperia.pl S.A.
+CPR                  CPR.WA                    Compremum S.A.
+CPS                  CPS.WA                    Cyfrowy Polsat S.A.
+CRI                  CRI.WA                    Creotech Instruments S.A.
+CRJ                  CRJ.WA                    Creepy Jar S.A.
+CRM                  CRM.WA                    PZ Cormay S.A.
+CSR                  CSR.WA                    Caspar Asset Management S.A.
+CTX                  CTX.WA                    Captor Therapeutics Spolka Akcyjna
+CZT                  CZT.WA                    Czerwona Torebka Spólka Akcyjna
+DAD                  DAD.WA                    Dadelo S.A.
+DAT                  DAT.WA                    DataWalk S.A.
+DBC                  DBC.WA                    Tire Company Debica S.A.
+DBE                  DBE.WA                    DB Energy S.A.
+DCR                  DCR.WA                    Decora S.A.
+DEK                  DEK.WA                    Dekpol S.A.
+DEL                  DEL.WA                    Delko S.A.
+DGA                  DGA.WA                    DGA Spólka Akcyjna
+DGE                  DGE.WA                    DRAGO entertainment Spólka Akcyjna
+DIA                  DIA.WA                    Diagnostyka S.A.
+DIG                  DIG.WA                    Digital Network SA
+DMG                  DMG.WA                    Dr. Miele Cosmed Group S.A.
+DNP                  DNP.WA                    Dino Polska S.A.
+DOM                  DOM.WA                    Dom Development S.A.
+DTR                  DTR.WA                    Digitree Group S.A.
+DVL                  DVL.WA                    Develia S.A.
+EAH                  EAH.WA                    ESOTIQ & Henderson S.A.
+EAT                  EAT.WA                    AmRest Holdings SE
+ECB                  ECB.WA                    ECB S.A.
+ECH                  ECH.WA                    Echo Investment S.A.
+EDI                  EDI.WA                    ED Invest Spólka Akcyjna
+EFK                  EFK.WA                    Korporacja Gospodarcza efekt S.A.
+EHG                  EHG.WA                    Eurohold Bulgaria AD
+EKP                  EKP.WA                    Elkop Estonia SE
+ELT                  ELT.WA                    Elektrotim S.A.
+ENA                  ENA.WA                    ENEA S.A.
+ENE                  ENE.WA                    Centrum Medyczne ENEL-MED S.A.
+ENG                  ENG.WA                    Energa SA
+ENI                  ENI.WA                    Energoinstal S.A.
+ENT                  ENT.WA                    Enter Air S.A.
+EQU                  EQU.WA                    Equnico SE
+ERB                  ERB.WA                    Erbud S.A.
+ETL                  ETL.WA                    Eurotel S.A.
+EUC                  EUC.WA                    Europejskie Centrum Odszkodowan S.A.
+EUR                  EUR.WA                    Eurocash S.A.
+FAB                  FAB.WA                    Fabrity S.A.
+FEE                  FEE.WA                    Feerum S.A.
+FHB                  FHB.WA                    FoodHub Spolka Akcyjna
+FON                  FON.WA                    FON SE
+FRO                  FRO.WA                    FERRO S.A.
+FSG                  FSG.WA                    Fabryki Sprzetu i Narzedzi Górniczych Grupa Kapitalowa FASING S.A.
+FTE                  FTE.WA                    Fabryki Mebli FORTE S.A.
+GEA                  GEA.WA                    Grenevia S.A.
+GIF                  GIF.WA                    Gaming Factory S.A.
+GKI                  GKI.WA                    Grupa Kapitalowa IMMOBILE S.A.
+GMT                  GMT.WA                    Genomtec S.A.
+GOB                  GOB.WA                    Gobarto S.A.
+GOP                  GOP.WA                    Games Operators S.A.
+GPP                  GPP.WA                    Grupa Pracuj S.A.
+GPW                  GPW.WA                    Gielda Papierów Wartosciowych w Warszawie S.A.
+GRN                  GRN.WA                    Grodno Spólka Akcyjna
+GRX                  GRX.WA                    GreenX Metals Limited
+GTC                  GTC.WA                    Globe Trade Centre S.A.
+GTN                  GTN.WA                    Getin Holding S.A.
+HDR                  HDR.WA                    Przedsiebiorstwo Hydrauliki Silowej HYDROTOR S.A.
+HEL                  HEL.WA                    Helio S.A.
+HRP                  HRP.WA                    Harper Hygienics S.A.
+HRS                  HRS.WA                    Herkules S.A.
+HUG                  HUG.WA                    Huuuge, Inc.
+IBS                  IBS.WA                    WISE Finance S.A.
+ICE                  ICE.WA                    Medinice S.A.
+IFI                  IFI.WA                    Ifirma SA
+IMC                  IMC.WA                    IMC S.A.
+IMP                  IMP.WA                    Imperio Alternatywna Spolka Inwestycyjna S.A.
+IMS                  IMS.WA                    IMS S.A.
+INC                  INC.WA                    INC S.A.
+ING                  ING.WA                    ING Bank Slaski S.A.
+INK                  INK.WA                    Instal Kraków S.A.
+INL                  INL.WA                    Introl S.A.
+INP                  INP.WA                    Inpro S.A.
+IPE                  IPE.WA                    IPOPEMA Securities S.A.
+IPO                  IPO.WA                    Intersport Polska S.A.
+ITB                  ITB.WA                    Interbud-Lublin S.A.
+IZB                  IZB.WA                    IZOBLOK S.A.
+IZO                  IZO.WA                    Izolacja Jarocin Spolka Akcyjna
+IZS                  IZS.WA                    Izostal S.A.
+JRH                  JRH.WA                    JRH
+JSW                  JSW.WA                    Jastrzebska Spólka Weglowa S.A.
+JWW                  JWW.WA                    JWW Invest S.A.
+KCH                  KCH.WA                    Krakchemia S.A.
+KCI                  KCI.WA                    KCI Spolka Akcyjna
+KER                  KER.WA                    Kernel Holding S.A.
+KGH                  KGH.WA                    KGHM Polska Miedz S.A.
+KGL                  KGL.WA                    KGL SA
+KGN                  KGN.WA                    Zespól Elektrocieplowni Wroclawskich KOGENERACJA S.A.
+KMP                  KMP.WA                    Przedsiebiorstwo Produkcyjno - Handlowe KOMPAP S.A.
+KOM                  KOM.WA                    Komputronik S.A.
+KPD                  KPD.WA                    Koszalinskie Przedsiebiorstwo Przemyslu Drzewnego Spólka Akcyjna
+KPL                  KPL.WA                    Kino Polska TV Spolka Akcyjna
+KRK                  KRK.WA                    Krka, d. d.
+KRU                  KRU.WA                    KRUK Spólka Akcyjna
+KSG                  KSG.WA                    KSG Agro S.A.
+KTY                  KTY.WA                    Grupa Kety S.A.
+KVT                  KVT.WA                    Krynica Vitamin S.A.
+LBT                  LBT.WA                    Libet S.A.
+LBW                  LBW.WA                    Lubawa S.A.
+LEN                  LEN.WA                    Lena Lighting S.A.
+LES                  LES.WA                    Less S.A.
+LKD                  LKD.WA                    Lokum Deweloper S.A.
+LPP                  LPP.WA                    LPP SA
+LRQ                  LRQ.WA                    Larq S.A.
+LSI                  LSI.WA                    LSI Software S.A.
+LTX                  LTX.WA                    Lentex S.A.
+LWB                  LWB.WA                    Lubelski Wegiel Bogdanka S.A.
+MAB                  MAB.WA                    Mabion S.A.
+MAK                  MAK.WA                    Makarony Polskie S.A.
+MBK                  MBK.WA                    mBank S.A.
+MBR                  MBR.WA                    Mo-BRUK S.A.
+MBW                  MBW.WA                    Marie Brizard Wine & Spirits SA
+MCI                  MCI.WA                    MCI Capital Alternatywna Spólka Inwestycyjna S.A.
+MCR                  MCR.WA                    mcr Spolka Akcyjna
+MDG                  MDG.WA                    Medicalgorithmics S.A.
+MDI                  MDI.WA                    MDI Energia S.A.
+MEG                  MEG.WA                    Megaron S.A.
+MEX                  MEX.WA                    Mex Polska S.A.
+MFO                  MFO.WA                    MFO S.A.
+MGT                  MGT.WA                    Mangata Holding S.A.
+MIL                  MIL.WA                    Bank Millennium S.A.
+MIR                  MIR.WA                    Miraculum S.A.
+MLG                  MLG.WA                    MLP Group S.A.
+MLK                  MLK.WA                    MLK Foods Public Company LTD
+MLS                  MLS.WA                    ML System S.A.
+MNC                  MNC.WA                    Mennica Polska S.A.
+MOC                  MOC.WA                    Molecure S.A.
+MOJ                  MOJ.WA                    MOJ S.A.
+MOL                  MOL.WA                    MOL Magyar Olaj- és Gázipari Nyilvánosan Muködo Részvénytársaság
+MON                  MON.WA                    Monnari Trade S.A.
+MOV                  MOV.WA                    Movie Games S.A.
+MRB                  MRB.WA                    Mirbud S.A.
+MRC                  MRC.WA                    Mercator Medical S.A.
+MSP                  MSP.WA                    Mostostal Plock S.A.
+MSW                  MSW.WA                    Mostostal Warszawa S.A.
+MSZ                  MSZ.WA                    Mostostal Zabrze S.A.
+MUR                  MUR.WA                    Murapol S.A.
+MVP                  MVP.WA                    Marvipol Development S.A.
+MWT                  MWT.WA                    M.W. Trade SA
+MXC                  MXC.WA                    Maxcom S.A.
+MZA                  MZA.WA                    Muza S.A.
+NCL                  NCL.WA                    NOCTILUCA
+NEU                  NEU.WA                    NEUCA S.A.
+NNG                  NNG.WA                    NanoGroup S.A.
+NTC                  NTC.WA                    New Tech Capital S.A.
+NTT                  NTT.WA                    NTT System S.A.
+NTU                  NTU.WA                    Novaturas AB
+NVA                  NVA.WA                    P.A. Nova S.A.
+NVG                  NVG.WA                    Novavis Group S.A.
+NVT                  NVT.WA                    Novita S.A.
+NWG                  NWG.WA                    Newag S.A.
+NXG                  NXG.WA                    Nexity Global S.A.
+ODL                  ODL.WA                    Odlewnie Polskie S.A.
+OND                  OND.WA                    Onde S.A.
+ONO                  ONO.WA                    onesano S.A.
+OPG                  OPG.WA                    CPI FIM SA
+OPL                  OPL.WA                    Orange Polska S.A.
+OPN                  OPN.WA                    Oponeo.pl S.A.
+OTM                  OTM.WA                    Zaklady Przemyslu Cukierniczego Otmuchów S.A.
+OTS                  OTS.WA                    OT Logistics S.A.
+PAS                  PAS.WA                    Passus S.A.
+PAT                  PAT.WA                    Patentus S.A.
+PBX                  PBX.WA                    Pekabex S.A.
+PCE                  PCE.WA                    Grupa Azoty Zaklady Chemiczne Police S.A.
+PCF                  PCF.WA                    PCF Group Spólka Akcyjna
+PCO                  PCO.WA                    Pepco Group N.V.
+PCR                  PCR.WA                    PCC Rokita SA
+PCX                  PCX.WA                    PCC Exol S.A.
+PEN                  PEN.WA                    Photon Energy N.V.
+PEO                  PEO.WA                    Bank Polska Kasa Opieki S.A.
+PEP                  PEP.WA                    Polenergia S.A.
+PGE                  PGE.WA                    PGE Polska Grupa Energetyczna S.A.
+PGM                  PGM.WA                    PMPG Polskie Media SA
+PGV                  PGV.WA                    PGF Polska Grupa Fotowoltaiczna SA
+PHN                  PHN.WA                    Polski Holding Nieruchomosci S.A.
+PHR                  PHR.WA                    Pharmena S.A.
+PJP                  PJP.WA                    PJP Makrum S.A.
+PKN                  PKN.WA                    Orlen S.A.
+PKO                  PKO.WA                    Powszechna Kasa Oszczednosci Bank Polski Spólka Akcyjna
+PKP                  PKP.WA                    Pkp Cargo S.A.
+PLW                  PLW.WA                    PlayWay S.A.
+PLZ                  PLZ.WA                    Plaza Centers N.V.
+PPS                  PPS.WA                    Pepees S.A.
+PRI                  PRI.WA                    Pragma Inkaso S.A.
+PRM                  PRM.WA                    Prochem S.A.
+PRT                  PRT.WA                    Protektor S.A.
+PTG                  PTG.WA                    Poltreg S.A.
+PTW                  PTW.WA                    PTWP
+PUR                  PUR.WA                    Pure Biologics S.A.
+PWX                  PWX.WA                    Polwax S.A.
+PXM                  PXM.WA                    Polimex-Mostostal S.A.
+PZU                  PZU.WA                    Powszechny Zaklad Ubezpieczen SA
+QNA                  QNA.WA                    QNATECHNO
+QNT                  QNT.WA                    Quantum software S.A.
+QRS                  QRS.WA                    Quercus TFI S.A.
+RAE                  RAE.WA                    Raen S.A.
+RAF                  RAF.WA                    Fabryka Obrabiarek RAFAMET S.A.
+RBW                  RBW.WA                    Rainbow Tours S.A.
+RLP                  RLP.WA                    Relpol S.A.
+RMK                  RMK.WA                    Remak-Energomontaz S.A.
+RNC                  RNC.WA                    REINO Capital S.A.
+RND                  RND.WA                    RENDER
+RNK                  RNK.WA                    Rank Progress S.A.
+RPC                  RPC.WA                    Zaklady Magnezytowe ROPCZYCE S.A.
+RVU                  RVU.WA                    Ryvu Therapeutics S.A.
+RWL                  RWL.WA                    Rawlplug S.A.
+SAN                  SAN.WA                    Banco Santander, S.A.
+SCP                  SCP.WA                    Scope Fluidics S.A.
+SEK                  SEK.WA                    Seko S.A.
+SEL                  SEL.WA                    Selena FM S.A.
+SFG                  SFG.WA                    AS Silvano Fashion Group
+SFS                  SFS.WA                    Sfinks Polska S.A.
+SGN                  SGN.WA                    Sygnity S.A.
+SHD                  SHD.WA                    Soho Development S.A.
+SHG                  SHG.WA                    Starhedge S.A.
+SHO                  SHO.WA                    Shoper S.A.
+SIM                  SIM.WA                    SimFabric S.A.
+SKA                  SKA.WA                    Fabryka Farb i Lakierów Sniezka SA
+SKH                  SKH.WA                    Skarbiec Holding S.A.
+SKL                  SKL.WA                    Skyline Investment S.A.
+SLV                  SLV.WA                    Selvita S.A.
+SNK                  SNK.WA                    Sanok Rubber Company Spólka Akcyjna
+SNT                  SNT.WA                    Synektik Spólka Akcyjna
+SNW                  SNW.WA                    Sanwil Holding Spólka Akcyjna
+SNX                  SNX.WA                    Sunex S.A.
+SON                  SON.WA                    Sonel S.A.
+SPL                  SPL.WA                    Santander Bank Polska S.A.
+SPR                  SPR.WA                    Spyrosoft Spólka Akcyjna
+STF                  STF.WA                    Stalprofil S.A.
+STP                  STP.WA                    Stalprodukt S.A.
+STS                  STS.WA                    Satis Group S.A.
+STX                  STX.WA                    Stalexport Autostrady S.A.
+SVE                  SVE.WA                    Synthaverse S.A.
+SVRS                 SVRS.WA                   Silvair, Inc.
+SWG                  SWG.WA                    Seco/Warwick S.A.
+TAR                  TAR.WA                    Tarczynski S.A.
+TEN                  TEN.WA                    Ten Square Games S.A.
+THG                  THG.WA                    TenderHut S.A.
+TLX                  TLX.WA                    Talex S.A.
+TOA                  TOA.WA                    TOYA S.A.
+TOR                  TOR.WA                    Torpol S.A.
+TPE                  TPE.WA                    TAURON Polska Energia S.A.
+TRK                  TRK.WA                    Trakcja S.A.
+TRN                  TRN.WA                    Trans Polonia S.A.
+TRR                  TRR.WA                    Termo-Rex S.A.
+TSG                  TSG.WA                    Tesgas S.A.
+TXT                  TXT.WA                    Text S.A.
+ULG                  ULG.WA                    Ultimate Games S.A.
+ULM                  ULM.WA                    ULMA Construccion Polska S.A.
+UNF                  UNF.WA                    Unfold.vc ASI S.A.
+UNI                  UNI.WA                    UNIBEP S.A.
+UNT                  UNT.WA                    Unimot S.A.
+URT                  URT.WA                    Urteste S.A.
+VGO                  VGO.WA                    VIGO Photonics S.A.
+VIN                  VIN.WA                    Gielda Praw Majatkowych Vindexus Spolka Akcyjna
+VOT                  VOT.WA                    Votum S.A.
+VOX                  VOX.WA                    Voxel S.A.
+VRC                  VRC.WA                    Vercom S.A.
+VRG                  VRG.WA                    VRG S.A.
+VVD                  VVD.WA                    Vivid Games S.A.
+WAS                  WAS.WA                    Wasko S.A.
+WLT                  WLT.WA                    Wielton S.A.
+WPL                  WPL.WA                    Wirtualna Polska Holding S.A.
+WPR                  WPR.WA                    WOODPCKR
+WTN                  WTN.WA                    Wittchen S.A.
+WWL                  WWL.WA                    Wawel S.A.
+WXF                  WXF.WA                    Warimpex Finanz- und Beteiligungs AG
+XPL                  XPL.WA                    Xplus S.A.
+XTB                  XTB.WA                    XTB S.A.
+XTP                  XTP.WA                    XTPL S.A.
+YAN                  YAN.WA                    Yanosik S.A.
+YRL                  YRL.WA                    yarrl S.A.
+ZAB                  ZAB.WA                    Zabka Group S.A.
+ZAP                  ZAP.WA                    Zaklady Azotowe Pulawy S.A.
+ZEP                  ZEP.WA                    ZE PAK SA
+ZMT                  ZMT.WA                    Zamet S.A.
+ZRE                  ZRE.WA                    Zaklad Budowy Maszyn ZREMB - Chojnice S.A.
+ZUE                  ZUE.WA                    ZUE S.A.
+ZUK                  ZUK.WA                    Zaklady Urzadzen Kotlowych "Staporków" S.A.

@@ -1,0 +1,21 @@
+Ticker                    yfinance Ticker                Name
+----------------------------------------------------------------------------------------------------
+ETCGLDRMAU.PL             ETCGLDRMAU.WA                  Royal Mint Responsibly Sourced Physical Gold ETC
+ETFAIFS.PL                ETFAIFS.WA                     ETFAIFS
+ETFBCASH.PL               ETFBCASH.WA                    Betaetf Wigtech Portfelowy Fundusz Inwestycyjny Zamkniety
+ETFBDIVPL.PL              ETFBDIVPL.WA                   Beta Etf Dywidenda Plus Portfelowy Fundusz Inwestycyjny Zamkniety
+ETFBM40TR.PL              ETFBM40TR.WA                   Beta ETF MWIG40TR Portfelowy Fundusz Inwestycyjny Zamkniety
+ETFBNDXPL.PL              ETFBNDXPL.WA                   Beta ETF Nasdaq-100 PLN-Hedged Portfelowy Fundusz Inwestycyjny Zamkniety
+ETFBNQ2ST.PL              ETFBNQ2ST.WA                   Beta ETF Nasdaq-100 2 X Short PCIF -  Investment Certificates ETF
+ETFBNQ3LV.PL              ETFBNQ3LV.WA                   ETFBNQ3LV
+ETFBS80TR.PL              ETFBS80TR.WA                   Beta Etf SWIG80TR PCIF
+ETFBSPXPL.PL              ETFBSPXPL.WA                   Beta ETF S&P 500 PLN-Hedged Portfelowy Fundusz Inwestycyjny Zamkniety
+ETFBTBSP.PL               ETFBTBSP.WA                    Beta ETF TBSP Portfelowy FIZ
+ETFBTCPL.PL               ETFBTCPL.WA                    Agiofunds Towarzystwo Funduszy Inwestycyjnych Spolka Akcyjna - Beta Bitcoin Portfelowy Fiz Pln Etf
+ETFBW20LV.PL              ETFBW20LV.WA                   Beta ETF WIG20lev Potrfelowy Fundusz Inwestycyjny Zamkniety
+ETFBW20ST.PL              ETFBW20ST.WA                   BETA ETF WIG20short Portfelowy FIZ
+ETFBW20TR.PL              ETFBW20TR.WA                   Beta ETF WIG20TR PCIF-Investment Certificates
+ETFDAX.PL                 ETFDAX.WA                      Amundi DAX III UCITS ETF
+ETFNATO.PL                ETFNATO.WA                     ETFNATO
+ETFSP500.PL               ETFSP500.WA                    Amundi Core S&P 500 Swap UCITS ETF EUR Dist
+ETFV60A.PL                ETFV60A.WA                     ETFV60A
