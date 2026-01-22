@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { TextField, Button, Container, Typography, Box, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
+import React, { useState, useEffect, useCallback } from 'react';
+import { TextField, Button, Container, Typography, Box, MenuItem, Select, FormControl, InputLabel, Autocomplete } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import '../styles/AddStocks.css';
 
@@ -11,8 +11,95 @@ const AddStocks = () => {
   const [type, setType] = useState('B');
   const [_price, setPrice] = useState('');
   const [_date, setDate] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedAsset, setSelectedAsset] = useState(null);
 
   const navigate = useNavigate();
+
+  // Debounced search function
+  const searchAssets = useCallback(async (query) => {
+    if (query.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('access');
+      const params = new URLSearchParams({
+        q: query,
+        asset_type: assetType,
+        limit: '20'
+      });
+      
+      const response = await fetch(`api/assets/search/?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSuggestions(data);
+      } else {
+        setSuggestions([]);
+      }
+    } catch (error) {
+      console.error('Error searching assets:', error);
+      setSuggestions([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [assetType]);
+
+  // Debounce effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery) {
+        searchAssets(searchQuery);
+      } else {
+        setSuggestions([]);
+      }
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, searchAssets]);
+
+  // Reset search when asset type changes
+  useEffect(() => {
+    setSearchQuery('');
+    setSuggestions([]);
+    setSelectedAsset(null);
+    setSymbol('');
+    setName('');
+  }, [assetType]);
+
+  // Handle asset selection from autocomplete
+  const handleAssetSelect = (event, value) => {
+    if (value) {
+      setSelectedAsset(value);
+      setSymbol(value.symbol || '');
+      setName(value.name || '');
+      setSearchQuery(value.symbol || value.name || '');
+    } else {
+      setSelectedAsset(null);
+      setSymbol('');
+      setName('');
+      setSearchQuery('');
+    }
+  };
+
+  // Handle manual input change
+  const handleSearchInputChange = (event, newValue) => {
+    setSearchQuery(newValue || '');
+    if (!newValue) {
+      setSelectedAsset(null);
+      setSymbol('');
+      setName('');
+    }
+  };
     
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -91,6 +178,41 @@ const AddStocks = () => {
 
           {assetType === 'stocks' && (
             <>
+              <Autocomplete
+                freeSolo
+                options={suggestions}
+                getOptionLabel={(option) => {
+                  if (typeof option === 'string') return option;
+                  return `${option.symbol} - ${option.name}`;
+                }}
+                loading={loading}
+                value={selectedAsset}
+                inputValue={searchQuery}
+                onInputChange={handleSearchInputChange}
+                onChange={handleAssetSelect}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Search by Symbol or Name *"
+                    variant="outlined"
+                    margin="normal"
+                    required
+                    helperText="Start typing to search for stocks"
+                  />
+                )}
+                renderOption={(props, option) => (
+                  <Box component="li" {...props} key={option.id}>
+                    <Box>
+                      <Typography variant="body1" fontWeight="bold">
+                        {option.symbol}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {option.name}
+                      </Typography>
+                    </Box>
+                  </Box>
+                )}
+              />
               <TextField
                 label="Symbol *"
                 variant="outlined"
@@ -99,6 +221,7 @@ const AddStocks = () => {
                 required
                 value={symbol}
                 onChange={(e) => setSymbol(e.target.value)}
+                disabled={!!selectedAsset}
               />
               <TextField
                 label="Name *"
@@ -108,12 +231,50 @@ const AddStocks = () => {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                disabled={!!selectedAsset}
               />
             </>
           )}
 
           {assetType === 'bonds' && (
             <>
+              <Autocomplete
+                freeSolo
+                options={suggestions}
+                getOptionLabel={(option) => {
+                  if (typeof option === 'string') return option;
+                  return option.symbol ? `${option.symbol} - ${option.name}` : option.name;
+                }}
+                loading={loading}
+                value={selectedAsset}
+                inputValue={searchQuery}
+                onInputChange={handleSearchInputChange}
+                onChange={handleAssetSelect}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Search by Symbol or Name *"
+                    variant="outlined"
+                    margin="normal"
+                    required
+                    helperText="Start typing to search for bonds"
+                  />
+                )}
+                renderOption={(props, option) => (
+                  <Box component="li" {...props} key={option.id}>
+                    <Box>
+                      {option.symbol && (
+                        <Typography variant="body1" fontWeight="bold">
+                          {option.symbol}
+                        </Typography>
+                      )}
+                      <Typography variant="body2" color="text.secondary">
+                        {option.name}
+                      </Typography>
+                    </Box>
+                  </Box>
+                )}
+              />
               <TextField
                 label="Name *"
                 variant="outlined"
@@ -122,6 +283,7 @@ const AddStocks = () => {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                disabled={!!selectedAsset}
               />
               <TextField
                 label="Symbol (optional)"
@@ -130,12 +292,50 @@ const AddStocks = () => {
                 fullWidth
                 value={symbol}
                 onChange={(e) => setSymbol(e.target.value)}
+                disabled={!!selectedAsset}
               />
             </>
           )}
 
           {assetType === 'cryptocurrencies' && (
             <>
+              <Autocomplete
+                freeSolo
+                options={suggestions}
+                getOptionLabel={(option) => {
+                  if (typeof option === 'string') return option;
+                  return option.symbol ? `${option.symbol} - ${option.name}` : option.name;
+                }}
+                loading={loading}
+                value={selectedAsset}
+                inputValue={searchQuery}
+                onInputChange={handleSearchInputChange}
+                onChange={handleAssetSelect}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Search by Symbol or Name *"
+                    variant="outlined"
+                    margin="normal"
+                    required
+                    helperText="Start typing to search for cryptocurrencies"
+                  />
+                )}
+                renderOption={(props, option) => (
+                  <Box component="li" {...props} key={option.id}>
+                    <Box>
+                      {option.symbol && (
+                        <Typography variant="body1" fontWeight="bold">
+                          {option.symbol}
+                        </Typography>
+                      )}
+                      <Typography variant="body2" color="text.secondary">
+                        {option.name}
+                      </Typography>
+                    </Box>
+                  </Box>
+                )}
+              />
               <TextField
                 label="Name *"
                 variant="outlined"
@@ -144,6 +344,7 @@ const AddStocks = () => {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                disabled={!!selectedAsset}
               />
               <TextField
                 label="Symbol (optional)"
@@ -152,6 +353,7 @@ const AddStocks = () => {
                 fullWidth
                 value={symbol}
                 onChange={(e) => setSymbol(e.target.value)}
+                disabled={!!selectedAsset}
               />
             </>
           )}

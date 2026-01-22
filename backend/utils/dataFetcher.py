@@ -60,9 +60,10 @@ def getBasicStockInfo(ticker):
     stock = yf.Ticker(ticker)
     info = stock.info
     
-    current_price = info.get('currentPrice', 'N/A')
+    #current_price = info.get('currentPrice', 'N/A')
     
     hist = stock.history(period='5d')
+    current_price = hist['Close'].iloc[-1]
     
     if len(hist) < 2:
         return {

@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.models import User
 from rest_framework import generics, serializers
 from .serializers import UserSerializer, UserAssetSerializer, AssetSerializer, TransactionSerializer
@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import generics
 from .models import UserAsset, Transactions, Asset
 from .services.transaction_service import get_or_create_asset, update_user_asset
+from django.db.models import Q
 # Create your views here.
 
 
@@ -88,6 +89,39 @@ class AssetCreate(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         return super().perform_create(serializer)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def searchAssets(request):
+    """
+    Search for assets by symbol or name (partial match, case-insensitive).
+    Query parameters:
+    - q: search query (required, minimum 2 characters)
+    - asset_type: optional filter by asset type (stocks, bonds, cryptocurrencies)
+    - limit: optional limit for results (default: 20, max: 50)
+    """
+    query = request.query_params.get('q', '').strip()
+    asset_type = request.query_params.get('asset_type', None)
+    limit = min(int(request.query_params.get('limit', 20)), 50)
+    
+    if len(query) < 2:
+        return Response({'error': 'Search query must be at least 2 characters long'}, status=400)
+    
+    # Build queryset with case-insensitive partial match on symbol or name
+    queryset = Asset.objects.filter(
+        Q(symbol__icontains=query) | Q(name__icontains=query)
+    )
+    
+    # Filter by asset_type if provided
+    if asset_type:
+        queryset = queryset.filter(asset_type=asset_type)
+    
+    # Limit results and order by symbol for consistency
+    queryset = queryset.order_by('symbol', 'name')[:limit]
+    
+    serializer = AssetSerializer(queryset, many=True)
+    return Response(serializer.data)
 
 
 @api_view(['GET', 'POST'])
