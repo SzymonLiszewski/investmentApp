@@ -12,6 +12,7 @@ from django.http import JsonResponse
 from utils.xtb_integration import getTransactions_xtb, login_to_xtb
 from api.serializers import TransactionSerializer
 from utils.news import getAllNews
+from analytics.services.asset_manager import AssetManager
 # Create your views here.
 
 #* Analysis views
@@ -122,3 +123,33 @@ def xtbLogin(request):
 def getNews(request):
     data = getAllNews(request.GET.get('ticker'),5)
     return Response(data)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def getUserAssetComposition(request):
+    """
+    Get user's portfolio composition with current values and percentages.
+    
+    Query parameters:
+    - currency: Target currency for values (e.g., 'USD', 'PLN'). Defaults to 'PLN'.
+    
+    Returns:
+    - total_value: Total portfolio value in target currency
+    - currency: Currency used for values
+    - assets: List of assets with their current values
+    - composition_by_type: Breakdown by asset type (stocks, bonds, etc.)
+    - composition_by_asset: Breakdown by individual asset with percentages
+    """
+    # Get currency from query params or use PLN as default
+    currency = request.query_params.get('currency', 'PLN')
+    
+    # Create AssetManager with user's preferred currency
+    asset_manager = AssetManager(default_currency=currency)
+    
+    # Get portfolio composition
+    composition = asset_manager.get_portfolio_composition(
+        user=request.user,
+        target_currency=currency
+    )
+    
+    return Response(composition)

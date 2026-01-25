@@ -17,20 +17,6 @@ class CreateUserView(generics.CreateAPIView):
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
-class CreateUserAsset(generics.ListCreateAPIView):
-    serializer_class = UserAssetSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user.id
-        return UserAsset.objects.filter(owner = user)
-    
-    def perform_create(self, serializer):
-        if serializer.is_valid():
-            serializer.save(owner=self.request.user)
-        else:
-            print(serializer.errors)
-
 class CreateTransaction(generics.ListCreateAPIView):
     serializer_class = TransactionSerializer
     permission_classes = [IsAuthenticated]

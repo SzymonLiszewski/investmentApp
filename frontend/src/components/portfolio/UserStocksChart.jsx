@@ -4,10 +4,11 @@ import {
 } from 'recharts';
 import { useState, useEffect } from 'react';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D', '#FFC658', '#FF6B6B'];
 
-function UserStocksChart(){
+function UserStocksChart({ currency }){
     const [userAsset, setUserAsset] = useState([]);
+    const [portfolioCurrency, setPortfolioCurrency] = useState('PLN');
 
     useEffect(()=>{
       const getUserAsset = async () => {
@@ -20,13 +21,15 @@ function UserStocksChart(){
     };
 
     getUserAsset();
-    },[]);
+    }, [currency]); // Re-fetch when currency changes
 
     const fetchUserAsset = async () => {
       try {
           const token = localStorage.getItem('access');
+          // Use currency from props or localStorage or default to PLN
+          const selectedCurrency = currency || localStorage.getItem('preferredCurrency') || 'PLN';
 
-          const response = await fetch('api/userAsset/', {
+          const response = await fetch(`api/analytics/portfolio/composition/?currency=${selectedCurrency}`, {
               method: 'GET',
               headers: {
                   'Content-Type': 'application/json',
@@ -39,10 +42,17 @@ function UserStocksChart(){
           }
 
           const data = await response.json();
-          const transformedData = data.map(item => ({
-            name: item.name, 
-            value: item.market_value || 0
+          
+          // Store the currency used for display
+          setPortfolioCurrency(data.currency);
+          
+          // Transform the new API response to chart format
+          // Use composition_by_asset which includes current values and percentages
+          const transformedData = data.composition_by_asset.map(item => ({
+            name: item.symbol || item.name,
+            value: item.current_value
           }));
+          
           return transformedData;
       } catch (error) {
           console.error('There has been a problem with your fetch operation:', error);
@@ -52,8 +62,9 @@ function UserStocksChart(){
 
 
       return (
-        <ResponsiveContainer width="100%" height={400}>
-          <PieChart>
+        <div>
+          <ResponsiveContainer width="100%" height={400}>
+            <PieChart>
             <Pie
               data={userAsset}
               cx="40%"
@@ -103,6 +114,7 @@ function UserStocksChart(){
             <Legend wrapperStyle={{ fontSize: 12 } } layout="vertical" verticalAlign="middle" align="right" />
           </PieChart>
         </ResponsiveContainer>
+        </div>
       );
 }
 export default UserStocksChart

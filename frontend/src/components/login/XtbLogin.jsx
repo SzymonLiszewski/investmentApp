@@ -18,7 +18,7 @@ const XtbLogin = () => {
   const loginUser = async (email, passwd) =>{
     
     try{
-        const response = await fetch('api/integration/xtb/login/', {
+        const response = await fetch('api/analytics/integration/xtb/login/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

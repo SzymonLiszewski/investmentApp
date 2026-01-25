@@ -25,7 +25,7 @@ const addHours = (date, hours) => {
   },[])
 
   let getData = async() =>{
-    let response = await fetch('/api/calendar/IPO')
+    let response = await fetch('/api/analytics/calendar/ipo/')
     let data = await response.json()
     let transformed = await data.map(item=>({
       symbol: item[0],

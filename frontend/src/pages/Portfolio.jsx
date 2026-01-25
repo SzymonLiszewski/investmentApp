@@ -2,6 +2,7 @@ import "../components/styles/Portfolio.css"
 import UserEarningsChart from "../components/portfolio/UserEarningsChart"
 import UserStocksChart from "../components/portfolio/UserStocksChart"
 import IndicatorsGaugeChart from "../components/portfolio/IndicatorsGaugeChart"
+import CurrencySelector from "../components/portfolio/CurrencySelector"
 import { Fragment, useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { Link } from "react-router-dom"
@@ -11,7 +12,11 @@ function Portfolio(){
     const [sortinoRatio, setSortinoRatio] = useState(-100)
     const [alpha, setAlpha] = useState(-100)
     const [profit, setProfit] = useState([])
-      useEffect(()=>{
+    const [selectedCurrency, setSelectedCurrency] = useState(() => {
+        return localStorage.getItem('preferredCurrency') || 'PLN';
+    })
+
+    useEffect(()=>{
         const getUserAsset = async () => {
           try {
               const assetData = await fetchUserProfit();
@@ -27,7 +32,7 @@ function Portfolio(){
             const token = localStorage.getItem('access');
             const id = localStorage.getItem('id');
             const pwd = localStorage.getItem('pwd')
-            const response = await fetch('api/portfolio/profit', {
+            const response = await fetch('api/analytics/portfolio/profit/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -70,7 +75,7 @@ function Portfolio(){
             const token = localStorage.getItem('access');
             const id = localStorage.getItem('id');
             const pwd = localStorage.getItem('pwd')
-            const response = await fetch('api/portfolio/update', {
+            const response = await fetch('api/analytics/portfolio/update/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -105,18 +110,25 @@ function Portfolio(){
     : (alpha >= 0 && alpha < 0.02) ? "Performs similarly to the benchmark after adjusting for market risk."
     : "Outperforms the benchmark after adjusting for market risk.";
 
+    const handleCurrencyChange = (currency) => {
+        setSelectedCurrency(currency);
+    };
+
     return (
         <Fragment>
-        <div style={{display: 'flex', gap: '10px', marginLeft: '5vw', marginBottom: '10px'}}>
-            <button className="connectedAccountsButton"><Link to="/connectAccounts" style={{color: "#000000"}}>connected accounts</Link></button>
-            <button className="connectedAccountsButton"><Link to="/addStock" style={{color: "#000000"}}>add assets</Link></button>
+        <div style={{display: 'flex', gap: '10px', marginLeft: '5vw', marginRight: '5vw', marginBottom: '10px', alignItems: 'center', justifyContent: 'space-between'}}>
+            <div style={{display: 'flex', gap: '10px'}}>
+                <button className="connectedAccountsButton"><Link to="/connectAccounts" style={{color: "#000000"}}>connected accounts</Link></button>
+                <button className="connectedAccountsButton"><Link to="/addStock" style={{color: "#000000"}}>add assets</Link></button>
+            </div>
+            <CurrencySelector onCurrencyChange={handleCurrencyChange} />
         </div>
         <div className="portfolio">
             <div className="portfolioDiv" id="return">
                 <h1><UserEarningsChart profit={profit}/></h1>
             </div>
             <div className="portfolioDiv" id="composition">
-                <h1><UserStocksChart/></h1>
+                <h1><UserStocksChart currency={selectedCurrency}/></h1>
             </div>
             <div className="portfolioDiv" id="indicators">
                 <h3>Sharpe Ratio</h3>
