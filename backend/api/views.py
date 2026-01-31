@@ -3,10 +3,10 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.models import User
 from rest_framework import generics, serializers
-from .serializers import UserSerializer, UserAssetSerializer, AssetSerializer, TransactionSerializer
+from .serializers import UserSerializer, AssetSerializer, TransactionSerializer
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import generics
-from .models import UserAsset, Transactions, Asset
+from .models import Transactions, Asset
 from .services.transaction_service import get_or_create_asset, update_user_asset
 from django.db.models import Q
 # Create your views here.
@@ -33,25 +33,45 @@ class CreateTransaction(generics.ListCreateAPIView):
         asset_type = request_data.get('asset_type', None)
         product_id = request_data.get('product', None)
         
+        # Get bond-specific fields if asset_type is bonds
+        bond_type = request_data.get('bond_type', None)
+        bond_series = request_data.get('bond_series', None)
+        maturity_date = request_data.get('maturity_date', None)
+        interest_rate_type = request_data.get('interest_rate_type', None)
+        interest_rate = request_data.get('interest_rate', None)
+        wibor_margin = request_data.get('wibor_margin', None)
+        inflation_margin = request_data.get('inflation_margin', None)
+        base_interest_rate = request_data.get('base_interest_rate', None)
+        face_value = request_data.get('face_value', None)
+        
+        # Parse maturity_date if it's a string
+        if maturity_date and isinstance(maturity_date, str):
+            from datetime import datetime
+            try:
+                maturity_date = datetime.strptime(maturity_date, '%Y-%m-%d').date()
+            except ValueError:
+                pass
+        
         asset = get_or_create_asset(
             symbol=symbol,
             name=name,
             asset_type=asset_type,
-            product_id=product_id
+            product_id=product_id,
+            bond_type=bond_type,
+            bond_series=bond_series,
+            maturity_date=maturity_date,
+            interest_rate_type=interest_rate_type,
+            interest_rate=interest_rate,
+            wibor_margin=wibor_margin,
+            inflation_margin=inflation_margin,
+            base_interest_rate=base_interest_rate,
+            face_value=face_value
         )
         
         # Create transaction with the found/created asset
         transaction = serializer.save(owner=self.request.user, product=asset)
         
         update_user_asset(transaction)
-
-class UserAssetDelete(generics.DestroyAPIView):
-    serializer_class = UserAssetSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-        return UserAsset.objects.filter(owner = user)
 
 class AssetCreate(generics.ListCreateAPIView):
     queryset = Asset.objects.all()

@@ -1,0 +1,69 @@
+{
+  "OS": [
+    {
+      "series": "OS0424",
+      "maturity_date": "2024-04-15",
+      "interest_rate": 6.5,
+      "interest_rate_type": "fixed",
+      "face_value": 100,
+      "bond_type": "OS",
+      "name": "Obligacje Skarbowe OS0424"
+    },
+    {
+      "series": "OS1024",
+      "maturity_date": "2024-10-15",
+      "interest_rate": 6.75,
+      "interest_rate_type": "fixed",
+      "face_value": 100,
+      "bond_type": "OS",
+      "name": "Obligacje Skarbowe OS1024"
+    }
+  ],
+  "OTS": [
+    {
+      "series": "OTS0424",
+      "maturity_date": "2024-04-15",
+      "interest_rate": 6.0,
+      "interest_rate_type": "fixed",
+      "face_value": 100,
+      "bond_type": "OTS",
+      "name": "Obligacje Trzymiesięczne Skarbowe OTS0424"
+    }
+  ],
+  "DOR": [
+    {
+      "series": "DOR0425",
+      "maturity_date": "2025-04-15",
+      "interest_rate_type": "variable_wibor",
+      "wibor_margin": 1.5,
+      "wibor_type": "WIBOR3M",
+      "face_value": 100,
+      "bond_type": "DOR",
+      "name": "Obligacje Dwuletnie Oprocentowane Zmiennie DOR0425"
+    }
+  ],
+  "ROR": [
+    {
+      "series": "ROR0426",
+      "maturity_date": "2026-04-15",
+      "interest_rate_type": "indexed_inflation",
+      "base_interest_rate": 2.5,
+      "inflation_margin": 1.0,
+      "face_value": 100,
+      "bond_type": "ROR",
+      "name": "Obligacje Rocznie Oprocentowane ROR0426"
+    }
+  ],
+  "EDO": [
+    {
+      "series": "EDO0429",
+      "maturity_date": "2029-04-15",
+      "interest_rate_type": "indexed_inflation",
+      "base_interest_rate": 2.0,
+      "inflation_margin": 1.25,
+      "face_value": 100,
+      "bond_type": "EDO",
+      "name": "Emerytalne Obligacje Długoterminowe EDO0429"
+    }
+  ]
+}

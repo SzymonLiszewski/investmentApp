@@ -16,7 +16,6 @@ urlpatterns = [
     
     # Asset management endpoints
     path('transactions/', views.CreateTransaction.as_view(), name="transactions"),
-    path('userAsset/delete/<int:pk>/', views.UserAssetDelete.as_view(), name="delete_asset"),
     path('assets/', views.AssetCreate.as_view(), name="assets"),
     path('assets/search/', views.searchAssets, name="search_assets"),
 ]

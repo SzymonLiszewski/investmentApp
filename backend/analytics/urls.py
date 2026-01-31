@@ -26,4 +26,11 @@ urlpatterns = [
     
     # News endpoint
     path('news/', views.getNews, name='news'),
+    
+    # Bond endpoints
+    path('bonds/series/', views.getBondSeries, name='bonds_series'),
+    path('bonds/series/<str:bond_type>/', views.getBondSeriesByType, name='bonds_series_by_type'),
+    path('bonds/calculate/', views.calculateBondValue, name='bonds_calculate'),
+    path('bonds/economic-data/', views.getEconomicData, name='economic_data'),
+    path('bonds/economic-data/history/', views.getEconomicDataHistory, name='economic_data_history'),
 ]

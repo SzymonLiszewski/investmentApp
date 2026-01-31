@@ -1,0 +1,80 @@
+[
+  {
+    "date": "2024-01-15",
+    "wibor_3m": 5.75,
+    "wibor_6m": 5.85,
+    "inflation_cpi": 3.2
+  },
+  {
+    "date": "2024-02-15",
+    "wibor_3m": 5.80,
+    "wibor_6m": 5.90,
+    "inflation_cpi": 3.1
+  },
+  {
+    "date": "2024-03-15",
+    "wibor_3m": 5.85,
+    "wibor_6m": 5.95,
+    "inflation_cpi": 2.9
+  },
+  {
+    "date": "2024-04-15",
+    "wibor_3m": 5.90,
+    "wibor_6m": 6.00,
+    "inflation_cpi": 2.8
+  },
+  {
+    "date": "2024-05-15",
+    "wibor_3m": 5.95,
+    "wibor_6m": 6.05,
+    "inflation_cpi": 2.7
+  },
+  {
+    "date": "2024-06-15",
+    "wibor_3m": 6.00,
+    "wibor_6m": 6.10,
+    "inflation_cpi": 2.6
+  },
+  {
+    "date": "2024-07-15",
+    "wibor_3m": 6.05,
+    "wibor_6m": 6.15,
+    "inflation_cpi": 2.5
+  },
+  {
+    "date": "2024-08-15",
+    "wibor_3m": 6.10,
+    "wibor_6m": 6.20,
+    "inflation_cpi": 2.4
+  },
+  {
+    "date": "2024-09-15",
+    "wibor_3m": 6.15,
+    "wibor_6m": 6.25,
+    "inflation_cpi": 2.3
+  },
+  {
+    "date": "2024-10-15",
+    "wibor_3m": 6.20,
+    "wibor_6m": 6.30,
+    "inflation_cpi": 2.2
+  },
+  {
+    "date": "2024-11-15",
+    "wibor_3m": 6.25,
+    "wibor_6m": 6.35,
+    "inflation_cpi": 2.1
+  },
+  {
+    "date": "2024-12-15",
+    "wibor_3m": 6.30,
+    "wibor_6m": 6.40,
+    "inflation_cpi": 2.0
+  },
+  {
+    "date": "2025-01-15",
+    "wibor_3m": 6.25,
+    "wibor_6m": 6.35,
+    "inflation_cpi": 1.9
+  }
+]
