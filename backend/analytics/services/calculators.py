@@ -137,9 +137,9 @@ class BondCalculator(AssetCalculator):
     If not set latest inflation from the DB is used for simulations.
     """
 
-    # Bond types:
+    # Bond types (polish_gov_bonds_rules):
     # ROR, DOR: variable, no capitalization, simple interest (nominal + accrued from purchase)
-    # TOS: fixed, interest paid annually → value = nominal + interest in current period only
+    # TOS: fixed, annual capitalization → value = capital after last anniversary + interest YTD
     # COI, EDO, ROS, DOS: annual capitalization → value = capital after last anniversary + interest YTD
 
     def __init__(self, projected_inflation: Optional[Decimal] = None):
@@ -151,7 +151,11 @@ class BondCalculator(AssetCalculator):
         anniversary_date: date,
         asset_data: Dict[str, Any],
     ) -> Optional[Decimal]:
-        """Rate (in %) for a given year: year 0 = base_interest_rate, year >= 1 = inflation + margin."""
+        """Rate (in %) for a given year. Fixed bonds (e.g. TOS): same rate every year. Others: year 0 = base_interest_rate, year >= 1 = inflation + margin."""
+        # Fixed-rate bonds (TOS): annual capitalization, fixed interest rate each year
+        fixed_rate = asset_data.get('interest_rate')
+        if fixed_rate is not None:
+            return Decimal(str(fixed_rate))
         if year_index == 0:
             base = asset_data.get('base_interest_rate')
             if base is not None:
@@ -249,42 +253,6 @@ class BondCalculator(AssetCalculator):
             print(f"Error calculating interest rate: {str(e)}")
             return None
 
-    def _get_value_tos(
-        self,
-        total_face_value: Decimal,
-        purchase_date: date,
-        today: date,
-        full_years: int,
-        asset_data: Dict[str, Any],
-    ) -> Decimal:
-        """TOS: fixed, interest paid annually – nominal + interest in current period only."""
-        rate = self.get_current_interest_rate(asset_data, purchase_date)
-        if rate is None:
-            return total_face_value
-        last_coupon = date(
-            purchase_date.year + full_years,
-            purchase_date.month,
-            purchase_date.day,
-        )
-        if last_coupon >= today:
-            last_coupon = (
-                date(
-                    purchase_date.year + full_years - 1,
-                    purchase_date.month,
-                    purchase_date.day,
-                )
-                if full_years > 0
-                else purchase_date
-            )
-        days_in_period = (today - last_coupon).days
-        if days_in_period <= 0:
-            return total_face_value
-        interest = (
-            total_face_value * rate * Decimal(str(days_in_period))
-            / Decimal('365') / Decimal('100')
-        )
-        return total_face_value + interest
-
     def _get_value_annual_capitalization(
         self,
         face_value: Decimal,
@@ -295,7 +263,7 @@ class BondCalculator(AssetCalculator):
         total_face_value: Decimal,
         asset_data: Dict[str, Any],
     ) -> Decimal:
-        """COI, EDO, ROS, DOS: capital after last anniversary + interest YTD (Actual/365)."""
+        """TOS, COI, EDO, ROS, DOS: capital after last anniversary + interest YTD (Actual/365, capital_annual * rate * days/365)."""
         capital = face_value
         for i in range(full_years):
             anniv = date(
@@ -351,7 +319,7 @@ class BondCalculator(AssetCalculator):
         """
         Calculate the current value of a bond according to polish_gov_bonds_rules:
         - ROR, DOR: nominal + simple interest from purchase to today (no capitalization).
-        - TOS: nominal + interest in current period only (interest paid annually).
+        - TOS: fixed, annual capitalization - capital after last anniversary + interest YTD (kapital_roczny * rate * days/365).
         - COI, EDO, ROS, DOS: capital after last anniversary + interest YTD (annual capitalization).
         """
         try:
@@ -384,14 +352,22 @@ class BondCalculator(AssetCalculator):
                 return total_face_value
 
             days_since_purchase = (today - purchase_date).days
-            full_years = days_since_purchase // 365
-
-            if bond_type == 'TOS':
-                return self._get_value_tos(
-                    total_face_value, purchase_date, today, full_years, asset_data
+            # full_years = number of anniversaries passed (for correct YTD in capitalization)
+            next_anniv = date(
+                purchase_date.year + 1,
+                purchase_date.month,
+                purchase_date.day,
+            )
+            full_years = 0
+            while next_anniv <= today:
+                full_years += 1
+                next_anniv = date(
+                    next_anniv.year + 1,
+                    next_anniv.month,
+                    next_anniv.day,
                 )
 
-            if bond_type in ('COI', 'EDO', 'ROS', 'DOS'):
+            if bond_type in ('TOS', 'COI', 'EDO', 'ROS', 'DOS'):
                 return self._get_value_annual_capitalization(
                     face_value, quantity, purchase_date, today, full_years,
                     total_face_value, asset_data,

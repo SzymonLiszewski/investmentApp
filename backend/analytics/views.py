@@ -285,6 +285,7 @@ def calculateBondValue(request):
             try:
                 bond = Asset.objects.get(id=asset_id, asset_type=Asset.AssetType.BONDS)
                 asset_data = {
+                    'bond_type': bond.bond_type,
                     'face_value': bond.face_value or Decimal('100'),
                     'maturity_date': bond.maturity_date,
                     'interest_rate_type': bond.interest_rate_type,
