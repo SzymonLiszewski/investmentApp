@@ -6,8 +6,8 @@ from unittest.mock import Mock, patch
 from decimal import Decimal
 from datetime import date
 
-from analytics.services.calculators import StockCalculator, BondCalculator
-from analytics.services.data_fetchers import StockDataFetcher
+from analytics.services.calculators import StockCalculator, BondCalculator, CryptoCalculator
+from analytics.services.data_fetchers import StockDataFetcher, CryptoDataFetcher
 from analytics.services.currency_converter import CurrencyConverter
 
 
@@ -249,3 +249,68 @@ class TestBondCalculator(TestCase):
         expected_value = total_nominal + expected_interest
         self.assertEqual(value, expected_value)
         mock_get_wibor.assert_called_once_with('3M')
+
+
+class TestCryptoCalculator(TestCase):
+    """Test the CryptoCalculator implementation."""
+
+    def setUp(self):
+        """Set up test fixtures."""
+        self.mock_fetcher = Mock(spec=CryptoDataFetcher)
+        self.mock_converter = Mock(spec=CurrencyConverter)
+        self.calculator = CryptoCalculator(self.mock_fetcher, self.mock_converter)
+
+    def test_get_asset_type(self):
+        """Test that get_asset_type returns 'cryptocurrencies'."""
+        self.assertEqual(self.calculator.get_asset_type(), 'cryptocurrencies')
+
+    def test_get_current_value_success_no_target_currency(self):
+        """Test get_current_value in crypto currency (no conversion)."""
+        self.mock_fetcher.get_current_price.return_value = Decimal('50000.00')
+
+        asset_data = {'symbol': 'BTC-USD', 'quantity': Decimal('0.5')}
+
+        value = self.calculator.get_current_value(asset_data)
+
+        self.assertIsNotNone(value)
+        self.assertEqual(value, Decimal('25000.00'))
+        self.mock_fetcher.get_current_price.assert_called_once_with('BTC-USD')
+        self.mock_converter.convert.assert_not_called()
+
+    def test_get_current_value_with_currency_conversion(self):
+        """Test get_current_value with target_currency uses CurrencyConverter."""
+        self.mock_fetcher.get_current_price.return_value = Decimal('4000.00')
+        self.mock_fetcher.get_currency.return_value = 'USD'
+        self.mock_converter.convert.return_value = Decimal('16000.00')
+
+        asset_data = {'symbol': 'ETH-USD', 'quantity': 2}
+
+        value = self.calculator.get_current_value(asset_data, target_currency='PLN')
+
+        self.assertIsNotNone(value)
+        self.assertEqual(value, Decimal('16000.00'))
+        self.mock_converter.convert.assert_called_once_with(
+            Decimal('8000.00'),
+            'USD',
+            'PLN'
+        )
+
+    def test_get_current_value_returns_none_when_no_symbol(self):
+        """Test get_current_value returns None when symbol is missing."""
+        asset_data = {'quantity': 1}
+        self.assertIsNone(self.calculator.get_current_value(asset_data))
+
+    def test_get_current_value_returns_none_when_no_quantity(self):
+        """Test get_current_value returns None when quantity is missing."""
+        asset_data = {'symbol': 'BTC-USD'}
+        self.assertIsNone(self.calculator.get_current_value(asset_data))
+
+    def test_get_current_value_returns_none_when_fetcher_returns_none(self):
+        """Test get_current_value returns None when fetcher returns None for price."""
+        self.mock_fetcher.get_current_price.return_value = None
+
+        asset_data = {'symbol': 'BTC-USD', 'quantity': 1}
+
+        value = self.calculator.get_current_value(asset_data)
+
+        self.assertIsNone(value)

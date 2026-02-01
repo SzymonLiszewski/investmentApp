@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from typing import Optional, Dict, Any
 from decimal import Decimal
 from datetime import date, datetime, timedelta
-from .data_fetchers import StockDataFetcher
+from .data_fetchers import StockDataFetcher, CryptoDataFetcher
 from .currency_converter import CurrencyConverter
 from analytics.selectors.economic_data import (
     get_latest_wibor,
@@ -126,6 +126,75 @@ class StockCalculator(AssetCalculator):
             Dictionary with stock information or None if not available
         """
         return self.data_fetcher.get_stock_info(symbol)
+
+
+class CryptoCalculator(AssetCalculator):
+    """
+    Calculator for cryptocurrency assets.
+    Uses CryptoDataFetcher for prices and CurrencyConverter for target currency.
+    """
+
+    def __init__(
+        self,
+        data_fetcher: CryptoDataFetcher,
+        currency_converter: Optional[CurrencyConverter] = None
+    ):
+        self.data_fetcher = data_fetcher
+        self.currency_converter = currency_converter or CurrencyConverter()
+
+    def _convert_to_target_currency(
+        self,
+        total_value: Decimal,
+        symbol: str,
+        target_currency: str,
+    ) -> Optional[Decimal]:
+        """Convert total_value from asset currency to target_currency. Returns None if conversion fails."""
+        asset_currency = self.data_fetcher.get_currency(symbol)
+        if not asset_currency or asset_currency == target_currency:
+            return total_value
+        return self.currency_converter.convert(
+            total_value,
+            asset_currency,
+            target_currency,
+        )
+
+    def get_current_value(
+        self,
+        asset_data: Dict[str, Any],
+        target_currency: Optional[str] = None
+    ) -> Optional[Decimal]:
+        try:
+            symbol = asset_data.get('symbol')
+            quantity = asset_data.get('quantity')
+
+            if not symbol or quantity is None:
+                return None
+
+            if not isinstance(quantity, Decimal):
+                quantity = Decimal(str(quantity))
+
+            current_price = self.data_fetcher.get_current_price(symbol)
+
+            if current_price is None:
+                return None
+
+            total_value = current_price * quantity
+
+            if target_currency:
+                total_value = self._convert_to_target_currency(
+                    total_value, symbol, target_currency
+                )
+                if total_value is None:
+                    return None
+
+            return total_value
+
+        except Exception as e:
+            print(f"Error calculating crypto value: {str(e)}")
+            return None
+
+    def get_asset_type(self) -> str:
+        return 'cryptocurrencies'
 
 
 class BondCalculator(AssetCalculator):

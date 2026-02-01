@@ -110,3 +110,102 @@ class YfinanceStockDataFetcher(StockDataFetcher):
         except Exception as e:
             print(f"Error fetching currency for {symbol}: {str(e)}")
             return None
+
+
+class CryptoDataFetcher(ABC):
+    """
+    Abstract base class for fetching cryptocurrency market data.
+    """
+
+    @abstractmethod
+    def get_current_price(self, symbol: str) -> Optional[Decimal]:
+        """
+        Get the current price of a cryptocurrency pair.
+
+        Args:
+            symbol: Crypto pair symbol (e.g. 'BTC-USD', 'ETH-USD')
+
+        Returns:
+            Current price as Decimal or None if not available
+        """
+        pass
+
+    @abstractmethod
+    def get_currency(self, symbol: str) -> Optional[str]:
+        """
+        Get the quote currency of the pair (e.g. 'USD' for BTC-USD).
+
+        Args:
+            symbol: Crypto pair symbol
+
+        Returns:
+            Currency code (e.g. 'USD') or None if not available
+        """
+        pass
+
+    def get_crypto_info(self, symbol: str) -> Optional[Dict[str, Any]]:
+        """
+        Get detailed information about a cryptocurrency (optional).
+
+        Args:
+            symbol: Crypto pair symbol
+
+        Returns:
+            Dictionary with crypto information or None if not available
+        """
+        price = self.get_current_price(symbol)
+        currency = self.get_currency(symbol)
+        if price is None or currency is None:
+            return None
+        return {
+            'symbol': symbol,
+            'current_price': price,
+            'currency': currency,
+        }
+
+
+class YfinanceCryptoDataFetcher(CryptoDataFetcher):
+    """
+    Implementation of CryptoDataFetcher using yfinance library.
+    DB stores only crypto symbol (e.g. BTC); pair with USD (e.g. BTC-USD) is built when fetching.
+    """
+
+    def __init__(self):
+        self._cache = {}
+
+    def _yfinance_symbol(self, symbol: str) -> str:
+        """Return symbol in yfinance format (pair with USD if not already a pair)."""
+        if '-' in symbol:
+            return symbol
+        return f"{symbol}-USD"
+
+    def get_current_price(self, symbol: str) -> Optional[Decimal]:
+        try:
+            yf_symbol = self._yfinance_symbol(symbol)
+            ticker = yf.Ticker(yf_symbol)
+            info = ticker.info
+
+            price = info.get('regularMarketPrice') or info.get('currentPrice')
+
+            if price is None:
+                hist = ticker.history(period='1d')
+                if not hist.empty:
+                    price = hist['Close'].iloc[-1]
+
+            if price is not None:
+                return Decimal(str(price))
+
+            return None
+        except Exception as e:
+            print(f"Error fetching crypto price for {symbol}: {str(e)}")
+            return None
+
+    def get_currency(self, symbol: str) -> Optional[str]:
+        try:
+            # Symbol from DB is crypto only (e.g. BTC) -> we use USD pair
+            if '-' in symbol:
+                return symbol.split('-')[-1].upper()
+            return 'USD'
+        except Exception as e:
+            print(f"Error fetching crypto currency for {symbol}: {str(e)}")
+            return None

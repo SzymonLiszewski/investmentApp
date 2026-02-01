@@ -512,7 +512,7 @@ const AddStocks = () => {
                     variant="outlined"
                     margin="normal"
                     required
-                    helperText="Start typing to search for cryptocurrencies"
+                    helperText="Start typing to search for cryptocurrencies. Use pair format (e.g. BTC-USD, ETH-USD) for valuation."
                   />
                 )}
                 renderOption={(props, option) => (
@@ -541,13 +541,15 @@ const AddStocks = () => {
                 disabled={!!selectedAsset}
               />
               <TextField
-                label="Symbol (optional)"
+                label="Symbol *"
                 variant="outlined"
                 margin="normal"
                 fullWidth
+                required
                 value={symbol}
                 onChange={(e) => setSymbol(e.target.value)}
                 disabled={!!selectedAsset}
+                helperText="Use pair format, e.g. BTC-USD, ETH-USD (required for valuation)"
               />
             </>
           )}

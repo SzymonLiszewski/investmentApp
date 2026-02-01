@@ -5,8 +5,8 @@ from typing import Dict, List, Optional, Any
 from decimal import Decimal
 from django.contrib.auth.models import User
 from api.models import UserAsset, Asset, Transactions
-from .calculators import AssetCalculator, StockCalculator, BondCalculator
-from .data_fetchers import YfinanceStockDataFetcher
+from .calculators import AssetCalculator, StockCalculator, BondCalculator, CryptoCalculator
+from .data_fetchers import YfinanceStockDataFetcher, YfinanceCryptoDataFetcher
 from .currency_converter import CurrencyConverter
 
 
@@ -26,14 +26,16 @@ class AssetManager:
         
         # Initialize data fetchers
         self.stock_data_fetcher = YfinanceStockDataFetcher()
-        
+        self.crypto_data_fetcher = YfinanceCryptoDataFetcher()
+
         # Initialize currency converter
         self.currency_converter = CurrencyConverter()
-        
+
         # Initialize calculators
         self.calculators: Dict[str, AssetCalculator] = {
             'stocks': StockCalculator(self.stock_data_fetcher, self.currency_converter),
             'bonds': BondCalculator(),
+            'cryptocurrencies': CryptoCalculator(self.crypto_data_fetcher, self.currency_converter),
         }
 
     def get_portfolio_composition(
@@ -248,7 +250,7 @@ class AssetManager:
         type_mapping = {
             'stocks': 'stocks',
             'bonds': 'bonds',
-            # Add more mappings as needed for cryptocurrencies, etc.
+            'cryptocurrencies': 'cryptocurrencies',
         }
 
         calculator_key = type_mapping.get(asset_type)
