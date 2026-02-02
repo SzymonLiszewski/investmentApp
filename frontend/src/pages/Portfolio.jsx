@@ -24,21 +24,16 @@ function Portfolio(){
               console.log(error.message);
           }
       };
-      updateTransactions();
       getUserAsset();
       },[]);
       const fetchUserProfit = async () => {
         try {
             const token = localStorage.getItem('access');
-            const id = localStorage.getItem('id');
-            const pwd = localStorage.getItem('pwd')
             const response = await fetch('api/analytics/portfolio/profit/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                    'userId': id,
-                    'password': pwd
+                    'Authorization': `Bearer ${token}`
                 }
             });
   
@@ -70,33 +65,6 @@ function Portfolio(){
             throw error;
         }
     };
-    const updateTransactions = async () =>{
-        try {
-            const token = localStorage.getItem('access');
-            const id = localStorage.getItem('id');
-            const pwd = localStorage.getItem('pwd')
-            const response = await fetch('api/analytics/portfolio/update/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                    'userId': id,
-                    'password': pwd
-                }
-            });
-            
-            if (!response.ok) {
-                throw new Error('XTB: Network response was not ok');
-            }
-  
-            const data = await response.json();
-            console.log("xtb", data)
-    }catch (error) {
-        console.error('XTB: There has been a problem with your fetch operation:', error);
-        throw error;
-    }
-};
-    
     //  value interpretation
     const interpretSharpe = sharpeRatio < 1 ? "Low return relative to its risk."
     : (sharpeRatio >= 1 && sharpeRatio < 2) ? "Decent return for its risk."

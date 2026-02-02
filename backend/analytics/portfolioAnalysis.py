@@ -1,7 +1,6 @@
 import yfinance as yf
 import pandas as pd
 import numpy as np
-from utils.xtb_integration import getPriceHistory
 from datetime import datetime, timedelta
 import time
 
@@ -12,32 +11,27 @@ def calculateProfit(portfolio, userID, passwd):
     if portfolio==None:
         return None, None
     tickers = [stock.product.symbol for stock in portfolio if stock.product.symbol]
-    #tickers.append('XD')
-   
-    #* finding first transaction date
-    earliest_purchase_date = min(pd.to_datetime(stock.date) for stock in portfolio)
-    
-    #* split between yfinance and xtb stocks
-    available_tickers = []
-    unavailable_tickers = []
 
+    #* split between available (yfinance) and unavailable tickers; only yfinance is used
+    available_tickers = []
     for ticker in tickers:
         if check_ticker_availability(ticker):
             available_tickers.append(ticker)
-        else:
-            unavailable_tickers.append(ticker)
- 
-    if available_tickers:
-        data_yf = yf.download(available_tickers, start=str(one_month_ago.strftime('%Y-%m-%d')), end=str(now.strftime('%Y-%m-%d')))['Adj Close']
-    if unavailable_tickers:
-        external_data = get_data_from_external_source(unavailable_tickers, userID, passwd)
-    if available_tickers and unavailable_tickers:
-        data = pd.concat([data_yf, external_data], axis=1)
-    elif available_tickers:
-        data = data_yf
-    else:
-        data = external_data
-        
+
+    if not available_tickers:
+        return None, None
+
+    #* filter portfolio to stocks with available data only
+    portfolio = [s for s in portfolio if s.product.symbol in available_tickers]
+    tickers = available_tickers
+
+    #* finding first transaction date
+    earliest_purchase_date = min(pd.to_datetime(stock.date) for stock in portfolio)
+
+    data = yf.download(available_tickers, start=str(one_month_ago.strftime('%Y-%m-%d')), end=str(now.strftime('%Y-%m-%d')))['Adj Close']
+    if isinstance(data, pd.Series):
+        data = pd.DataFrame({available_tickers[0]: data})
+
     portfolio_value = pd.Series(index=data.index, dtype=np.float64)
     initial_value = 0
 
@@ -131,18 +125,6 @@ def calculateIndicators(portfolio_value, benchmark_data):
     except:
         alpha = 0
     return sharpe_ratio, sortino_ratio, alpha
-
-def get_data_from_external_source(tickers, userID, passwd):
-    external_data = {}
-    for ticker in tickers:
-        #todo: get id and passwd from request
-        hist = getPriceHistory(userID,passwd,ticker)
-        df = pd.DataFrame(hist)
-        df['date'] = pd.to_datetime(df['date'])  
-        df.set_index('date', inplace=True)       
-        external_data[ticker] = df['price']
-    combined_external_df = pd.DataFrame(external_data)
-    return combined_external_df
 
 def check_ticker_availability(ticker):
     try:

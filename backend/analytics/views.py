@@ -9,8 +9,6 @@ from utils.economicCalendar import getEarnings, getIPO
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from api.models import Transactions, UserAsset
 from django.http import JsonResponse
-from utils.xtb_integration import getTransactions_xtb, login_to_xtb
-from api.serializers import TransactionSerializer
 from utils.news import getAllNews
 from analytics.services.asset_manager import AssetManager
 from api.models import Asset
@@ -80,10 +78,8 @@ def CalendarIPOView(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def profitView(request):
-    userTransactions = Transactions.objects.filter(owner = request.user)
-    userId = request.headers.get("userId")
-    password = request.headers.get("password")
-    profit, benchmark = calculateProfit(userTransactions, userId, password)
+    userTransactions = Transactions.objects.filter(owner=request.user)
+    profit, benchmark = calculateProfit(userTransactions, None, None)
     sharpe, sortino, alpha = calculateIndicators(profit, benchmark)
     profit = profit.to_json(orient='index')
     return JsonResponse({'calculated_data': profit, 'sharpe': sharpe, 'sortino': sortino, 'alpha': alpha})
@@ -91,39 +87,14 @@ def profitView(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def updateTransactions(request):
-    userId = request.headers.get("userId")
-    password = request.headers.get("password")
-    xtb_transactions = getTransactions_xtb(userId, password)
-    if xtb_transactions!=None:
-        for i in xtb_transactions:
-            if i != {}:
-                #* add transaction if it does not exists in database
-                isTransactionCreated = Transactions.objects.filter(external_id=i['order']).first()
-                if isTransactionCreated==None:
-                    serializer = TransactionSerializer(data={'product': i['symbol'], 'transactionType': "B", 'quantity': i['volume'], 'price': i['open_price'], 'date': i['date'], 'external_id': i['order']})
-                    if serializer.is_valid():
-                        transaction = serializer.save(owner=request.user)
-                        #* if USER_ASSET does not exits in db create new object, otherwise add value of owned shares
-                        user_product, created = UserAsset.objects.get_or_create(
-                            owner=transaction.owner,
-                            ownedAsset=transaction.product
-                        )
-                        if created:
-                            user_product.quantity = transaction.quantity
-                        else:
-                            user_product.quantity += transaction.quantity
-                        user_product.save()
-                    else:
-                        print(serializer.errors)
+    # XTB integration removed: public API has been closed.
     return JsonResponse({'status': 'OK'})
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def xtbLogin(request):
-    userId = request.headers.get("userId")
-    password = request.headers.get("password")
-    response = login_to_xtb(userId, password)
-    return JsonResponse({'status': response})
+    # XTB integration removed: public API has been closed.
+    return JsonResponse({'status': False, 'deprecated': True})
 
 @api_view(['GET'])
 @permission_classes([AllowAny])

@@ -3,8 +3,14 @@ import socket
 import logging
 import time
 import ssl
+import warnings
 from threading import Thread
 from datetime import datetime
+
+# XTB public API has been closed; these integration functions are deprecated.
+XTB_DEPRECATION_MSG = (
+    "XTB integration is deprecated: the public API has been closed."
+)
 
 # set to true on debug environment only
 DEBUG = True
@@ -315,6 +321,7 @@ def procNewsExample(msg):
     
 
 def getTransactions_xtb(_userId, _password):
+    warnings.warn(XTB_DEPRECATION_MSG, DeprecationWarning, stacklevel=2)
 
     userId = _userId
     password = _password
@@ -354,6 +361,8 @@ def getTransactions_xtb(_userId, _password):
     return history
 
 def getPriceHistory(_userId, _password, _ticker):
+    warnings.warn(XTB_DEPRECATION_MSG, DeprecationWarning, stacklevel=2)
+
     userId = _userId
     password = _password
     # create & connect to RR socket
@@ -384,6 +393,8 @@ def getPriceHistory(_userId, _password, _ticker):
     return prices
 
 def login_to_xtb(_userId, _password):
+    warnings.warn(XTB_DEPRECATION_MSG, DeprecationWarning, stacklevel=2)
+
     userId = int(_userId)
     password = _password
     # create & connect to RR socket

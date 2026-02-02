@@ -14,7 +14,6 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage'
 import AddStocks from './components/portfolio/AddStocks';
 import { AuthProvider } from './AuthContext';
-import XtbLoginPage from './pages/XtbLoginPage';
 import ConnectedAccounts from './components/portfolio/ConnectAccounts';
 import AboutPage from './pages/AboutPage';
 
@@ -34,7 +33,6 @@ const App = () => {
                         <Route path='/login' element={<LoginPage/>}/>
                         <Route path='/register' element={<RegisterPage/>}/>
                         <Route path='/addStock' element={<AddStocks/>}/>
-                        <Route path='/xtbLogin' element={<XtbLoginPage/>}/>
                         <Route path='/connectAccounts' element={<ConnectedAccounts/>}/>
                         <Route path='/about' element={<AboutPage/>}/>
                     </Routes>
