@@ -1,6 +1,6 @@
 # StockSense
 
-StockSense is a hobby project aimed at providing stock market data, designed for finance enthusiasts and investors. The application allows you to track stock quotes, analyze key financial indicators, make simple predictions, access news with sentiment analysis, and connect with XTB for basic portfolio analysis.
+StockSense is a hobby project that provides stock market data for finance enthusiasts and investors. The app focuses on portfolio tracking: add your positions, view composition and allocation by asset class, follow returns over time, and check risk metrics (Sharpe, Sortino, Alpha) in your chosen currency. You can also follow quotes for stocks and indices, analyze technical and fundamental indicators, run simple price predictions, and browse financial news with sentiment analysis.
 
 
 ## Features
@@ -17,8 +17,6 @@ StockSense is a hobby project aimed at providing stock market data, designed for
 - **News and sentiment analysis**:
   Access relevant financial news and evaluate sentiment to inform decision-making.
 
-- **Portfolio analysis with XTB integration**:
-  Connect your XTB account to analyze your investment portfolio.
 
 ## Technologies
 
