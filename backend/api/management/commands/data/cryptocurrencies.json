@@ -1,0 +1,17 @@
+[
+  { "symbol": "BTC", "name": "Bitcoin" },
+  { "symbol": "ETH", "name": "Ethereum" },
+  { "symbol": "USDT", "name": "Tether" },
+  { "symbol": "BNB", "name": "BNB" },
+  { "symbol": "SOL", "name": "Solana" },
+  { "symbol": "XRP", "name": "XRP" },
+  { "symbol": "USDC", "name": "USD Coin" },
+  { "symbol": "ADA", "name": "Cardano" },
+  { "symbol": "AVAX", "name": "Avalanche" },
+  { "symbol": "DOGE", "name": "Dogecoin" },
+  { "symbol": "DOT", "name": "Polkadot" },
+  { "symbol": "MATIC", "name": "Polygon" },
+  { "symbol": "LINK", "name": "Chainlink" },
+  { "symbol": "LTC", "name": "Litecoin" },
+  { "symbol": "UNI7083", "name": "Uniswap" }
+]
