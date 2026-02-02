@@ -4,8 +4,8 @@ Asset manager for portfolio analysis and composition.
 from typing import Dict, List, Optional, Any
 from decimal import Decimal
 from django.contrib.auth.models import User
-from api.models import UserAsset, Asset
-from .calculators import AssetCalculator, StockCalculator
+from api.models import UserAsset, Asset, Transactions
+from .calculators import AssetCalculator, StockCalculator, BondCalculator
 from .data_fetchers import YfinanceStockDataFetcher
 from .currency_converter import CurrencyConverter
 
@@ -33,6 +33,7 @@ class AssetManager:
         # Initialize calculators
         self.calculators: Dict[str, AssetCalculator] = {
             'stocks': StockCalculator(self.stock_data_fetcher, self.currency_converter),
+            'bonds': BondCalculator(),
         }
 
     def get_portfolio_composition(
@@ -77,6 +78,28 @@ class AssetManager:
                 'name': asset.name,
                 'asset_type': asset_type,
             }
+            
+            # Add bond-specific fields if asset is a bond
+            if asset_type == 'bonds':
+                first_transaction = Transactions.objects.filter(
+                    owner=user,
+                    product=asset
+                ).order_by('date', 'id').first()
+                
+                purchase_date = first_transaction.date if first_transaction else None
+                
+                asset_data.update({
+                    'bond_type': asset.bond_type,
+                    'face_value': asset.face_value or Decimal('100'),
+                    'maturity_date': asset.maturity_date,
+                    'interest_rate_type': asset.interest_rate_type,
+                    'interest_rate': asset.interest_rate,
+                    'wibor_margin': asset.wibor_margin,
+                    'inflation_margin': asset.inflation_margin,
+                    'base_interest_rate': asset.base_interest_rate,
+                    'wibor_type': '3M',  # Default
+                    'purchase_date': purchase_date,
+                })
 
             # Get appropriate calculator
             calculator = self._get_calculator_for_asset_type(asset_type)
@@ -86,6 +109,7 @@ class AssetManager:
                 continue
 
             # Calculate current value in target currency
+            # Note: BondCalculator ignores target_currency (bonds are always in PLN)
             current_value = calculator.get_current_value(asset_data, currency)
 
             if current_value is None:
@@ -140,6 +164,76 @@ class AssetManager:
             'composition_by_asset': composition_by_asset_percent,
         }
 
+    def _get_value_from_last_transaction(self, user_asset: UserAsset) -> float:
+        """Fallback: value from last transaction price when calculator is unavailable."""
+        try:
+            last_tx = (
+                Transactions.objects.filter(
+                    owner=user_asset.owner,
+                    product=user_asset.ownedAsset,
+                )
+                .order_by('-date', '-id')
+                .first()
+            )
+            if last_tx and last_tx.price and float(last_tx.price) > 0:
+                return float(last_tx.price) * float(user_asset.quantity)
+        except Exception:
+            pass
+        return 0.0
+
+    def get_asset_market_value(
+        self,
+        user_asset: UserAsset,
+        target_currency: Optional[str] = None,
+    ) -> float:
+        """
+        Calculate current market value for a single UserAsset.
+        Uses the same calculators as get_portfolio_composition.
+        """
+        currency = target_currency or self.default_currency
+        asset = user_asset.ownedAsset
+        asset_type = asset.asset_type
+
+        asset_data = {
+            'symbol': asset.symbol,
+            'quantity': user_asset.quantity,
+            'name': asset.name,
+            'asset_type': asset_type,
+        }
+
+        if asset_type == 'bonds':
+            first_transaction = (
+                Transactions.objects.filter(
+                    owner=user_asset.owner,
+                    product=asset,
+                )
+                .order_by('date', 'id')
+                .first()
+            )
+            purchase_date = first_transaction.date if first_transaction else None
+            asset_data.update({
+                'bond_type': asset.bond_type,
+                'face_value': asset.face_value or Decimal('100'),
+                'maturity_date': asset.maturity_date,
+                'interest_rate_type': asset.interest_rate_type,
+                'interest_rate': asset.interest_rate,
+                'wibor_margin': asset.wibor_margin,
+                'inflation_margin': asset.inflation_margin,
+                'base_interest_rate': asset.base_interest_rate,
+                'wibor_type': '3M',
+                'purchase_date': purchase_date,
+            })
+
+        calculator = self._get_calculator_for_asset_type(asset_type)
+        if calculator is None:
+            return self._get_value_from_last_transaction(user_asset)
+
+        current_value = calculator.get_current_value(asset_data, currency)
+        if current_value is None:
+            return self._get_value_from_last_transaction(user_asset)
+
+        return float(current_value)
+
     def _get_calculator_for_asset_type(self, asset_type: str) -> Optional[AssetCalculator]:
         """
         Get the appropriate calculator for a given asset type.
@@ -153,7 +247,8 @@ class AssetManager:
         # Map asset types to calculator keys
         type_mapping = {
             'stocks': 'stocks',
-            # Add more mappings as needed for bonds, cryptocurrencies, etc.
+            'bonds': 'bonds',
+            # Add more mappings as needed for cryptocurrencies, etc.
         }
 
         calculator_key = type_mapping.get(asset_type)

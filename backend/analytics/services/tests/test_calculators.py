@@ -4,18 +4,11 @@ Unit tests for asset calculators.
 from django.test import TestCase
 from unittest.mock import Mock, patch
 from decimal import Decimal
-from analytics.services.calculators import AssetCalculator, StockCalculator
+from datetime import date
+
+from analytics.services.calculators import StockCalculator, BondCalculator
 from analytics.services.data_fetchers import StockDataFetcher
 from analytics.services.currency_converter import CurrencyConverter
-
-
-class TestAssetCalculator(TestCase):
-    """Test the abstract AssetCalculator class."""
-
-    def test_is_abstract(self):
-        """Test that AssetCalculator cannot be instantiated."""
-        with self.assertRaises(TypeError):
-            AssetCalculator()
 
 
 class TestStockCalculator(TestCase):
@@ -136,3 +129,123 @@ class TestStockCalculator(TestCase):
         self.assertEqual(value, Decimal('1000.00'))
         # Converter should NOT be called when currencies are the same
         self.mock_converter.convert.assert_not_called()
+
+
+class TestBondCalculator(TestCase):
+    """
+    Unit tests for BondCalculator (Polish Treasury Bonds).
+    """
+
+    def test_get_asset_type(self):
+        """BondCalculator returns 'bonds' as asset type."""
+        calculator = BondCalculator()
+        self.assertEqual(calculator.get_asset_type(), 'bonds')
+
+    def test_get_current_value_returns_none_for_invalid_data(self):
+        """get_current_value returns None when maturity_date is missing or quantity is invalid."""
+        calculator = BondCalculator()
+        self.assertIsNone(calculator.get_current_value({
+            'quantity': 10,
+            'face_value': 100,  # common_rules: nominal_value 100
+            # no maturity_date
+        }))
+        self.assertIsNone(calculator.get_current_value({
+            'maturity_date': '2026-06-30',
+            'quantity': 0,
+            'face_value': 100,
+        }))
+        self.assertIsNone(calculator.get_current_value({
+            'maturity_date': '2026-12-31',
+            'quantity': None,
+            'face_value': 100,
+        }))
+
+    @patch('analytics.services.calculators.date')
+    def test_get_current_value_inflation_indexed_bond_edo(self, mock_date):
+        """EDO (10Y): inflation-indexed, fixed in year 1, inflation+margin later, annual capitalization (Actual/365)."""
+        mock_date.today.return_value = date(2025, 6, 15)
+        mock_date.side_effect = lambda year, month, day: date(year, month, day)
+        calculator = BondCalculator(projected_inflation=Decimal('5'))
+        asset_data = {
+            'face_value': 100,  # common_rules: nominal_value 100 PLN
+            'quantity': Decimal('1'),
+            'maturity_date': '2033-01-01',  # EDO maturity = 10 years
+            'purchase_date': '2023-01-01',
+            'bond_type': 'EDO',
+            'interest_rate_type': 'indexed_inflation',
+            'base_interest_rate': Decimal('6.25'),   # year 0: fixed
+            'inflation_margin': Decimal('2.0'),    # year 1+: inflation 5% + 2.0% = 7.0%
+        }
+        value = calculator.get_current_value(asset_data)
+        self.assertIsNotNone(value)
+        # Year 0: capital = 100 * (1 + 6.25/100) = 106.25
+        capital = Decimal('100') * (Decimal('1') + Decimal('6.25') / Decimal('100'))
+        # Year 1: capital = 106.25 * (1 + 7.0/100) = 113.68
+        capital = capital * (Decimal('1') + (Decimal('5') + Decimal('2.0')) / Decimal('100'))
+        # Year 2 YTD: from 2025-01-01 to 2025-06-15 = 165 days, rate 7.0%
+        days_ytd = (date(2025, 6, 15) - date(2025, 1, 1)).days
+        interest_ytd = (
+            capital * (Decimal('5') + Decimal('2.0')) * Decimal(str(days_ytd))
+            / Decimal('365') / Decimal('100')
+        )
+        expected_value = (capital + interest_ytd) * Decimal('1')
+        self.assertEqual(value, expected_value)
+
+    @patch('analytics.services.calculators.date')
+    def test_get_current_value_fixed_bond_tos(self, mock_date):
+        """TOS (3Y): fixed, annual capitalization - capital after last anniversary + interest YTD (capital_annual * rate * days/365)."""
+        mock_date.today.return_value = date(2024, 6, 15)
+        mock_date.side_effect = lambda year, month, day: date(year, month, day)
+        calculator = BondCalculator()
+        asset_data = {
+            'face_value': 100,
+            'quantity': Decimal('1'),
+            'maturity_date': '2026-01-01',  # TOS = 3 years
+            'purchase_date': '2023-01-01',
+            'bond_type': 'TOS',
+            'interest_rate_type': 'fixed',
+            'interest_rate': Decimal('5.65'),
+        }
+        value = calculator.get_current_value(asset_data)
+        self.assertIsNotNone(value)
+        # TOS: annual capitalization. After 1 year: capital = 100 * (1 + 5.65/100) = 105.65
+        capital_after_year1 = Decimal('100') * (Decimal('1') + Decimal('5.65') / Decimal('100'))
+        # YTD from 2024-01-01 to 2024-06-15 (166 days in leap year)
+        days_ytd = (date(2024, 6, 15) - date(2024, 1, 1)).days
+        interest_ytd = (
+            capital_after_year1 * Decimal('5.65') * Decimal(str(days_ytd))
+            / Decimal('365') / Decimal('100')
+        )
+        expected_value = (capital_after_year1 + interest_ytd) * Decimal('1')
+        self.assertEqual(value, expected_value)
+
+    @patch('analytics.services.calculators.date')
+    @patch('analytics.services.calculators.get_latest_wibor')
+    def test_get_current_value_variable_wibor_bond_ror(self, mock_get_wibor, mock_date):
+        """ROR (1Y): variable WIBOR - value = nominal + simple interest from purchase to today (Actual/365)."""
+        mock_date.today.return_value = date(2024, 7, 15)
+        mock_date.side_effect = lambda year, month, day: date(year, month, day)
+        mock_get_wibor.return_value = Decimal('5.75')
+        calculator = BondCalculator()
+        asset_data = {
+            'face_value': 100,
+            'quantity': Decimal('1'),
+            'maturity_date': '2025-01-01',  # ROR = 1 year
+            'purchase_date': '2024-01-01',
+            'bond_type': 'ROR',
+            'interest_rate_type': 'variable_wibor',
+            'wibor_margin': Decimal('1.25'),
+            'wibor_type': '3M',
+        }
+        value = calculator.get_current_value(asset_data)
+        self.assertIsNotNone(value)
+        total_nominal = Decimal('100')
+        days = (date(2024, 7, 15) - date(2024, 1, 1)).days
+        rate = Decimal('5.75') + Decimal('1.25')  # WIBOR + margin
+        expected_interest = (
+            total_nominal * rate * Decimal(str(days))
+            / Decimal('365') / Decimal('100')
+        )
+        expected_value = total_nominal + expected_interest
+        self.assertEqual(value, expected_value)
+        mock_get_wibor.assert_called_once_with('3M')

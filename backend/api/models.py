@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from decimal import Decimal
 
 # Create your models here.
 
@@ -9,6 +10,11 @@ class Asset(models.Model):
         BONDS = 'bonds', 'Bonds'
         CRYPTOCURRENCIES = 'cryptocurrencies', 'Cryptocurrencies'
     
+    class InterestRateType(models.TextChoices):
+        FIXED = 'fixed', 'Fixed'
+        VARIABLE_WIBOR = 'variable_wibor', 'Variable WIBOR'
+        INDEXED_INFLATION = 'indexed_inflation', 'Indexed Inflation'
+    
     id = models.AutoField(primary_key=True)
     symbol = models.CharField(max_length=50, unique=True, null=True, blank=True)  # Required for stocks, optional for others
     name = models.CharField(max_length=255)  # Required for all
@@ -17,6 +23,22 @@ class Asset(models.Model):
         choices=AssetType.choices,
         default=AssetType.STOCKS
     )
+    
+    # Bond-specific fields
+    bond_type = models.CharField(max_length=10, null=True, blank=True)  # OS, OTS, EDO, ROR, DOR, etc.
+    bond_series = models.CharField(max_length=20, null=True, blank=True)  # e.g., OS0424
+    maturity_date = models.DateField(null=True, blank=True)
+    interest_rate = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)  # For fixed or base rate
+    face_value = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('100.00'))
+    interest_rate_type = models.CharField(
+        max_length=20,
+        choices=InterestRateType.choices,
+        null=True,
+        blank=True
+    )
+    wibor_margin = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)  # Margin for WIBOR-based bonds
+    inflation_margin = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)  # Margin for inflation-indexed bonds
+    base_interest_rate = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)  # Base rate for first period of indexed bonds
 
     def __str__(self):
         if self.symbol:
