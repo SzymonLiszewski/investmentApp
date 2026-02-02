@@ -3,20 +3,25 @@ import {
   PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import { useState, useEffect } from 'react';
+import { Box, CircularProgress } from '@mui/material';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D', '#FFC658', '#FF6B6B'];
 
 function UserStocksChart({ currency }){
     const [userAsset, setUserAsset] = useState([]);
     const [portfolioCurrency, setPortfolioCurrency] = useState('PLN');
+    const [loading, setLoading] = useState(true);
 
     useEffect(()=>{
       const getUserAsset = async () => {
+        setLoading(true);
         try {
             const assetData = await fetchUserAsset();
             setUserAsset(assetData);
         } catch (error) {
             console.log(error.message);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -60,9 +65,22 @@ function UserStocksChart({ currency }){
       }
   };
 
+    const titleStyle = { marginBottom: 8, textAlign: 'center' };
 
+    if (loading) {
       return (
         <div>
+          <h3 style={titleStyle}>Allocation by asset</h3>
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight={400}>
+            <CircularProgress />
+          </Box>
+        </div>
+      );
+    }
+
+    return (
+        <div>
+          <h3 style={titleStyle}>Allocation by asset</h3>
           <ResponsiveContainer width="100%" height={400}>
             <PieChart>
             <Pie
