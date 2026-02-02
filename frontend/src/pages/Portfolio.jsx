@@ -1,6 +1,7 @@
 import "../components/styles/Portfolio.css"
 import UserEarningsChart from "../components/portfolio/UserEarningsChart"
 import UserStocksChart from "../components/portfolio/UserStocksChart"
+import AssetClassAllocationChart from "../components/portfolio/AssetClassAllocationChart"
 import IndicatorsGaugeChart from "../components/portfolio/IndicatorsGaugeChart"
 import CurrencySelector from "../components/portfolio/CurrencySelector"
 import { Fragment, useEffect, useState } from 'react';
@@ -96,7 +97,10 @@ function Portfolio(){
                 <h1><UserEarningsChart profit={profit}/></h1>
             </div>
             <div className="portfolioDiv" id="composition">
-                <h1><UserStocksChart currency={selectedCurrency}/></h1>
+                <UserStocksChart currency={selectedCurrency} />
+            </div>
+            <div className="portfolioDiv" id="compositionByClass">
+                <AssetClassAllocationChart currency={selectedCurrency} />
             </div>
             <div className="portfolioDiv" id="indicators">
                 <h3>Sharpe Ratio</h3>
