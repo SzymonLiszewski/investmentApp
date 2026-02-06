@@ -21,7 +21,7 @@ const App = () => {
     return (
         <Fragment>
             <AuthProvider>
-                <NavBar isLoggedIn={true}/>
+                <NavBar />
                 <div className='container'>
                     <Routes>
                         <Route path='/' element={<HomePage/>}/>

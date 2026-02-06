@@ -2,21 +2,25 @@
 .FundamentalAnalysisContainer {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
-    grid-template-rows: repeat(4, 25%);
+    grid-template-rows: repeat(4, minmax(100px, 1fr));
     grid-column-gap: 20px;
     grid-row-gap: 20px;
     width: 90vw;
+    min-height: 400px;
     height: 80%;
     margin-left: 5vw;
     margin-right: 5vw;
-
-    }
+}
     
 .FundamentalContainer{
     background-color: #ffffff;
     border-radius: 30px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
     color: #000000;
+    padding: 16px;
+    box-sizing: border-box;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .FundamentalContainer h1,
@@ -25,26 +29,49 @@
     color: #000000;
 }
 
+.FundamentalContainer h1 {
+    /* dynamic: bigger on large screens, smaller on narrow tiles */
+    font-size: clamp(1.6rem, 2.8vw, 3rem);
+}
+
+.FundamentalContainer h3 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    margin: 0;
+    max-width: 100%;
+    /* dynamic label size – slightly larger for readability */
+    font-size: clamp(1.05rem, 1.6vw, 1.35rem);
+}
+
 #MarketCap { 
     grid-area: 1 / 1 / 3 / 4;
     text-align: center;
     display: grid;
-    grid-template-rows: 1fr 1fr 1fr; 
+    grid-template-rows: auto 1fr auto;
+    align-items: start;
 }
-#marketCap h3{
+#MarketCap h3{
     align-self: start;
-    grid-area: 1 / 1 / 2 / 2;
     margin-bottom: 0;
 }
 #MarketCap h1{
     margin-top: 0;
     align-self: center;
-    font-size: 70px;
 }
 #pe { 
     grid-area: 1 / 4 / 2 / 5; 
     text-align: center;
     z-index: 0;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 #pe h3{
@@ -54,13 +81,18 @@
 #pe h1{
     z-index: 1000;
     align-self: center;
-    font-size: 30px;
     margin-top: 0;
+    font-size: clamp(1.25rem, 2vw, 2rem);
 }
 #ps { 
     grid-area: 2 / 4 / 3 / 5; 
     text-align: center;
     z-index: 0;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 #ps h3{
     margin-top: 10px;
@@ -69,14 +101,15 @@
 #ps h1{
     z-index: 1000;
     align-self: center;
-    font-size: 30px;
     margin-top: 0;
+    font-size: clamp(1.25rem, 2vw, 2rem);
 }
 #eps { 
     grid-area: 1 / 5 / 3 / 7; 
     text-align: center;
     display: grid;
-    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-rows: auto 1fr auto;
+    align-items: start;
 }
 #eps h3{
     align-self: start;
@@ -107,5 +140,12 @@
     font-size: 20px !important;
 }
 .questionCircle{
-    margin-left: 20px;
+    flex-shrink: 0;
+}
+
+.fundamental-label {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }

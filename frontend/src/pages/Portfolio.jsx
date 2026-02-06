@@ -7,6 +7,7 @@ import CurrencySelector from "../components/portfolio/CurrencySelector"
 import { Fragment, useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { Link } from "react-router-dom"
+import apiClient from "../api/client"
 
 function Portfolio(){
     const [sharpeRatio, setSharpeRatio] = useState(-100)
@@ -29,20 +30,8 @@ function Portfolio(){
       },[]);
       const fetchUserProfit = async () => {
         try {
-            const token = localStorage.getItem('access');
-            const response = await fetch('api/analytics/portfolio/profit/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-  
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-  
-            const data = await response.json();
+            const response = await apiClient.post('api/analytics/portfolio/profit/');
+            const data = response.data;
 
             const rawCalculatedData = data.calculated_data;
         

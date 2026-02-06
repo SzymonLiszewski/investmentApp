@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { TextField, Button, Container, Typography, Box, MenuItem, Select, FormControl, InputLabel, Autocomplete } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import '../styles/AddStocks.css';
+import apiClient from '../../api/client';
 
 const AddStocks = () => {
   const [assetType, setAssetType] = useState('stocks');
@@ -39,25 +40,13 @@ const AddStocks = () => {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem('access');
       const params = new URLSearchParams({
         q: query,
         asset_type: assetType,
         limit: '20'
       });
-      
-      const response = await fetch(`api/assets/search/?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setSuggestions(data);
-      } else {
-        setSuggestions([]);
-      }
+      const response = await apiClient.get(`api/assets/search/?${params}`);
+      setSuggestions(response.data);
     } catch (error) {
       console.error('Error searching assets:', error);
       setSuggestions([]);
@@ -132,8 +121,6 @@ const AddStocks = () => {
 
   const addAssetAndTransaction = async () => {
     try {
-      const token = localStorage.getItem('access');
-      
       // Prepare transaction data with asset information
       const transactionData = {
         quantity: parseFloat(count),
@@ -167,20 +154,8 @@ const AddStocks = () => {
         }
       }
 
-      // Create transaction - backend will handle asset creation if needed
-      const transactionResponse = await fetch('api/transactions/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(transactionData)
-      });
-
-      const data = await transactionResponse.json();
-      if (!transactionResponse.ok) {
-        throw new Error(JSON.stringify(data) || 'Network response was not ok');
-      }
+      const response = await apiClient.post('api/transactions/', transactionData);
+      const data = response.data;
 
       alert('Asset added successfully');
       navigate('/');
