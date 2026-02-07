@@ -4,6 +4,7 @@ import {
 } from 'recharts';
 import { useState, useEffect } from 'react';
 import { Box, CircularProgress } from '@mui/material';
+import apiClient from '../../api/client';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D', '#FFC658', '#FF6B6B'];
 
@@ -30,23 +31,11 @@ function UserStocksChart({ currency }){
 
     const fetchUserAsset = async () => {
       try {
-          const token = localStorage.getItem('access');
-          // Use currency from props or localStorage or default to PLN
           const selectedCurrency = currency || localStorage.getItem('preferredCurrency') || 'PLN';
-
-          const response = await fetch(`api/analytics/portfolio/composition/?currency=${selectedCurrency}`, {
-              method: 'GET',
-              headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`
-              }
-          });
-
-          if (!response.ok) {
-              throw new Error('Network response was not ok');
-          }
-
-          const data = await response.json();
+          const response = await apiClient.get(
+            `api/analytics/portfolio/composition/?currency=${selectedCurrency}`
+          );
+          const data = response.data;
           
           // Store the currency used for display
           setPortfolioCurrency(data.currency);

@@ -4,6 +4,7 @@ import {
 } from 'recharts';
 import { useState, useEffect } from 'react';
 import { Box, CircularProgress } from '@mui/material';
+import apiClient from '../../api/client';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
 
@@ -36,25 +37,11 @@ function AssetClassAllocationChart({ currency }) {
   }, [currency]);
 
   const fetchCompositionByClass = async () => {
-    const token = localStorage.getItem('access');
     const selectedCurrency = currency || localStorage.getItem('preferredCurrency') || 'PLN';
-
-    const response = await fetch(
-      `api/analytics/portfolio/composition/?currency=${selectedCurrency}`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      }
+    const response = await apiClient.get(
+      `api/analytics/portfolio/composition/?currency=${selectedCurrency}`
     );
-
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-
-    const data = await response.json();
+    const data = response.data;
 
     const byClass = Object.entries(data.composition_by_type || {}).map(
       ([assetType, item]) => ({
