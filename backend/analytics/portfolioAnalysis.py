@@ -1,10 +1,24 @@
+"""
+Legacy / on-demand portfolio profit calculation.
+
+WARNING: This module is kept for backward-compatibility and potential future
+on-demand analysis with custom time intervals.  For the daily portfolio value
+chart, use analytics.services.portfolio_snapshots.PortfolioSnapshotService
+and the /portfolio/value-history/ endpoint instead.
+"""
 import yfinance as yf
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 import time
 
+
 def calculateProfit(portfolio, userID, passwd):
+    """
+    Legacy function - computes short-window (30-day) profit using live
+    yfinance data.  Retained for on-demand / custom-interval analysis.
+    For daily value history prefer PortfolioSnapshotService.
+    """
     now = datetime.now()- timedelta(days=1)
     one_month_ago = now - timedelta(days=30)
     #* downloading historical data

@@ -12,12 +12,13 @@ from django.http import JsonResponse
 from utils.news import getAllNews
 from analytics.services.asset_manager import AssetManager
 from api.models import Asset
-from analytics.models import EconomicData
+from analytics.models import EconomicData, PortfolioSnapshot
 from analytics.selectors.economic_data import get_latest_economic_data
 from analytics.services.calculators import BondCalculator
+from analytics.services.portfolio_snapshots import PortfolioSnapshotService
 from rest_framework import serializers
 from decimal import Decimal
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 # Create your views here.
 
 #* Analysis views
@@ -78,6 +79,13 @@ def CalendarIPOView(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def profitView(request):
+    """
+    Legacy endpoint - computes short-window profit & indicators using live
+    yfinance data.  Kept for backward-compatibility and future on-demand
+    analysis with custom intervals.
+
+    For the daily portfolio-value chart prefer /portfolio/value-history/.
+    """
     userTransactions = Transactions.objects.filter(owner=request.user)
     profit, benchmark = calculateProfit(userTransactions, None, None)
     sharpe, sortino, alpha = calculateIndicators(profit, benchmark)
@@ -434,3 +442,73 @@ def getEconomicDataHistory(request):
         })
     
     return Response(history)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def valueHistoryView(request):
+    """
+    Return the daily portfolio-value history based on pre-computed snapshots.
+
+    Query parameters
+    ----------------
+    start_date : str (YYYY-MM-DD)   - default: 1 year ago
+    end_date   : str (YYYY-MM-DD)   - default: today
+    currency   : str                - default: PLN
+    rebuild    : "true" / "false"   - force-rebuild snapshots for the range
+    """
+    currency = request.query_params.get('currency', 'PLN')
+    today = date.today()
+
+    # Parse date range
+    start_date_str = request.query_params.get('start_date')
+    end_date_str = request.query_params.get('end_date')
+
+    if start_date_str:
+        try:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return Response(
+                {'error': 'Invalid start_date format. Use YYYY-MM-DD'}, status=400,
+            )
+    else:
+        start_date = today - timedelta(days=365)
+
+    if end_date_str:
+        try:
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return Response(
+                {'error': 'Invalid end_date format. Use YYYY-MM-DD'}, status=400,
+            )
+    else:
+        end_date = today
+
+    # Optionally rebuild snapshots
+    rebuild = request.query_params.get('rebuild', 'false').lower() == 'true'
+    if rebuild:
+        try:
+            service = PortfolioSnapshotService(currency=currency)
+            service.build_snapshots_for_user(
+                request.user, start_date, end_date, currency=currency,
+            )
+        except Exception:
+            pass  # best-effort; still return whatever is in DB
+
+    # Query snapshots
+    snapshots = PortfolioSnapshot.objects.filter(
+        user=request.user,
+        currency=currency,
+        date__gte=start_date,
+        date__lte=end_date,
+    ).order_by('date')
+
+    data = [
+        {
+            'date': snap.date.isoformat(),
+            'total_value': float(snap.total_value),
+            'currency': snap.currency,
+        }
+        for snap in snapshots
+    ]
+
+    return Response(data)

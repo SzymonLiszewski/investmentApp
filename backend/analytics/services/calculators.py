@@ -383,13 +383,21 @@ class BondCalculator(AssetCalculator):
     def get_current_value(
         self,
         asset_data: Dict[str, Any],
-        target_currency: Optional[str] = None
+        target_currency: Optional[str] = None,
+        valuation_date: Optional[date] = None,
     ) -> Optional[Decimal]:
         """
-        Calculate the current value of a bond according to polish_gov_bonds_rules:
-        - ROR, DOR: nominal + simple interest from purchase to today (no capitalization).
-        - TOS: fixed, annual capitalization - capital after last anniversary + interest YTD (kapital_roczny * rate * days/365).
-        - COI, EDO, ROS, DOS: capital after last anniversary + interest YTD (annual capitalization).
+        Calculate the value of a bond according to polish_gov_bonds_rules.
+
+        - ROR, DOR: nominal + simple interest from purchase to valuation date (no capitalization).
+        - TOS: fixed, annual capitalization — capital after last anniversary + interest YTD.
+        - COI, EDO, ROS, DOS: annual capitalization — capital after last anniversary + interest YTD.
+
+        Args:
+            asset_data: Bond information dict.
+            target_currency: Ignored (Polish bonds are always in PLN).
+            valuation_date: Date at which the bond is valued.
+                            Defaults to ``date.today()`` for backward compatibility.
         """
         try:
             face_value = asset_data.get('face_value', 100)
@@ -411,7 +419,7 @@ class BondCalculator(AssetCalculator):
             if purchase_date and isinstance(purchase_date, str):
                 purchase_date = datetime.strptime(purchase_date, '%Y-%m-%d').date()
 
-            today = date.today()
+            today = valuation_date or date.today()
             total_face_value = face_value * quantity
 
             if maturity_date <= today:

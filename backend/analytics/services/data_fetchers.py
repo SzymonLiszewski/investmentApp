@@ -1,10 +1,16 @@
 """
 Data fetchers for retrieving stock market data.
 """
+import logging
 from abc import ABC, abstractmethod
-from typing import Optional, Dict, Any
+from datetime import date, timedelta
+from typing import Dict, List, Optional, Any
 from decimal import Decimal
+
+import pandas as pd
 import yfinance as yf
+
+logger = logging.getLogger(__name__)
 
 
 class StockDataFetcher(ABC):
@@ -48,6 +54,28 @@ class StockDataFetcher(ABC):
 
         Returns:
             Currency code (e.g., 'USD', 'PLN') or None if not available
+        """
+        pass
+
+    @abstractmethod
+    def get_historical_prices(
+        self,
+        symbols: List[str],
+        start_date: date,
+        end_date: date,
+    ) -> Dict[str, pd.Series]:
+        """
+        Batch-download historical Close prices for multiple stock symbols.
+
+        Args:
+            symbols: List of stock ticker symbols (e.g. ``['AAPL', 'MSFT.WA']``).
+            start_date: Start of date range (inclusive).
+            end_date: End of date range (inclusive).
+
+        Returns:
+            Dict mapping each symbol to a ``pd.Series`` indexed by
+            ``datetime.date`` with Close prices.  Missing trading days
+            are forward-filled.
         """
         pass
 
@@ -111,6 +139,54 @@ class YfinanceStockDataFetcher(StockDataFetcher):
             print(f"Error fetching currency for {symbol}: {str(e)}")
             return None
 
+    def get_historical_prices(
+        self,
+        symbols: List[str],
+        start_date: date,
+        end_date: date,
+    ) -> Dict[str, pd.Series]:
+        if not symbols:
+            return {}
+
+        try:
+            data = yf.download(
+                symbols,
+                start=start_date.isoformat(),
+                end=(end_date + timedelta(days=1)).isoformat(),
+                progress=False,
+            )
+        except Exception:
+            logger.exception("yfinance download failed for %s", symbols)
+            return {}
+
+        if data is None or data.empty:
+            return {}
+
+        # Extract Close prices
+        try:
+            close = data["Close"]
+        except KeyError:
+            return {}
+
+        # Single ticker → Series; convert to DataFrame
+        if isinstance(close, pd.Series):
+            close = close.to_frame(name=symbols[0])
+
+        # Handle MultiIndex columns produced by newer yfinance
+        if isinstance(close.columns, pd.MultiIndex):
+            close.columns = close.columns.get_level_values(-1)
+
+        # Normalise index to datetime.date and forward-fill gaps
+        close.index = pd.to_datetime(close.index).date
+        close = close.ffill()
+
+        result: Dict[str, pd.Series] = {}
+        for sym in symbols:
+            if sym in close.columns:
+                result[sym] = close[sym].dropna()
+
+        return result
+
 
 class CryptoDataFetcher(ABC):
     """
@@ -140,6 +216,29 @@ class CryptoDataFetcher(ABC):
 
         Returns:
             Currency code (e.g. 'USD') or None if not available
+        """
+        pass
+
+    @abstractmethod
+    def get_historical_prices(
+        self,
+        symbols: List[str],
+        start_date: date,
+        end_date: date,
+    ) -> Dict[str, pd.Series]:
+        """
+        Batch-download historical Close prices for crypto symbols.
+
+        Args:
+            symbols: List of crypto symbols in DB format
+                     (e.g. ``['BTC', 'ETH']``).  The implementation is
+                     responsible for mapping to the provider's format.
+            start_date: Start of date range (inclusive).
+            end_date: End of date range (inclusive).
+
+        Returns:
+            Dict mapping each **input** symbol to a ``pd.Series``
+            indexed by ``datetime.date`` with Close prices.
         """
         pass
 
@@ -209,3 +308,55 @@ class YfinanceCryptoDataFetcher(CryptoDataFetcher):
         except Exception as e:
             print(f"Error fetching crypto currency for {symbol}: {str(e)}")
             return None
+
+    def get_historical_prices(
+        self,
+        symbols: List[str],
+        start_date: date,
+        end_date: date,
+    ) -> Dict[str, pd.Series]:
+        if not symbols:
+            return {}
+
+        # Map DB symbols → yfinance symbols
+        yf_to_orig: Dict[str, str] = {}
+        for sym in symbols:
+            yf_to_orig[self._yfinance_symbol(sym)] = sym
+
+        yf_symbols = list(yf_to_orig.keys())
+
+        try:
+            data = yf.download(
+                yf_symbols,
+                start=start_date.isoformat(),
+                end=(end_date + timedelta(days=1)).isoformat(),
+                progress=False,
+            )
+        except Exception:
+            logger.exception("yfinance crypto download failed for %s", yf_symbols)
+            return {}
+
+        if data is None or data.empty:
+            return {}
+
+        try:
+            close = data["Close"]
+        except KeyError:
+            return {}
+
+        if isinstance(close, pd.Series):
+            close = close.to_frame(name=yf_symbols[0])
+
+        if isinstance(close.columns, pd.MultiIndex):
+            close.columns = close.columns.get_level_values(-1)
+
+        close.index = pd.to_datetime(close.index).date
+        close = close.ffill()
+
+        # Map back to original DB symbols
+        result: Dict[str, pd.Series] = {}
+        for yf_sym, orig_sym in yf_to_orig.items():
+            if yf_sym in close.columns:
+                result[orig_sym] = close[yf_sym].dropna()
+
+        return result
