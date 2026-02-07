@@ -1,3 +1,6 @@
+import logging
+from datetime import date
+
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -9,6 +12,9 @@ from rest_framework import generics
 from .models import Transactions, Asset
 from .services.transaction_service import get_or_create_asset, update_user_asset
 from django.db.models import Q
+from analytics.services.portfolio_snapshots import PortfolioSnapshotService
+
+logger = logging.getLogger(__name__)
 # Create your views here.
 
 
@@ -72,6 +78,18 @@ class CreateTransaction(generics.ListCreateAPIView):
         transaction = serializer.save(owner=self.request.user, product=asset)
         
         update_user_asset(transaction)
+
+        # Rebuild portfolio snapshots from the transaction date onward.
+        # TODO: move to an async Celery task for better UX.
+        try:
+            service = PortfolioSnapshotService()
+            service.build_snapshots_for_user(
+                user=self.request.user,
+                start_date=transaction.date,
+                end_date=date.today(),
+            )
+        except Exception:
+            logger.exception("Snapshot rebuild failed after transaction creation")
 
 class AssetCreate(generics.ListCreateAPIView):
     queryset = Asset.objects.all()

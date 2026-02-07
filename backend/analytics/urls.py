@@ -19,6 +19,7 @@ urlpatterns = [
     # Portfolio endpoints
     path('portfolio/composition/', views.getUserAssetComposition, name='portfolio_composition'),
     path('portfolio/profit/', views.profitView, name='portfolio_profit'),
+    path('portfolio/value-history/', views.valueHistoryView, name='portfolio_value_history'),
     path('portfolio/update/', views.updateTransactions, name='portfolio_update'),
     
     # Integration endpoints

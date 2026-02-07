@@ -5,7 +5,6 @@ import AssetClassAllocationChart from "../components/portfolio/AssetClassAllocat
 import IndicatorsGaugeChart from "../components/portfolio/IndicatorsGaugeChart"
 import CurrencySelector from "../components/portfolio/CurrencySelector"
 import { Fragment, useEffect, useState } from 'react';
-import { format } from 'date-fns';
 import { Link } from "react-router-dom"
 import apiClient from "../api/client"
 
@@ -13,48 +12,42 @@ function Portfolio(){
     const [sharpeRatio, setSharpeRatio] = useState(-100)
     const [sortinoRatio, setSortinoRatio] = useState(-100)
     const [alpha, setAlpha] = useState(-100)
-    const [profit, setProfit] = useState([])
+    const [valueHistory, setValueHistory] = useState([])
     const [selectedCurrency, setSelectedCurrency] = useState(() => {
         return localStorage.getItem('preferredCurrency') || 'PLN';
     })
 
-    useEffect(()=>{
-        const getUserAsset = async () => {
-          try {
-              const assetData = await fetchUserProfit();
-          } catch (error) {
-              console.log(error.message);
-          }
-      };
-      getUserAsset();
-      },[]);
-      const fetchUserProfit = async () => {
-        try {
-            const response = await apiClient.post('api/analytics/portfolio/profit/');
-            const data = response.data;
+    // Fetch portfolio value history from snapshot-based endpoint
+    useEffect(() => {
+        const fetchValueHistory = async () => {
+            try {
+                const currency = selectedCurrency || 'PLN';
+                const response = await apiClient.get(
+                    `api/analytics/portfolio/value-history/?currency=${currency}&rebuild=true`
+                );
+                setValueHistory(response.data);
+            } catch (error) {
+                console.error('Error fetching value history:', error);
+            }
+        };
+        fetchValueHistory();
+    }, [selectedCurrency]);
 
-            const rawCalculatedData = data.calculated_data;
-        
-        const jsonString = rawCalculatedData.replace(/^"(.+)"$/, '$1');
-
-        const parsedData = JSON.parse(jsonString);
-
-        console.log('Parsed Data:', parsedData);
-
-            const formattedData = Object.entries(parsedData).map(([unixTime, price]) => ({
-              date: format(new Date(Number(unixTime)), 'yyyy-MM-dd'),
-              price: price
-          }));
-        setSharpeRatio(data.sharpe)
-        setSortinoRatio(data.sortino)
-        setAlpha(data.alpha)
-        setProfit(formattedData);
-            return formattedData;
-        } catch (error) {
-            console.error('There has been a problem with your fetch operation:', error);
-            throw error;
-        }
-    };
+    // Fetch legacy indicators (sharpe, sortino, alpha)
+    useEffect(() => {
+        const fetchIndicators = async () => {
+            try {
+                const response = await apiClient.post('api/analytics/portfolio/profit/');
+                const data = response.data;
+                setSharpeRatio(data.sharpe);
+                setSortinoRatio(data.sortino);
+                setAlpha(data.alpha);
+            } catch (error) {
+                console.error('Error fetching indicators:', error);
+            }
+        };
+        fetchIndicators();
+    }, []);
     //  value interpretation
     const interpretSharpe = sharpeRatio < 1 ? "Low return relative to its risk."
     : (sharpeRatio >= 1 && sharpeRatio < 2) ? "Decent return for its risk."
@@ -83,7 +76,7 @@ function Portfolio(){
         </div>
         <div className="portfolio">
             <div className="portfolioDiv" id="return">
-                <h1><UserEarningsChart profit={profit}/></h1>
+                <h1><UserEarningsChart data={valueHistory} currency={selectedCurrency} /></h1>
             </div>
             <div className="portfolioDiv" id="composition">
                 <UserStocksChart currency={selectedCurrency} />

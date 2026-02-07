@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,6 +27,10 @@ SECRET_KEY = 'django-insecure-ppuehh_@$g#h7j%u5rt*exi8445816x2d#t%^k5x7&44(qb)m#
 DEBUG = True
 
 ALLOWED_HOSTS = []
+
+# Heavy ML (TensorFlow/Keras, Hugging Face Transformers). When False, sentiment
+# and LSTM predictions are skipped or no-op; set ENABLE_ML_FUNCTIONS=true in prod.
+ENABLE_ML_FUNCTIONS = os.environ.get('ENABLE_ML_FUNCTIONS', 'false').lower() == 'true'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -142,7 +147,6 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
-import os
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 

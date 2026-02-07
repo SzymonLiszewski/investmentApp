@@ -1,5 +1,36 @@
 from django.db import models
+from django.contrib.auth.models import User
 from decimal import Decimal
+
+
+class PortfolioSnapshot(models.Model):
+    """
+    Daily snapshot of a user's total portfolio value.
+
+    Snapshots are created by a batch job (management command / cron) and
+    re-calculated from the transaction date whenever a new transaction is
+    recorded.
+    """
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='portfolio_snapshots',
+    )
+    date = models.DateField()
+    currency = models.CharField(max_length=10, default='PLN')
+    total_value = models.DecimalField(max_digits=15, decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'date', 'currency')
+        ordering = ['date']
+        indexes = [
+            models.Index(fields=['user', 'date']),
+        ]
+
+    def __str__(self):
+        return (
+            f"Snapshot {self.user.username} {self.date} "
+            f"{self.total_value} {self.currency}"
+        )
 
 
 class EconomicData(models.Model):

@@ -1,7 +1,8 @@
 """
 Asset manager for portfolio analysis and composition.
 """
-from typing import Dict, List, Optional, Any
+from datetime import date
+from typing import Callable, Dict, List, Optional, Any
 from decimal import Decimal
 from django.contrib.auth.models import User
 from api.models import UserAsset, Asset, Transactions
@@ -165,6 +166,177 @@ class AssetManager:
             'composition_by_type': composition_by_type_percent,
             'composition_by_asset': composition_by_asset_percent,
         }
+
+    # ------------------------------------------------------------------
+    # Generic position valuation (used by SnapshotService & others)
+    # ------------------------------------------------------------------
+
+    def value_positions(
+        self,
+        positions: List[Dict[str, Any]],
+        get_price: Callable[[str], Optional[Decimal]],
+        valuation_date: Optional[date] = None,
+        target_currency: Optional[str] = None,
+    ) -> Decimal:
+        """
+        Calculate the total value of a list of positions.
+
+        This is the single source of truth for "how to value a portfolio"
+        regardless of *where* prices come from (live fetcher, historical
+        cache, test stub, etc.).
+
+        Args:
+            positions: List of dicts, each containing:
+                - 'asset': an Asset model instance
+                - 'quantity': number (int / float / Decimal)
+                - 'purchase_date' (optional): earliest BUY date,
+                  used for bond interest-accrual calculations.
+            get_price: Callable that receives a ticker symbol and returns
+                       the unit price (Decimal / float) or ``None`` when
+                       the price is unavailable.
+            valuation_date: Date at which the portfolio is valued.
+                            Defaults to date.today().  Passed through
+                            to BondCalculator for interest accrual.
+            target_currency: Currency to express the total value in
+                (e.g. 'PLN', 'USD').  When set, each position is
+                converted from its native currency to *target_currency*.
+                ``None`` means no conversion (backward-compatible).
+
+        Returns:
+            Total portfolio value as Decimal.
+        """
+        total = Decimal('0')
+        val_date = valuation_date or date.today()
+
+        for pos in positions:
+            asset = pos['asset']
+            quantity = pos['quantity']
+            if quantity <= 0:
+                continue
+
+            qty_dec = Decimal(str(quantity))
+            asset_type = asset.asset_type
+            position_value = Decimal('0')
+
+            if asset_type in ('stocks', 'cryptocurrencies') and asset.symbol:
+                price = get_price(asset.symbol)
+                if price is not None:
+                    if not isinstance(price, Decimal):
+                        price = Decimal(str(price))
+                    position_value = price * qty_dec
+
+            elif asset_type == 'bonds':
+                position_value = self._value_bond_position(
+                    asset, qty_dec, pos.get('purchase_date'), val_date,
+                )
+
+            # Convert to target currency when requested
+            if position_value > 0 and target_currency:
+                native_currency = self._get_native_currency(asset)
+                if native_currency != target_currency:
+                    converted = self.currency_converter.convert(
+                        position_value, native_currency, target_currency,
+                    )
+                    if converted is not None:
+                        position_value = converted
+
+            total += position_value
+
+        return total
+
+    def _value_bond_position(
+        self,
+        asset: 'Asset',
+        quantity: Decimal,
+        purchase_date: Optional[date],
+        valuation_date: date,
+    ) -> Decimal:
+        """
+        Value a single bond position using ``BondCalculator``.
+
+        Falls back to face_value x quantity when the calculator
+        cannot determine a value (missing economic data, etc.).
+        """
+        face_value = asset.face_value or Decimal('100')
+        if not isinstance(face_value, Decimal):
+            face_value = Decimal(str(face_value))
+        fallback = face_value * quantity
+
+        calculator = self._get_calculator_for_asset_type('bonds')
+        if calculator is None:
+            return fallback
+
+        asset_data = {
+            'face_value': face_value,
+            'quantity': quantity,
+            'maturity_date': asset.maturity_date,
+            'bond_type': asset.bond_type,
+            'interest_rate_type': asset.interest_rate_type,
+            'interest_rate': asset.interest_rate,
+            'wibor_margin': asset.wibor_margin,
+            'inflation_margin': asset.inflation_margin,
+            'base_interest_rate': asset.base_interest_rate,
+            'wibor_type': '3M',
+            'purchase_date': purchase_date,
+        }
+
+        value = calculator.get_current_value(
+            asset_data, valuation_date=valuation_date,
+        )
+        return value if value is not None else fallback
+
+    # ------------------------------------------------------------------
+    # Native currency inference
+    # ------------------------------------------------------------------
+
+    def _get_native_currency(self, asset: 'Asset') -> str:
+        """
+        Determine the native (trading) currency of an asset.
+
+        - Bonds: always PLN (Polish Treasury Bonds).
+        - Crypto: always USD (prices fetched as ``<SYM>-USD``).
+        - Stocks: inferred from the exchange suffix of the symbol.
+        """
+        asset_type = asset.asset_type
+        if asset_type == 'bonds':
+            return 'PLN'
+        if asset_type == 'cryptocurrencies':
+            return 'USD'
+        if asset_type == 'stocks' and asset.symbol:
+            return self._infer_stock_currency(asset.symbol)
+        return 'USD'
+
+    @staticmethod
+    def _infer_stock_currency(symbol: str) -> str:
+        """
+        Infer the trading currency of a stock from its exchange suffix.
+
+        Common suffixes for Polish retail investors:
+        - ``.WA`` — Warsaw Stock Exchange (PLN)
+        - ``.DE``, ``.F`` — Frankfurt (EUR)
+        - ``.L`` — London (GBP)
+        - No suffix — US market (USD, default)
+        """
+        _SUFFIX_CURRENCY = {
+            '.WA': 'PLN',
+            '.L': 'GBP',
+            '.DE': 'EUR',
+            '.F': 'EUR',
+            '.PA': 'EUR',
+            '.AS': 'EUR',
+            '.MI': 'EUR',
+            '.MC': 'EUR',
+            '.TO': 'CAD',
+            '.AX': 'AUD',
+            '.HK': 'HKD',
+            '.T': 'JPY',
+        }
+        for suffix, currency in _SUFFIX_CURRENCY.items():
+            if symbol.endswith(suffix):
+                return currency
+        return 'USD'
+
+    # ------------------------------------------------------------------
 
     def _get_value_from_last_transaction(self, user_asset: UserAsset) -> float:
         """Fallback: value from last transaction price when calculator is unavailable."""

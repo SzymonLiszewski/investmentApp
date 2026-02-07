@@ -1,6 +1,7 @@
 """
 Tests for analytics views.
 """
+from datetime import date
 from django.test import TestCase
 from django.contrib.auth.models import User
 from rest_framework.test import APIClient
@@ -8,6 +9,7 @@ from rest_framework import status
 from unittest.mock import patch, Mock
 from decimal import Decimal
 from api.models import Asset, UserAsset
+from analytics.models import PortfolioSnapshot
 
 
 class TestGetUserAssetComposition(TestCase):
@@ -106,3 +108,91 @@ class TestGetUserAssetComposition(TestCase):
             self.assertIn('asset_type', asset)
             self.assertIn('quantity', asset)
             self.assertIn('current_value', asset)
+
+
+class TestValueHistoryEndpoint(TestCase):
+    """Tests for the portfolio value-history endpoint."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(
+            username="histuser", email="hist@test.com", password="pass",
+        )
+
+        PortfolioSnapshot.objects.create(
+            user=self.user,
+            date=date(2026, 1, 1),
+            currency="PLN",
+            total_value=Decimal("10000.00"),
+        )
+        PortfolioSnapshot.objects.create(
+            user=self.user,
+            date=date(2026, 1, 2),
+            currency="PLN",
+            total_value=Decimal("10500.00"),
+        )
+        PortfolioSnapshot.objects.create(
+            user=self.user,
+            date=date(2026, 1, 3),
+            currency="PLN",
+            total_value=Decimal("10200.00"),
+        )
+
+    def test_requires_authentication(self):
+        response = self.client.get("/api/analytics/portfolio/value-history/")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_returns_snapshots_in_range(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(
+            "/api/analytics/portfolio/value-history/",
+            {"start_date": "2026-01-01", "end_date": "2026-01-03", "currency": "PLN"},
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.json()
+        self.assertEqual(len(data), 3)
+        self.assertEqual(data[0]["date"], "2026-01-01")
+        self.assertAlmostEqual(data[0]["total_value"], 10000.0)
+        self.assertEqual(data[2]["date"], "2026-01-03")
+
+    def test_filters_by_date_range(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(
+            "/api/analytics/portfolio/value-history/",
+            {"start_date": "2026-01-02", "end_date": "2026-01-02", "currency": "PLN"},
+        )
+        data = response.json()
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]["date"], "2026-01-02")
+
+    def test_filters_by_currency(self):
+        self.client.force_authenticate(user=self.user)
+        # No snapshots in USD
+        response = self.client.get(
+            "/api/analytics/portfolio/value-history/",
+            {"start_date": "2026-01-01", "end_date": "2026-01-03", "currency": "USD"},
+        )
+        data = response.json()
+        self.assertEqual(len(data), 0)
+
+    def test_invalid_date_format_returns_400(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(
+            "/api/analytics/portfolio/value-history/",
+            {"start_date": "not-a-date"},
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_returns_correct_fields(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(
+            "/api/analytics/portfolio/value-history/",
+            {"start_date": "2026-01-01", "end_date": "2026-01-01", "currency": "PLN"},
+        )
+        data = response.json()
+        self.assertEqual(len(data), 1)
+        entry = data[0]
+        self.assertIn("date", entry)
+        self.assertIn("total_value", entry)
+        self.assertIn("currency", entry)
+        self.assertEqual(entry["currency"], "PLN")
