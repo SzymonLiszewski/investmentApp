@@ -1,14 +1,15 @@
+import os
+import pickle
+from datetime import datetime, timedelta
+
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.linear_model import LinearRegression
 import yfinance as yf
-from datetime import timedelta
-from datetime import datetime
-import pickle
-from tensorflow import keras
-import os
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import MinMaxScaler
 from statsmodels.tsa.statespace.sarimax import SARIMAX
+
+from django.conf import settings
 
 
 def linear_regression_predict(ticker, start_date, end_date, predicted_days=30):
@@ -51,17 +52,22 @@ def linear_regression_predict(ticker, start_date, end_date, predicted_days=30):
     return {list(data_dict.keys())[-1]:list(data_dict.values())[-1]}
 
 def load_lstm_model(ticker, start_date, end_date, predicted_days=30):
+    if not getattr(settings, 'ENABLE_ML_FUNCTIONS', False):
+        raise ValueError(
+            'LSTM predictions are disabled. Set ENABLE_ML_FUNCTIONS=true to enable.'
+        )
+    from tensorflow import keras
+
     data = yf.download(ticker, start=start_date, end=end_date)
     close_prices = data['Close']
 
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    scaler_path = os.path.join(BASE_DIR, 'analytics','saved_models','GSPC', 'scaler.pkl')
+    scaler_path = os.path.join(BASE_DIR, 'analytics', 'saved_models', 'GSPC', 'scaler.pkl')
     with open(scaler_path, 'rb') as scaler_file:
         scaler = pickle.load(scaler_file)
 
-
     scaled_data = scaler.transform(close_prices.values.reshape(-1, 1))
-    model_path = os.path.join(BASE_DIR, 'analytics','saved_models','GSPC', 'my_model.h5')
+    model_path = os.path.join(BASE_DIR, 'analytics', 'saved_models', 'GSPC', 'my_model.h5')
     model = keras.models.load_model(model_path)
 
     # Przewidywanie na przyszłość
