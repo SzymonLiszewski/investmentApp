@@ -15,7 +15,7 @@ function NewsList(){
 
     const getNews = async() =>{
         try {
-            const response = await fetch(`/api/analytics/news/?ticker=${ticker}`);
+            const response = await fetch(`/api/analytics/news-with-sentiment/?ticker=${ticker}`);
             if (!response.ok) {
               throw new Error(`HTTP error! status: ${response.status}`);
             }

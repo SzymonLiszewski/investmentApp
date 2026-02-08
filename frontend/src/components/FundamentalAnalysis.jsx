@@ -30,7 +30,7 @@ function FundamentalAnalysis({ticker}){
     },[])
     
     let getData = async () =>{
-        let response = await fetch(`/api/analytics/fundamental/${ticker}/`)
+        let response = await fetch(`/api/fundamental/${ticker}/`)
         let data = await response.json()
         setMarketCap(data['Market Cap'])
         setPSRatio(data['P/S Ratio'])

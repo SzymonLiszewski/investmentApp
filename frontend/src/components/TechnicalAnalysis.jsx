@@ -32,7 +32,7 @@ function TechnicalAnalysis({ticker}){
     },[])
     
     let getData = async () =>{
-        let response = await fetch(`/api/analytics/technical/${ticker}/`)
+        let response = await fetch(`/api/technical/${ticker}/`)
         let data = await response.json()
         setSMA50(data['SMA_50'])
         setSMA200(data['SMA_200'])
