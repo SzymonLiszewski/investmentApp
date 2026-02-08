@@ -1,0 +1,77 @@
+"""
+Initial migration for base app.
+
+Uses db_table to take over existing tables from api and analytics apps.
+These tables already exist in the database, so we use RunSQL with
+state_operations to register the models without actually creating tables.
+"""
+from django.db import migrations, models
+from decimal import Decimal
+
+
+class Migration(migrations.Migration):
+
+    initial = True
+
+    dependencies = []
+
+    operations = [
+        migrations.SeparateDatabaseAndState(
+            # No database operations - tables already exist as api_asset
+            database_operations=[],
+            # State operations - register the model in Django's state
+            state_operations=[
+                migrations.CreateModel(
+                    name='Asset',
+                    fields=[
+                        ('id', models.AutoField(primary_key=True, serialize=False)),
+                        ('symbol', models.CharField(blank=True, max_length=50, null=True, unique=True)),
+                        ('name', models.CharField(max_length=255)),
+                        ('asset_type', models.CharField(
+                            choices=[('stocks', 'Stocks'), ('bonds', 'Bonds'), ('cryptocurrencies', 'Cryptocurrencies')],
+                            default='stocks', max_length=20,
+                        )),
+                        ('bond_type', models.CharField(blank=True, max_length=10, null=True)),
+                        ('bond_series', models.CharField(blank=True, max_length=20, null=True)),
+                        ('maturity_date', models.DateField(blank=True, null=True)),
+                        ('interest_rate', models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True)),
+                        ('face_value', models.DecimalField(decimal_places=2, default=Decimal('100.00'), max_digits=10)),
+                        ('interest_rate_type', models.CharField(
+                            blank=True,
+                            choices=[('fixed', 'Fixed'), ('variable_wibor', 'Variable WIBOR'), ('indexed_inflation', 'Indexed Inflation')],
+                            max_length=20, null=True,
+                        )),
+                        ('wibor_margin', models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True)),
+                        ('inflation_margin', models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True)),
+                        ('base_interest_rate', models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True)),
+                    ],
+                    options={
+                        'db_table': 'api_asset',
+                    },
+                ),
+            ],
+        ),
+        migrations.SeparateDatabaseAndState(
+            database_operations=[],
+            state_operations=[
+                migrations.CreateModel(
+                    name='EconomicData',
+                    fields=[
+                        ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                        ('date', models.DateField(help_text='Date of the economic data measurement', unique=True)),
+                        ('wibor_3m', models.DecimalField(decimal_places=2, help_text='WIBOR 3M rate in percentage', max_digits=5)),
+                        ('wibor_6m', models.DecimalField(decimal_places=2, help_text='WIBOR 6M rate in percentage', max_digits=5)),
+                        ('inflation_cpi', models.DecimalField(decimal_places=2, help_text='CPI inflation rate in percentage', max_digits=5)),
+                        ('created_at', models.DateTimeField(auto_now_add=True)),
+                        ('updated_at', models.DateTimeField(auto_now=True)),
+                    ],
+                    options={
+                        'db_table': 'analytics_economicdata',
+                        'ordering': ['-date'],
+                        'verbose_name': 'Economic Data',
+                        'verbose_name_plural': 'Economic Data',
+                    },
+                ),
+            ],
+        ),
+    ]

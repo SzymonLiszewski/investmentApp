@@ -10,7 +10,7 @@ const StockInfoBox = ({ name, price, change, ticker }) => {
     let [PriceChange, setPriceChange] = useState(0)
 
     let getData = async () =>{
-      let response = await fetch(`/api/analytics/basic/${ticker}/`)
+      let response = await fetch(`/api/basic/${ticker}/`)
       let data = await response.json()
       setCurrentPrice(data['Current Price'])
       setPriceChange(data['Percent Change'])

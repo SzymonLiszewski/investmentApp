@@ -30,7 +30,7 @@ function Analysis2(){
     }, [ticker])
 
     let getData = async () =>{
-        let response = await fetch(`/api/analytics/basic/${ticker}/`)
+        let response = await fetch(`/api/basic/${ticker}/`)
         let data = await response.json()
         //console.log('data:', data)
         setCompanyName(data['Company Name'])

@@ -154,7 +154,7 @@ const AddStocks = () => {
         }
       }
 
-      const response = await apiClient.post('api/transactions/', transactionData);
+      const response = await apiClient.post('api/portfolio/transactions/', transactionData);
       const data = response.data;
 
       alert('Asset added successfully');

@@ -6,8 +6,8 @@ from django.conf import settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
 
 django.setup()
-from api.serializers import AssetSerializer
-from api.models import Asset
+from base.serializers import AssetSerializer
+from base.models import Asset
 
 def updateFromXTB():
     file_path = os.path.join(settings.STATIC_ROOT, 'xtbSymbols.json')

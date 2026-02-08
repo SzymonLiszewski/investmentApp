@@ -23,7 +23,7 @@ function Portfolio(){
             try {
                 const currency = selectedCurrency || 'PLN';
                 const response = await apiClient.get(
-                    `api/analytics/portfolio/value-history/?currency=${currency}&rebuild=true`
+                    `api/portfolio/value-history/?currency=${currency}&rebuild=true`
                 );
                 setValueHistory(response.data);
             } catch (error) {
@@ -37,7 +37,7 @@ function Portfolio(){
     useEffect(() => {
         const fetchIndicators = async () => {
             try {
-                const response = await apiClient.post('api/analytics/portfolio/profit/');
+                const response = await apiClient.post('api/portfolio/profit/');
                 const data = response.data;
                 setSharpeRatio(data.sharpe);
                 setSortinoRatio(data.sortino);

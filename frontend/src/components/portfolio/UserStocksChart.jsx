@@ -33,7 +33,7 @@ function UserStocksChart({ currency }){
       try {
           const selectedCurrency = currency || localStorage.getItem('preferredCurrency') || 'PLN';
           const response = await apiClient.get(
-            `api/analytics/portfolio/composition/?currency=${selectedCurrency}`
+            `api/portfolio/composition/?currency=${selectedCurrency}`
           );
           const data = response.data;
           
