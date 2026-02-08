@@ -4,6 +4,7 @@ import UserStocksChart from "../components/portfolio/UserStocksChart"
 import AssetClassAllocationChart from "../components/portfolio/AssetClassAllocationChart"
 import IndicatorsGaugeChart from "../components/portfolio/IndicatorsGaugeChart"
 import CurrencySelector from "../components/portfolio/CurrencySelector"
+import ActivePositionsTable from "../components/portfolio/ActivePositionsTable"
 import { Fragment, useEffect, useState } from 'react';
 import { Link } from "react-router-dom"
 import apiClient from "../api/client"
@@ -93,6 +94,9 @@ function Portfolio(){
 
                 <h3>Alpha</h3>
                 <IndicatorsGaugeChart data={alpha} range={[-0.05, 0.05]} name="Alpha" interpretation={interpretAlpha}/>
+            </div>
+            <div className="portfolioDiv" id="positions">
+                <ActivePositionsTable currency={selectedCurrency} />
             </div>
         </div>
         </Fragment>

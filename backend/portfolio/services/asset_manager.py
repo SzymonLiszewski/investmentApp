@@ -40,6 +40,45 @@ class AssetManager:
             'cryptocurrencies': CryptoCalculator(self.crypto_data_fetcher, self.currency_converter),
         }
 
+    def _get_cost_basis(self, user: User, asset: 'Asset', current_quantity: float) -> Optional[Decimal]:
+        """
+        Compute cost basis (total cost of current position) from transactions.
+        Uses average-cost method: on SELL, cost is reduced proportionally to quantity.
+
+        Returns:
+            Total cost in asset's native currency, or None if no transactions.
+        """
+        txs = (
+            Transactions.objects.filter(owner=user, product=asset)
+            .order_by('date', 'id')
+        )
+        qty = Decimal('0')
+        cost = Decimal('0')
+        for tx in txs:
+            qty_tx = Decimal(str(tx.quantity))
+            price_tx = Decimal(str(tx.price)) if tx.price else Decimal('0')
+            if tx.transactionType == 'B':  # BUY
+                cost += qty_tx * price_tx
+                qty += qty_tx
+            else:  # SELL
+                if qty <= 0:
+                    continue
+                qty_after = qty - qty_tx
+                if qty_after < 0:
+                    qty_after = Decimal('0')
+                if qty > 0:
+                    cost = cost * (qty_after / qty)
+                qty = qty_after
+        if qty <= 0:
+            return None
+        # Scale cost to match current_quantity (in case of rounding)
+        current_q = Decimal(str(current_quantity))
+        if current_q <= 0:
+            return None
+        if qty != current_q:
+            cost = cost * (current_q / qty) if qty > 0 else Decimal('0')
+        return cost
+
     def get_portfolio_composition(
         self,
         user: User,
@@ -59,7 +98,7 @@ class AssetManager:
                 - 'currency': Currency used for values
                 - 'assets': List of assets with their current values
                 - 'composition_by_type': Breakdown by asset type
-                - 'composition_by_asset': Breakdown by individual asset
+                - 'composition_by_asset': Breakdown by individual asset (incl. cost & profit)
         """
         # Use target currency or fall back to default
         currency = target_currency or self.default_currency
@@ -128,14 +167,38 @@ class AssetManager:
                 composition_by_type[asset_type] = Decimal('0')
             composition_by_type[asset_type] += current_value
 
-            # Add to assets data
+            # Cost basis and profit (in target currency)
+            quantity_float = float(user_asset.quantity)
+            cost_basis = self._get_cost_basis(user, asset, user_asset.quantity)
+            total_cost_dec = None
+            if cost_basis is not None and cost_basis > 0:
+                native_currency = self._get_native_currency(asset)
+                if native_currency != currency:
+                    total_cost_dec = self.currency_converter.convert(
+                        cost_basis, native_currency, currency,
+                    )
+                else:
+                    total_cost_dec = cost_basis
+            total_cost_float = float(total_cost_dec) if total_cost_dec is not None else None
+            average_purchase_price = (
+                (total_cost_float / quantity_float) if total_cost_float and quantity_float else None
+            )
+            profit = (float(current_value) - total_cost_float) if total_cost_float is not None else None
+            profit_percentage = (
+                (profit / total_cost_float * 100) if total_cost_float and total_cost_float > 0 and profit is not None else None
+            )
+
             asset_info = {
                 'id': asset.id,
                 'symbol': asset.symbol,
                 'name': asset.name,
                 'asset_type': asset_type,
-                'quantity': float(user_asset.quantity),
+                'quantity': quantity_float,
                 'current_value': float(current_value),
+                'average_purchase_price': round(average_purchase_price, 4) if average_purchase_price is not None else None,
+                'total_cost': round(total_cost_float, 2) if total_cost_float is not None else None,
+                'profit': round(profit, 2) if profit is not None else None,
+                'profit_percentage': round(profit_percentage, 2) if profit_percentage is not None else None,
             }
             assets_data.append(asset_info)
             composition_by_asset.append(asset_info)
