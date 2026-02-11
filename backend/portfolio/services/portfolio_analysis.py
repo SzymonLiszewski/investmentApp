@@ -10,7 +10,7 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 from datetime import date, datetime, timedelta
-from typing import Optional, TYPE_CHECKING
+from typing import Iterable, Optional, Tuple, TYPE_CHECKING
 
 import time
 
@@ -181,6 +181,29 @@ def _simulate_benchmark_value(
     # Division by 0 or NaN in price can result in inf/-inf, so we replace them with zero to avoid distorting the number of units.
     units = (cash_flow_series.fillna(0) / bench).replace([np.inf, -np.inf], 0).fillna(0).cumsum()
     return units * bench
+
+
+def snapshots_to_value_series(
+    snapshots: Iterable,
+) -> Tuple[pd.Series, pd.Series]:
+    """
+    Build portfolio value and total invested pandas Series from snapshot iterable.
+    Each snapshot must have .date, .total_value, .total_invested.
+    Returns (portfolio_value_series, total_invested_series) with DatetimeIndex.
+    """
+    snapshots = list(snapshots)
+    if not snapshots:
+        return pd.Series(dtype=float), pd.Series(dtype=float)
+    index = pd.DatetimeIndex([s.date for s in snapshots])
+    portfolio_value_series = pd.Series(
+        index=index,
+        data=[float(s.total_value) for s in snapshots],
+    )
+    total_invested_series = pd.Series(
+        index=index,
+        data=[float(s.total_invested) for s in snapshots],
+    )
+    return portfolio_value_series, total_invested_series
 
 
 def calculateIndicators(

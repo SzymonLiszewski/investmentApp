@@ -2,7 +2,6 @@ import logging
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 
-import pandas as pd
 from django.http import JsonResponse
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -11,7 +10,8 @@ from rest_framework import generics
 
 from base.models import Asset
 from base.services import get_default_stock_fetcher, get_default_crypto_fetcher
-from .models import Transactions, PortfolioSnapshot
+from .models import Transactions
+from .selectors import get_portfolio_snapshots
 from .serializers import TransactionSerializer
 from .services.transaction_service import (
     get_or_create_asset,
@@ -26,8 +26,11 @@ from .services.calculators import BondCalculator
 from .services.portfolio_analysis import (
     calculateIndicators,
     get_benchmark_series,
+    snapshots_to_value_series,
 )
 from base.selectors.economic_data import get_latest_economic_data
+
+from .utils import parse_date
 
 logger = logging.getLogger(__name__)
 
@@ -146,40 +149,24 @@ def getUserAssetComposition(request):
 def indicatorsView(request):
     """Return portfolio risk indicators (Sharpe, Sortino, Alpha) from snapshots and benchmark."""
     today = date.today()
-    start_date_str = request.query_params.get('start_date')
-    end_date_str = request.query_params.get('end_date')
     currency = request.query_params.get('currency', 'PLN')
-
-    if start_date_str:
-        try:
-            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-        except ValueError:
-            return JsonResponse(
-                {'error': 'Invalid start_date format. Use YYYY-MM-DD'},
-                status=400,
-            )
-    else:
-        start_date = today - timedelta(days=365)
-
-    if end_date_str:
-        try:
-            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
-        except ValueError:
-            return JsonResponse(
-                {'error': 'Invalid end_date format. Use YYYY-MM-DD'},
-                status=400,
-            )
-    else:
-        end_date = today
-
+    start_date, err_start = parse_date(
+        request.query_params.get('start_date'),
+        today - timedelta(days=365),
+        'start_date',
+    )
+    end_date, err_end = parse_date(
+        request.query_params.get('end_date'),
+        today,
+        'end_date',
+    )
+    if err_start or err_end:
+        return JsonResponse({'error': err_start or err_end}, status=400)
     end_date = min(end_date, today)
 
-    snapshots = PortfolioSnapshot.objects.filter(
-        user=request.user,
-        currency=currency,
-        date__gte=start_date,
-        date__lte=end_date,
-    ).order_by('date')
+    snapshots = get_portfolio_snapshots(
+        request.user, currency, start_date, end_date
+    )
 
     if not snapshots:
         return JsonResponse({
@@ -188,13 +175,8 @@ def indicatorsView(request):
             'alpha': -100,
         })
 
-    portfolio_value_series = pd.Series(
-        index=pd.DatetimeIndex([s.date for s in snapshots]),
-        data=[float(s.total_value) for s in snapshots],
-    )
-    total_invested_series = pd.Series(
-        index=pd.DatetimeIndex([s.date for s in snapshots]),
-        data=[float(s.total_invested) for s in snapshots],
+    portfolio_value_series, total_invested_series = snapshots_to_value_series(
+        snapshots
     )
 
     # Convert to USD for benchmark comparison (benchmark is in USD); use historical FX per day
@@ -262,25 +244,18 @@ def valueHistoryView(request):
     """Return the daily portfolio-value history based on pre-computed snapshots."""
     currency = request.query_params.get('currency', 'PLN')
     today = date.today()
-    start_date_str = request.query_params.get('start_date')
-    end_date_str = request.query_params.get('end_date')
-
-    if start_date_str:
-        try:
-            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-        except ValueError:
-            return Response({'error': 'Invalid start_date format. Use YYYY-MM-DD'}, status=400)
-    else:
-        start_date = today - timedelta(days=365)
-
-    if end_date_str:
-        try:
-            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
-        except ValueError:
-            return Response({'error': 'Invalid end_date format. Use YYYY-MM-DD'}, status=400)
-    else:
-        end_date = today
-
+    start_date, err_start = parse_date(
+        request.query_params.get('start_date'),
+        today - timedelta(days=365),
+        'start_date',
+    )
+    end_date, err_end = parse_date(
+        request.query_params.get('end_date'),
+        today,
+        'end_date',
+    )
+    if err_start or err_end:
+        return Response({'error': err_start or err_end}, status=400)
     end_date = min(end_date, today)
 
     refresh_today = request.query_params.get('refresh_today', 'false').lower() == 'true'
@@ -293,10 +268,9 @@ def valueHistoryView(request):
         except Exception:
             logger.exception("Refresh today snapshot failed in valueHistoryView")
 
-    snapshots = PortfolioSnapshot.objects.filter(
-        user=request.user, currency=currency,
-        date__gte=start_date, date__lte=end_date,
-    ).order_by('date')
+    snapshots = get_portfolio_snapshots(
+        request.user, currency, start_date, end_date
+    )
 
     data = [
         {

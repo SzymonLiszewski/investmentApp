@@ -14,6 +14,7 @@ from portfolio.services.portfolio_analysis import (
     RISK_FREE_RATE,
     calculateIndicators,
     get_benchmark_series,
+    snapshots_to_value_series,
 )
 
 
@@ -26,6 +27,52 @@ def _value_series(dates, values):
 def _price_series(dates, prices):
     """Build pd.Series as returned by fetcher (index = date objects)."""
     return pd.Series(prices, index=pd.Index(dates))
+
+
+def _mock_snapshot(date_val, total_value, total_invested):
+    """Minimal snapshot-like object with .date, .total_value, .total_invested."""
+    from types import SimpleNamespace
+    return SimpleNamespace(
+        date=date_val,
+        total_value=total_value,
+        total_invested=total_invested,
+    )
+
+
+class SnapshotsToValueSeriesTests(TestCase):
+    """Tests for snapshots_to_value_series."""
+
+    def test_returns_two_series_with_datetime_index(self):
+        snapshots = [
+            _mock_snapshot(date(2025, 1, 1), 1000.0, 900.0),
+            _mock_snapshot(date(2025, 1, 2), 1010.0, 900.0),
+            _mock_snapshot(date(2025, 1, 3), 1005.0, 950.0),
+        ]
+        pv_series, inv_series = snapshots_to_value_series(snapshots)
+        self.assertIsInstance(pv_series, pd.Series)
+        self.assertIsInstance(inv_series, pd.Series)
+        self.assertEqual(len(pv_series), 3)
+        self.assertEqual(len(inv_series), 3)
+        self.assertIsInstance(pv_series.index, pd.DatetimeIndex)
+        self.assertIsInstance(inv_series.index, pd.DatetimeIndex)
+        self.assertEqual(list(pv_series), [1000.0, 1010.0, 1005.0])
+        self.assertEqual(list(inv_series), [900.0, 900.0, 950.0])
+
+    def test_empty_snapshots_returns_empty_series(self):
+        pv_series, inv_series = snapshots_to_value_series([])
+        self.assertIsInstance(pv_series, pd.Series)
+        self.assertIsInstance(inv_series, pd.Series)
+        self.assertEqual(len(pv_series), 0)
+        self.assertEqual(len(inv_series), 0)
+
+    def test_decimal_snapshot_values_converted_to_float(self):
+        from decimal import Decimal
+        snapshots = [
+            _mock_snapshot(date(2025, 1, 1), Decimal('1000.50'), Decimal('800.25')),
+        ]
+        pv_series, inv_series = snapshots_to_value_series(snapshots)
+        self.assertEqual(list(pv_series), [1000.5])
+        self.assertEqual(list(inv_series), [800.25])
 
 
 class GetBenchmarkSeriesTests(TestCase):
