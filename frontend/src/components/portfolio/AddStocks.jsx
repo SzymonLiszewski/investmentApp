@@ -558,6 +558,8 @@ const AddStocks = () => {
             fullWidth
             value={_price}
             onChange={(e) => setPrice(e.target.value)}
+            helperText="Leave empty to use the closing price for the selected date"
+            inputProps={{ step: '0.01', min: '0' }}
           />
           <TextField
             label="Date"

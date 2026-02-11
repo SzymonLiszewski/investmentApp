@@ -34,11 +34,14 @@ function Portfolio(){
         fetchValueHistory();
     }, [selectedCurrency]);
 
-    // Fetch legacy indicators (sharpe, sortino, alpha)
+    // Fetch indicators (Sharpe, Sortino, Alpha) from snapshot-based backend; use selected currency
     useEffect(() => {
         const fetchIndicators = async () => {
             try {
-                const response = await apiClient.post('api/portfolio/profit/');
+                const currency = selectedCurrency || 'PLN';
+                const response = await apiClient.get('api/portfolio/indicators/', {
+                    params: { currency },
+                });
                 const data = response.data;
                 setSharpeRatio(data.sharpe);
                 setSortinoRatio(data.sortino);
@@ -48,7 +51,7 @@ function Portfolio(){
             }
         };
         fetchIndicators();
-    }, []);
+    }, [selectedCurrency]);
     //  value interpretation
     const interpretSharpe = sharpeRatio < 1 ? "Low return relative to its risk."
     : (sharpeRatio >= 1 && sharpeRatio < 2) ? "Decent return for its risk."
@@ -58,9 +61,9 @@ function Portfolio(){
     : (sortinoRatio >= 0.5 && sortinoRatio < 1) ? "Moderate downside risk."
     : "Low downside risk relative to its return.";
 
-    const interpretAlpha = alpha < 0 ? "Underperforms compared to the benchmark after adjusting for market risk."
-    : (alpha >= 0 && alpha < 0.02) ? "Performs similarly to the benchmark after adjusting for market risk."
-    : "Outperforms the benchmark after adjusting for market risk.";
+    const interpretAlpha = alpha < 0 ? "Underperforms compared to the benchmark"
+    : (alpha >= 0 && alpha < 0.02) ? "Performs similarly to the benchmark"
+    : "Outperforms the benchmark";
 
     const handleCurrencyChange = (currency) => {
         setSelectedCurrency(currency);
@@ -86,14 +89,11 @@ function Portfolio(){
                 <AssetClassAllocationChart currency={selectedCurrency} />
             </div>
             <div className="portfolioDiv" id="indicators">
-                <h3>Sharpe Ratio</h3>
-                <IndicatorsGaugeChart data={sharpeRatio} range={[-1, 3]} name="Sharpe Ratio" interpretation={interpretSharpe}/>
-
-                <h3>Sortino Ratio</h3>
-                <IndicatorsGaugeChart data={sortinoRatio} range={[-0.5, 2]} name="Sortino Ratio" interpretation={interpretSortino}/>
-
-                <h3>Alpha</h3>
-                <IndicatorsGaugeChart data={alpha} range={[-0.05, 0.05]} name="Alpha" interpretation={interpretAlpha}/>
+                <div className="indicatorsRow">
+                    <IndicatorsGaugeChart data={sharpeRatio} range={[-1, 3]} name="Sharpe Ratio" interpretation={interpretSharpe}/>
+                    <IndicatorsGaugeChart data={sortinoRatio} range={[-0.5, 2]} name="Sortino Ratio" interpretation={interpretSortino}/>
+                    <IndicatorsGaugeChart data={alpha} range={[-0.2, 0.2]} name="Alpha" interpretation={interpretAlpha}/>
+                </div>
             </div>
             <div className="portfolioDiv" id="positions">
                 <ActivePositionsTable currency={selectedCurrency} />

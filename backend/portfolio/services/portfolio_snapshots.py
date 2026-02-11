@@ -84,10 +84,31 @@ class PortfolioSnapshotService:
             stock_symbols, crypto_symbols, start_date, end_date,
         )
 
+        # Running total of net cash invested (BUY adds, SELL subtracts)
+        total_invested_runner = Decimal("0")
+        tx_index = 0
+
         # Build snapshots day by day
         snapshots: List[PortfolioSnapshot] = []
         current = start_date
         while current <= end_date:
+            # Include any transactions on or before this day in total_invested
+            while tx_index < len(transactions) and transactions[tx_index].date <= current:
+                tx = transactions[tx_index]
+                amount = Decimal(str(tx.price * tx.quantity))
+                from_currency = tx.currency or self.asset_manager._get_native_currency(tx.product)
+                if from_currency != currency:
+                    converted = self.asset_manager.currency_converter.convert(
+                        amount, from_currency, currency
+                    )
+                    if converted is not None:
+                        amount = converted
+                if tx.transactionType == Transactions.transaction_type.BUY:
+                    total_invested_runner += amount
+                else:
+                    total_invested_runner -= amount
+                tx_index += 1
+
             positions = self._reconstruct_positions(transactions, current)
 
             # Build a price-getter closure for this specific date
@@ -106,7 +127,10 @@ class PortfolioSnapshotService:
                 user=user,
                 date=current,
                 currency=currency,
-                defaults={"total_value": total},
+                defaults={
+                    "total_value": total,
+                    "total_invested": total_invested_runner,
+                },
             )
             snapshots.append(snap)
             current += timedelta(days=1)

@@ -34,6 +34,64 @@ body, html {
     grid-row: 1;
     text-align: center;
     min-height: 0;
+    align-self: start;
+}
+
+.indicatorsRow {
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+    align-items: flex-start;
+    padding: 20px 8px 0px 8px;
+}
+
+.indicatorGauge {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 10px;
+    min-width: 0;
+}
+
+.indicatorChartWrap {
+    width: 200px;
+    height: 160px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.indicatorTextBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.indicatorName {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #000;
+}
+
+.indicatorGaugePlaceholder {
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    font-size: 1.25rem;
+}
+
+.indicatorInterpretation {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.3;
+    color: #333;
+    max-width: 220px;
+    text-align: left;
 }
 
 /* Row 2: allocation by asset 1/2, allocation by class 1/2 */

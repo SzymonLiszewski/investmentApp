@@ -2,6 +2,7 @@ import logging
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 
+import pandas as pd
 from django.http import JsonResponse
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -12,11 +13,20 @@ from base.models import Asset
 from base.services import get_default_stock_fetcher, get_default_crypto_fetcher
 from .models import Transactions, PortfolioSnapshot
 from .serializers import TransactionSerializer
-from .services.transaction_service import get_or_create_asset, update_user_asset
+from .services.transaction_service import (
+    get_or_create_asset,
+    get_target_currency_for_user,
+    update_user_asset,
+    resolve_price_for_date,
+)
 from .services.asset_manager import AssetManager
+from .services.currency_converter import CurrencyConverter
 from .services.portfolio_snapshots import PortfolioSnapshotService
 from .services.calculators import BondCalculator
-from .services.portfolio_analysis import calculateProfit, calculateIndicators
+from .services.portfolio_analysis import (
+    calculateIndicators,
+    get_benchmark_series,
+)
 from base.selectors.economic_data import get_latest_economic_data
 
 logger = logging.getLogger(__name__)
@@ -61,7 +71,51 @@ class CreateTransaction(generics.ListCreateAPIView):
             base_interest_rate=base_interest_rate, face_value=face_value,
         )
 
-        transaction = serializer.save(owner=self.request.user, product=asset)
+        # Resolve price when user left it empty: use closing price for transaction date
+        price = request_data.get('price')
+        transaction_date = request_data.get('date')
+        if transaction_date and isinstance(transaction_date, str):
+            try:
+                transaction_date = datetime.strptime(transaction_date, '%Y-%m-%d').date()
+            except ValueError:
+                transaction_date = None
+        if transaction_date is None:
+            transaction_date = date.today()
+
+        price_value = None
+        if price is not None and price != '':
+            try:
+                price_value = float(price)
+            except (TypeError, ValueError):
+                pass
+        resolved_from_api = False
+        if (price_value is None or price_value <= 0) and symbol and asset_type in ('stocks', 'cryptocurrencies'):
+            resolved = resolve_price_for_date(symbol, asset_type, transaction_date)
+            if resolved is not None:
+                price_value = resolved
+                resolved_from_api = True
+
+        # When price was resolved from API, express it in user/snapshot currency
+        transaction_currency = None
+        if resolved_from_api and price_value is not None and price_value > 0:
+            target_currency = get_target_currency_for_user(self.request.user)
+            asset_manager = AssetManager(default_currency=target_currency)
+            native_currency = asset_manager._get_native_currency(asset)
+            if native_currency != target_currency:
+                converter = CurrencyConverter()
+                converted = converter.convert(Decimal(str(price_value)), native_currency, target_currency)
+                if converted is not None:
+                    price_value = float(converted)
+            transaction_currency = target_currency
+
+        save_kwargs = {
+            'owner': self.request.user,
+            'product': asset,
+            'price': price_value if price_value is not None else 0.0,
+        }
+        if transaction_currency is not None:
+            save_kwargs['currency'] = transaction_currency
+        transaction = serializer.save(**save_kwargs)
         update_user_asset(transaction)
 
         try:
@@ -87,20 +141,107 @@ def getUserAssetComposition(request):
     return Response(composition)
 
 
-@api_view(['POST'])
+@api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def profitView(request):
-    """Legacy endpoint - computes short-window profit & indicators."""
-    userTransactions = Transactions.objects.filter(owner=request.user)
-    profit, benchmark = calculateProfit(userTransactions, None, None)
-    sharpe, sortino, alpha = calculateIndicators(profit, benchmark)
-    profit = profit.to_json(orient='index')
-    return JsonResponse({
-        'calculated_data': profit,
-        'sharpe': sharpe,
-        'sortino': sortino,
-        'alpha': alpha,
-    })
+def indicatorsView(request):
+    """Return portfolio risk indicators (Sharpe, Sortino, Alpha) from snapshots and benchmark."""
+    today = date.today()
+    start_date_str = request.query_params.get('start_date')
+    end_date_str = request.query_params.get('end_date')
+    currency = request.query_params.get('currency', 'PLN')
+
+    if start_date_str:
+        try:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return JsonResponse(
+                {'error': 'Invalid start_date format. Use YYYY-MM-DD'},
+                status=400,
+            )
+    else:
+        start_date = today - timedelta(days=365)
+
+    if end_date_str:
+        try:
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return JsonResponse(
+                {'error': 'Invalid end_date format. Use YYYY-MM-DD'},
+                status=400,
+            )
+    else:
+        end_date = today
+
+    end_date = min(end_date, today)
+
+    snapshots = PortfolioSnapshot.objects.filter(
+        user=request.user,
+        currency=currency,
+        date__gte=start_date,
+        date__lte=end_date,
+    ).order_by('date')
+
+    if not snapshots:
+        return JsonResponse({
+            'sharpe': -100,
+            'sortino': -100,
+            'alpha': -100,
+        })
+
+    portfolio_value_series = pd.Series(
+        index=pd.DatetimeIndex([s.date for s in snapshots]),
+        data=[float(s.total_value) for s in snapshots],
+    )
+    total_invested_series = pd.Series(
+        index=pd.DatetimeIndex([s.date for s in snapshots]),
+        data=[float(s.total_invested) for s in snapshots],
+    )
+
+    # Convert to USD for benchmark comparison (benchmark is in USD); use historical FX per day
+    if currency != 'USD':
+        converter = CurrencyConverter()
+        total_invested_series = converter.convert_series(
+            total_invested_series, currency, 'USD', start_date, end_date
+        )
+        portfolio_value_series = converter.convert_series(
+            portfolio_value_series, currency, 'USD', start_date, end_date
+        )
+
+    benchmark_series = get_benchmark_series(start_date, end_date)
+    if benchmark_series is None or benchmark_series.empty:
+        return JsonResponse({
+            'sharpe': -100,
+            'sortino': -100,
+            'alpha': -100,
+        })
+
+    # Align benchmark to snapshot dates (benchmark has only trading days; snapshots are every calendar day)
+    benchmark_series = benchmark_series.reindex(portfolio_value_series.index).ffill().bfill()
+
+    sharpe, sortino, alpha, benchmark_profit_usd = calculateIndicators(
+        portfolio_value_series, benchmark_series, total_invested_series=total_invested_series
+    )
+
+    # Convert benchmark profit from USD to user currency (today's rate) for display
+    benchmark_profit_display = None
+    if benchmark_profit_usd is not None:
+        if currency == 'USD':
+            benchmark_profit_display = float(benchmark_profit_usd)
+        else:
+            converter = CurrencyConverter()
+            converted = converter.convert(Decimal(str(benchmark_profit_usd)), 'USD', currency)
+            if converted is not None:
+                benchmark_profit_display = float(converted)
+
+    # Use -100 for missing indicators so frontend shows "No data" (IndicatorsGaugeChart convention)
+    response_data = {
+        'sharpe': sharpe if sharpe is not None else -100,
+        'sortino': sortino if sortino is not None else -100,
+        'alpha': alpha if alpha is not None else -100,
+    }
+    if benchmark_profit_display is not None:
+        response_data['benchmark_profit'] = benchmark_profit_display
+    return JsonResponse(response_data)
 
 
 @api_view(['POST'])
@@ -140,13 +281,17 @@ def valueHistoryView(request):
     else:
         end_date = today
 
-    rebuild = request.query_params.get('rebuild', 'false').lower() == 'true'
-    if rebuild:
+    end_date = min(end_date, today)
+
+    refresh_today = request.query_params.get('refresh_today', 'false').lower() == 'true'
+    if refresh_today:
         try:
             service = PortfolioSnapshotService(currency=currency)
-            service.build_snapshots_for_user(request.user, start_date, end_date, currency=currency)
+            service.build_snapshots_for_user(
+                request.user, today, today, currency=currency
+            )
         except Exception:
-            pass
+            logger.exception("Refresh today snapshot failed in valueHistoryView")
 
     snapshots = PortfolioSnapshot.objects.filter(
         user=request.user, currency=currency,
@@ -154,7 +299,12 @@ def valueHistoryView(request):
     ).order_by('date')
 
     data = [
-        {'date': snap.date.isoformat(), 'total_value': float(snap.total_value), 'currency': snap.currency}
+        {
+            'date': snap.date.isoformat(),
+            'total_value': float(snap.total_value),
+            'total_invested': float(snap.total_invested),
+            'currency': snap.currency,
+        }
         for snap in snapshots
     ]
     return Response(data)

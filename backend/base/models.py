@@ -38,9 +38,6 @@ class Asset(models.Model):
     inflation_margin = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     base_interest_rate = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
 
-    class Meta:
-        db_table = 'api_asset'
-
     def __str__(self):
         if self.symbol:
             return self.symbol
@@ -77,7 +74,6 @@ class EconomicData(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
-        db_table = 'analytics_economicdata'
         ordering = ['-date']
         verbose_name = "Economic Data"
         verbose_name_plural = "Economic Data"

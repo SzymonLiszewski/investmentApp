@@ -44,10 +44,12 @@ class AssetManager:
         """
         Compute cost basis (total cost of current position) from transactions.
         Uses average-cost method: on SELL, cost is reduced proportionally to quantity.
+        Transaction amounts in non-native currency are converted to asset native currency.
 
         Returns:
             Total cost in asset's native currency, or None if no transactions.
         """
+        native_currency = self._get_native_currency(asset)
         txs = (
             Transactions.objects.filter(owner=user, product=asset)
             .order_by('date', 'id')
@@ -57,8 +59,14 @@ class AssetManager:
         for tx in txs:
             qty_tx = Decimal(str(tx.quantity))
             price_tx = Decimal(str(tx.price)) if tx.price else Decimal('0')
+            amount = qty_tx * price_tx
+            tx_currency = getattr(tx, 'currency', None) or native_currency
+            if tx_currency != native_currency and amount > 0:
+                converted = self.currency_converter.convert(amount, tx_currency, native_currency)
+                if converted is not None:
+                    amount = converted
             if tx.transactionType == 'B':  # BUY
-                cost += qty_tx * price_tx
+                cost += amount
                 qty += qty_tx
             else:  # SELL
                 if qty <= 0:

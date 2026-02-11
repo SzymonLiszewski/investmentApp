@@ -24,14 +24,15 @@ class TransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transactions
         fields = [
-            "owner", "product", "transactionType", "quantity", "price", "date", "external_id",
+            "owner", "product", "transactionType", "quantity", "price", "date", "currency", "external_id",
             "symbol", "name", "asset_type",
             "bond_type", "bond_series", "maturity_date", "interest_rate_type",
             "interest_rate", "wibor_margin", "inflation_margin", "base_interest_rate", "face_value"
         ]
         extra_kwargs = {
             "owner": {"read_only": True},
-            "price": {"required": False},
+            "price": {"required": False, "allow_null": True},
+            "currency": {"required": False, "allow_null": True},
             "external_id": {"required": False},
             "product": {"required": False}
         }

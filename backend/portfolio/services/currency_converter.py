@@ -1,26 +1,51 @@
 """
 Currency converter for converting asset values between currencies.
 
-Uses yfinance exchange-rate tickers (e.g. ``USDPLN=X``) so that no
-additional API keys or third-party services are required.
+Uses an FXDataFetcher (default from base.services) for rates; falls back to
+yfinance when no fetcher is provided (backward compatibility).
 """
 import logging
-from typing import Optional
+from datetime import date
+from typing import Optional, TYPE_CHECKING
+
+import pandas as pd
+import yfinance as yf
 from decimal import Decimal
 
-import yfinance as yf
+if TYPE_CHECKING:
+    from base.services.market_data_fetcher import FXDataFetcher
 
 logger = logging.getLogger(__name__)
 
 
+def _get_default_fx_fetcher():
+    """Lazy import to avoid circular imports."""
+    from base.services import get_default_fx_fetcher
+    return get_default_fx_fetcher()
+
+
 class CurrencyConverter:
     """
-    Handles currency conversion using yfinance FX data.
+    Single entry point for FX: spot conversion, exchange rate, and time-series
+    conversion. Uses FXDataFetcher when provided (or default); otherwise
+    fetches current rate via yfinance.
     """
 
-    def __init__(self):
-        """Initialize the currency converter."""
+    def __init__(self, fx_fetcher: Optional['FXDataFetcher'] = None):
+        """
+        Args:
+            fx_fetcher: Optional. When set, used for current rate and historical
+                FX series. When None, uses default from base.services for
+                get_historical_fx_series/convert_series, and yfinance for
+                _fetch_rate (current rate).
+        """
         self._cache: dict[str, Decimal] = {}
+        self._fx_fetcher = fx_fetcher
+
+    def _get_fx_fetcher(self) -> Optional['FXDataFetcher']:
+        if self._fx_fetcher is not None:
+            return self._fx_fetcher
+        return _get_default_fx_fetcher()
 
     def convert(
         self,
@@ -84,12 +109,17 @@ class CurrencyConverter:
     def _fetch_rate(
         self, from_currency: str, to_currency: str,
     ) -> Optional[Decimal]:
-        """Fetch the current exchange rate from yfinance."""
+        """Fetch the current exchange rate (via fetcher when set, else yfinance)."""
+        fetcher = self._get_fx_fetcher()
+        if fetcher is not None:
+            rate = fetcher.get_current_rate(from_currency, to_currency)
+            if rate is not None:
+                return rate
         ticker_symbol = f"{from_currency}{to_currency}=X"
         try:
             ticker = yf.Ticker(ticker_symbol)
             hist = ticker.history(period='2d')
-            if hist is not None and not hist.empty:
+            if hist is not None and not hist.empty and 'Close' in hist.columns:
                 price = float(hist['Close'].iloc[-1])
                 return Decimal(str(price))
         except Exception as e:
@@ -97,3 +127,48 @@ class CurrencyConverter:
                 "Failed to fetch FX rate %s→%s: %s", from_currency, to_currency, e,
             )
         return None
+
+    def get_historical_fx_series(
+        self,
+        from_currency: str,
+        to_currency: str,
+        start_date: date,
+        end_date: date,
+    ) -> Optional[pd.Series]:
+        """
+        Return a Series of exchange rates so that amount_from * rate = amount_to.
+        Index: DatetimeIndex (dates). Returns None if fetcher is unavailable or fails.
+        """
+        if from_currency == to_currency:
+            idx = pd.date_range(start=start_date, end=end_date, freq='D')
+            return pd.Series(1.0, index=pd.DatetimeIndex(idx))
+        fetcher = self._get_fx_fetcher()
+        if fetcher is None:
+            return None
+        return fetcher.get_historical_fx_series(
+            from_currency, to_currency, start_date, end_date
+        )
+
+    def convert_series(
+        self,
+        series: pd.Series,
+        from_currency: str,
+        to_currency: str,
+        start_date: date,
+        end_date: date,
+    ) -> pd.Series:
+        """
+        Convert a time series of amounts from one currency to another using
+        historical FX rates (one rate per date). amount_from * rate = amount_to.
+
+        If conversion fails or same currency, returns the original series unchanged.
+        """
+        if from_currency == to_currency:
+            return series
+        fx_series = self.get_historical_fx_series(from_currency, to_currency, start_date, end_date)
+        if fx_series is None or fx_series.empty:
+            return series
+        fx_aligned = fx_series.reindex(series.index).ffill().bfill()
+        fx_aligned = fx_aligned.replace(0, float('nan')).fillna(1.0)
+        converted = series * fx_aligned
+        return converted.fillna(series)
