@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-ppuehh_@$g#h7j%u5rt*exi8445816x2d#t%^k5x7&44(qb)m#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",") if os.environ.get("ALLOWED_HOSTS") else []
 
 # Heavy ML (TensorFlow/Keras, Hugging Face Transformers). When False, sentiment
 # and LSTM predictions are skipped or no-op; set ENABLE_ML_FUNCTIONS=true in prod.
@@ -96,23 +96,28 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-'''
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Use PostgreSQL when running in Docker (env vars set by docker-compose).
+if os.environ.get("USE_POSTGRES"):
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("POSTGRES_DB", "stocksense"),
+            "USER": os.environ.get("POSTGRES_USER", "stocksense"),
+            "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "stocksense"),
+            "HOST": os.environ.get("POSTGRES_HOST", "db"),
+            "PORT": os.environ.get("POSTGRES_PORT", "5432"),
+        }
     }
-}'''
-DATABASES = {
-    "default": {
-        "ENGINE": "mssql",
-        "NAME": "StockSense",
-        "HOST": "localhost",
-        "PORT": "",
-        "OPTIONS": {"driver": "ODBC Driver 17 for SQL Server", 
-        },
-    },
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "mssql",
+            "NAME": "StockSense",
+            "HOST": "localhost",
+            "PORT": "",
+            "OPTIONS": {"driver": "ODBC Driver 17 for SQL Server"},
+        }
+    }
 
 
 # Password validation

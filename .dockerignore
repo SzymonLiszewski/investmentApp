@@ -1,0 +1,40 @@
+# Dependencies – biggest savings
+node_modules
+**/node_modules
+frontend/node_modules
+
+# Python (venv ~2.5GB – must be excluded)
+venv
+venv/
+**/venv
+**/venv/
+.venv
+.venv/
+**/.venv
+**/.venv/
+env
+env/
+__pycache__
+**/__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+.env
+*.egg-info
+.eggs
+
+# Git & IDE
+.git
+.gitignore
+.cursor
+.vscode
+.idea
+
+# Build / cache
+frontend/dist
+*.log
+*.sqlite3
+
+# Optional: uncomment if context still too large
+# backend/analytics/saved_models
