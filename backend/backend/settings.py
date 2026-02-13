@@ -21,12 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ppuehh_@$g#h7j%u5rt*exi8445816x2d#t%^k5x7&44(qb)m#'
+SECRET_KEY = os.environ["SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ["DEBUG"].lower() == "true"
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",") if os.environ.get("ALLOWED_HOSTS") else []
+ALLOWED_HOSTS = [h.strip() for h in os.environ["ALLOWED_HOSTS"].split(",") if h.strip()]
 
 # Heavy ML (TensorFlow/Keras, Hugging Face Transformers). When False, sentiment
 # and LSTM predictions are skipped or no-op; set ENABLE_ML_FUNCTIONS=true in prod.
@@ -94,30 +94,18 @@ TEMPLATES = [
 WSGI_APPLICATION = 'backend.wsgi.application'
 
 
-# Database
+# Database – PostgreSQL only
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-# Use PostgreSQL when running in Docker (env vars set by docker-compose).
-if os.environ.get("USE_POSTGRES"):
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.environ.get("POSTGRES_DB", "stocksense"),
-            "USER": os.environ.get("POSTGRES_USER", "stocksense"),
-            "PASSWORD": os.environ.get("POSTGRES_PASSWORD", "stocksense"),
-            "HOST": os.environ.get("POSTGRES_HOST", "db"),
-            "PORT": os.environ.get("POSTGRES_PORT", "5432"),
-        }
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ["POSTGRES_DB"],
+        "USER": os.environ["POSTGRES_USER"],
+        "PASSWORD": os.environ["POSTGRES_PASSWORD"],
+        "HOST": os.environ["POSTGRES_HOST"],
+        "PORT": os.environ["POSTGRES_PORT"],
     }
-else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "mssql",
-            "NAME": "StockSense",
-            "HOST": "localhost",
-            "PORT": "",
-            "OPTIONS": {"driver": "ODBC Driver 17 for SQL Server"},
-        }
-    }
+}
 
 
 # Password validation

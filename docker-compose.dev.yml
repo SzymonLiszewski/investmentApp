@@ -1,0 +1,74 @@
+# Development override. Usage: docker compose -f docker-compose.dev.yml up
+# Or: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: stocksense
+      POSTGRES_USER: stocksense
+      POSTGRES_PASSWORD: stocksense
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stocksense -d stocksense"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    user: "root"  # so volume mount ./backend has no permission issues
+    environment:
+      SECRET_KEY: "dev-secret-key-not-for-production"
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: stocksense
+      POSTGRES_USER: stocksense
+      POSTGRES_PASSWORD: stocksense
+      ALLOWED_HOSTS: "localhost,127.0.0.1,backend"
+      ENABLE_ML_FUNCTIONS: "false"
+      DEBUG: "true"
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    command: sh -c "python manage.py migrate --noinput && python manage.py seed_polish_stocks && python manage.py seed_crypto && python manage.py seed_economic_data && python manage.py seed_polish_bonds && python manage.py seed_nasdaq_stocks && python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    environment:
+      VITE_PROXY_TARGET: "http://backend:8000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    command: npm run dev -- --host 0.0.0.0
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@stocksense.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data_dev:/var/lib/pgadmin
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data_dev:
+  pgadmin_data_dev:
