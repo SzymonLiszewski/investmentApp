@@ -1,0 +1,68 @@
+# Production. Usage: docker compose -f docker-compose.prod.yml up -d
+# Set POSTGRES_PASSWORD and SECRET_KEY via env file or environment.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-stocksense}
+      POSTGRES_USER: ${POSTGRES_USER:-stocksense}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-stocksense} -d ${POSTGRES_DB:-stocksense}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: ${POSTGRES_DB:-stocksense}
+      POSTGRES_USER: ${POSTGRES_USER:-stocksense}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,backend}
+      ENABLE_ML_FUNCTIONS: ${ENABLE_ML_FUNCTIONS:-false}
+      DEBUG: "false"
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY}
+    expose:
+      - "8000"
+    restart: unless-stopped
+    command: >
+      sh -c "python manage.py migrate --noinput
+      && python manage.py collectstatic --noinput --clear
+      && gunicorn backend.wsgi:application --bind 0.0.0.0:8000 --workers 2 --threads 2"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    environment:
+      VITE_PROXY_TARGET: "http://backend:8000"
+    expose:
+      - "5173"
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    restart: unless-stopped
+    depends_on:
+      - backend
+      - frontend
+
+volumes:
+  postgres_data_prod:

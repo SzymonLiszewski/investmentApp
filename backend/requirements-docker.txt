@@ -1,0 +1,23 @@
+# Slim requirements for Docker (no ML stack – use ENABLE_ML_FUNCTIONS=false).
+# For full features (sentiment, LSTM), use requirements.txt and set ENABLE_ML_FUNCTIONS=true.
+Django
+gunicorn
+django-cors-headers
+djangorestframework
+djangorestframework-simplejwt
+PyJWT
+python-decouple
+psycopg2-binary
+
+# Data & market
+yfinance
+pandas
+numpy
+ta
+feedparser
+newsdataapi
+forex-python
+
+# Analytics (linear regression, SARIMAX – no LSTM/transformers)
+scikit_learn
+statsmodels>=0.14.2
