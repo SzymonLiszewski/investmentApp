@@ -1,7 +1,13 @@
+from datetime import date, timedelta
+from typing import Optional
+
+import pandas as pd
 from rest_framework import serializers
+
 from base.models import Asset
 from base.serializers import AssetSerializer
-from portfolio.models import UserAsset
+from base.services import get_default_stock_fetcher, get_default_crypto_fetcher
+from portfolio.models import UserAsset, PortfolioSnapshot
 
 
 def get_or_create_asset(
@@ -80,6 +86,81 @@ def get_or_create_asset(
         })
 
     return asset
+
+
+def get_target_currency_for_user(user) -> str:
+    """
+    Return the currency to use for this user: from the most recent snapshot,
+    or default 'PLN' if they have no snapshots.
+    """
+    latest = (
+        PortfolioSnapshot.objects.filter(user=user)
+        .order_by('-date')
+        .values_list('currency', flat=True)
+        .first()
+    )
+    return latest or 'PLN'
+
+
+def _get_price_at_date(
+    price_series: Optional[pd.Series],
+    target_date: date,
+) -> Optional[float]:
+    """
+    Return the Close price on target_date, or the most recent earlier trading day,
+    or the nearest next trading day if no earlier data exists.
+    """
+    if price_series is None or price_series.empty:
+        return None
+    if target_date in price_series.index:
+        val = price_series[target_date]
+        if pd.notna(val):
+            return float(val)
+    # Prefer most recent earlier date
+    earlier = price_series[price_series.index <= target_date]
+    if not earlier.empty:
+        val = earlier.iloc[-1]
+        if pd.notna(val):
+            return float(val)
+    # Fallback: nearest next trading day
+    later = price_series[price_series.index > target_date]
+    if not later.empty:
+        val = later.iloc[0]
+        if pd.notna(val):
+            return float(val)
+    return None
+
+
+# Window (calendar days) for historical fetch: before and after target_date
+_PRICE_RESOLVE_DAYS_BACK = 7
+_PRICE_RESOLVE_DAYS_FORWARD = 2
+
+
+def resolve_price_for_date(
+    symbol: str,
+    asset_type: str,
+    target_date: date,
+    stock_fetcher=None,
+    crypto_fetcher=None,
+) -> Optional[float]:
+    """
+    Resolve missing transaction price using data fetchers: fetch closing price
+    for the given symbol on the given date. Fetches several days around the date;
+    if there is no quote on the exact day (e.g. weekend/holiday), uses the
+    previous or next available trading day.
+    """
+    if not symbol or asset_type not in ("stocks", "cryptocurrencies"):
+        return None
+    stock_fetcher = stock_fetcher or get_default_stock_fetcher()
+    crypto_fetcher = crypto_fetcher or get_default_crypto_fetcher()
+    start_date = target_date - timedelta(days=_PRICE_RESOLVE_DAYS_BACK)
+    end_date = target_date + timedelta(days=_PRICE_RESOLVE_DAYS_FORWARD)
+    if asset_type == "stocks":
+        prices = stock_fetcher.get_historical_prices([symbol], start_date, end_date)
+    else:
+        prices = crypto_fetcher.get_historical_prices([symbol], start_date, end_date)
+    series = prices.get(symbol) if prices else None
+    return _get_price_at_date(series, target_date)
 
 
 def update_user_asset(transaction):

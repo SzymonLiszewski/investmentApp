@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import models
 from django.contrib.auth.models import User
 from base.models import Asset
@@ -7,9 +9,6 @@ class UserAsset(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="ownedAssets")
     ownedAsset = models.ForeignKey(Asset, on_delete=models.CASCADE)
     quantity = models.FloatField(default=0)
-
-    class Meta:
-        db_table = 'api_userasset'
 
 
 class Transactions(models.Model):
@@ -29,24 +28,32 @@ class Transactions(models.Model):
     quantity = models.FloatField(default=0.0)
     price = models.FloatField(default=0.0)
     date = models.DateField(default='2024-01-01')
+    currency = models.CharField(
+        max_length=10,
+        blank=True,
+        null=True,
+        help_text='Currency of price when set (e.g. PLN). When null, price is in asset native currency.',
+    )
     external_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
-
-    class Meta:
-        db_table = 'api_transactions'
 
 
 class PortfolioSnapshot(models.Model):
-    """Daily snapshot of a user's total portfolio value."""
+    """Daily snapshot of a user's total portfolio value and cost basis."""
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='portfolio_snapshots',
     )
     date = models.DateField()
     currency = models.CharField(max_length=10, default='PLN')
     total_value = models.DecimalField(max_digits=15, decimal_places=2)
+    total_invested = models.DecimalField(
+        max_digits=15,
+        decimal_places=2,
+        default=Decimal('0'),
+        help_text='Cumulative net cash invested (purchases minus sales) up to this date.',
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'analytics_portfoliosnapshot'
         unique_together = ('user', 'date', 'currency')
         ordering = ['date']
         indexes = [

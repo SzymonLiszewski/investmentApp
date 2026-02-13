@@ -1,5 +1,6 @@
 // src/HomePage.jsx
 import React, { Fragment } from 'react';
+import './App.css';
 import NavBar from './components/navbar';
 import {Route, Routes} from 'react-router-dom';
 import Analysis from './pages/Analysis';

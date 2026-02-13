@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from unittest.mock import Mock, patch
 from decimal import Decimal
 from base.models import Asset
-from portfolio.models import UserAsset
+from portfolio.models import UserAsset, Transactions
 from portfolio.services.asset_manager import AssetManager
 from portfolio.services.calculators import StockCalculator
 
@@ -113,6 +113,77 @@ class TestAssetManager(TestCase):
         self.assertIsNotNone(googl_asset)
         self.assertEqual(googl_asset['current_value'], 500.00)
         self.assertEqual(googl_asset['percentage'], 25.00)
+
+    @patch('base.infrastructure.yfinance_fetchers.yf.Ticker')
+    def test_get_portfolio_composition_includes_cost_and_profit(self, mock_ticker):
+        """Composition includes average_purchase_price, total_cost, profit, profit_percentage when transactions exist."""
+        def mock_ticker_side_effect(symbol):
+            mock_instance = Mock()
+            if symbol == 'AAPL':
+                mock_instance.info = {'currentPrice': 150.00}
+            elif symbol == 'GOOGL':
+                mock_instance.info = {'currentPrice': 100.00}
+            return mock_instance
+        mock_ticker.side_effect = mock_ticker_side_effect
+
+        # BUY 10 AAPL @ 100, BUY 5 GOOGL @ 80
+        Transactions.objects.create(
+            owner=self.user, product=self.stock1,
+            transactionType='B', quantity=10, price=100.0, date=date(2025, 1, 1),
+        )
+        Transactions.objects.create(
+            owner=self.user, product=self.stock2,
+            transactionType='B', quantity=5, price=80.0, date=date(2025, 1, 2),
+        )
+
+        composition = self.manager.get_portfolio_composition(self.user)
+
+        aapl = next((a for a in composition['composition_by_asset'] if a['symbol'] == 'AAPL'), None)
+        self.assertIsNotNone(aapl)
+        self.assertEqual(aapl['average_purchase_price'], 100.0)
+        self.assertEqual(aapl['total_cost'], 1000.0)
+        self.assertEqual(aapl['current_value'], 1500.0)
+        self.assertEqual(aapl['profit'], 500.0)
+        self.assertEqual(aapl['profit_percentage'], 50.0)
+
+        googl = next((a for a in composition['composition_by_asset'] if a['symbol'] == 'GOOGL'), None)
+        self.assertIsNotNone(googl)
+        self.assertEqual(googl['average_purchase_price'], 80.0)
+        self.assertEqual(googl['total_cost'], 400.0)
+        self.assertEqual(googl['current_value'], 500.0)
+        self.assertEqual(googl['profit'], 100.0)
+        self.assertEqual(googl['profit_percentage'], 25.0)
+
+    @patch('base.infrastructure.yfinance_fetchers.yf.Ticker')
+    def test_get_portfolio_composition_cost_basis_after_sell(self, mock_ticker):
+        """After BUY 10 @ 100 and SELL 5, remaining 5 have cost basis 500 (avg 100)."""
+        def mock_ticker_side_effect(symbol):
+            mock_instance = Mock()
+            mock_instance.info = {'currentPrice': 120.00}
+            return mock_instance
+        mock_ticker.side_effect = mock_ticker_side_effect
+
+        Transactions.objects.create(
+            owner=self.user, product=self.stock1,
+            transactionType='B', quantity=10, price=100.0, date=date(2025, 1, 1),
+        )
+        Transactions.objects.create(
+            owner=self.user, product=self.stock1,
+            transactionType='S', quantity=5, price=110.0, date=date(2025, 1, 15),
+        )
+        # UserAsset should reflect current quantity (5)
+        self.user_asset1.quantity = 5
+        self.user_asset1.save()
+
+        composition = self.manager.get_portfolio_composition(self.user)
+        aapl = next((a for a in composition['composition_by_asset'] if a['symbol'] == 'AAPL'), None)
+        self.assertIsNotNone(aapl)
+        self.assertEqual(aapl['quantity'], 5.0)
+        self.assertEqual(aapl['average_purchase_price'], 100.0)
+        self.assertEqual(aapl['total_cost'], 500.0)  # 5 * 100
+        self.assertEqual(aapl['current_value'], 600.0)  # 5 * 120
+        self.assertEqual(aapl['profit'], 100.0)
+        self.assertEqual(aapl['profit_percentage'], 20.0)
 
     def test_get_portfolio_composition_empty_portfolio(self):
         """Test getting composition for user with no assets."""

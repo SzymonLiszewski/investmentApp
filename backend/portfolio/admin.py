@@ -9,7 +9,7 @@ class UserAssetAdmin(admin.ModelAdmin):
 
 @admin.register(Transactions)
 class TransactionsAdmin(admin.ModelAdmin):
-    list_display = ('owner', 'product', 'transactionType', 'quantity', 'price', 'date')
+    list_display = ('owner', 'product', 'transactionType', 'quantity', 'price', 'currency', 'date')
     list_filter = ('transactionType', 'date')
 
 

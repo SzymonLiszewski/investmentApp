@@ -75,3 +75,29 @@ class CryptoDataFetcher(ABC):
             'current_price': price,
             'currency': currency,
         }
+
+
+class FXDataFetcher(ABC):
+    """Abstract base class for fetching FX (exchange rate) data."""
+
+    @abstractmethod
+    def get_historical_fx_series(
+        self,
+        from_currency: str,
+        to_currency: str,
+        start_date: date,
+        end_date: date,
+    ) -> Optional[pd.Series]:
+        """
+        Return a Series of exchange rates so that amount_in_from * rate = amount_in_to.
+        Index: DatetimeIndex (dates). Used for converting time series to another currency.
+        """
+        pass
+
+    @abstractmethod
+    def get_current_rate(self, from_currency: str, to_currency: str) -> Optional[Decimal]:
+        """
+        Return current exchange rate so that amount_in_from * rate = amount_in_to.
+        Used for converting a single value (e.g. benchmark profit) to user currency.
+        """
+        pass

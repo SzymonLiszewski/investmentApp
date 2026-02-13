@@ -9,7 +9,7 @@ from decimal import Decimal
 import pandas as pd
 import yfinance as yf
 
-from base.services.market_data_fetcher import StockDataFetcher, CryptoDataFetcher
+from base.services.market_data_fetcher import StockDataFetcher, CryptoDataFetcher, FXDataFetcher
 
 logger = logging.getLogger(__name__)
 
@@ -275,3 +275,76 @@ class YfinanceCryptoDataFetcher(CryptoDataFetcher):
             if yf_sym in close.columns:
                 result[orig_sym] = close[yf_sym].dropna()
         return result
+
+
+class YfinanceFXDataFetcher(FXDataFetcher):
+    """Implementation of FXDataFetcher using yfinance (e.g. USDPLN=X)."""
+
+    def get_historical_fx_series(
+        self,
+        from_currency: str,
+        to_currency: str,
+        start_date: date,
+        end_date: date,
+    ) -> Optional[pd.Series]:
+        if from_currency == to_currency:
+            idx = pd.date_range(start=start_date, end=end_date, freq='D')
+            return pd.Series(1.0, index=pd.DatetimeIndex(idx))
+        # Try ticker from_to=X (gives "to per from")
+        ticker_symbol = f"{from_currency}{to_currency}=X"
+        try:
+            ticker = yf.Ticker(ticker_symbol)
+            hist = ticker.history(
+                start=start_date.isoformat(),
+                end=(end_date + timedelta(days=1)).isoformat(),
+                auto_adjust=False,
+            )
+            if hist is not None and not hist.empty and 'Close' in hist.columns:
+                close = hist['Close'].dropna()
+                if not close.empty:
+                    close.index = pd.to_datetime(close.index)
+                    if close.index.tz is not None:
+                        close.index = close.index.tz_localize(None)
+                    close.index = close.index.date
+                    close.index = pd.DatetimeIndex(close.index)
+                    return close.astype(float)
+        except Exception as e:
+            logger.debug("FX ticker %s failed: %s", ticker_symbol, e)
+        # Try inverse pair (e.g. USDPLN for PLN→USD)
+        ticker_symbol = f"{to_currency}{from_currency}=X"
+        try:
+            ticker = yf.Ticker(ticker_symbol)
+            hist = ticker.history(
+                start=start_date.isoformat(),
+                end=(end_date + timedelta(days=1)).isoformat(),
+                auto_adjust=False,
+            )
+            if hist is not None and not hist.empty and 'Close' in hist.columns:
+                close = hist['Close'].dropna()
+                if not close.empty:
+                    inv = (1.0 / close).astype(float)
+                    inv.index = pd.to_datetime(inv.index)
+                    if inv.index.tz is not None:
+                        inv.index = inv.index.tz_localize(None)
+                    inv.index = inv.index.date
+                    inv.index = pd.DatetimeIndex(inv.index)
+                    return inv
+        except Exception as e:
+            logger.warning("Failed to fetch historical FX %s→%s: %s", from_currency, to_currency, e)
+        return None
+
+    def get_current_rate(self, from_currency: str, to_currency: str) -> Optional[Decimal]:
+        if from_currency == to_currency:
+            return Decimal('1')
+        for ticker_symbol in (f"{from_currency}{to_currency}=X", f"{to_currency}{from_currency}=X"):
+            try:
+                ticker = yf.Ticker(ticker_symbol)
+                hist = ticker.history(period='2d')
+                if hist is not None and not hist.empty and 'Close' in hist.columns:
+                    rate = float(hist['Close'].iloc[-1])
+                    if ticker_symbol.startswith(to_currency):
+                        rate = 1.0 / rate
+                    return Decimal(str(rate))
+            except Exception as e:
+                logger.debug("FX rate %s: %s", ticker_symbol, e)
+        return None

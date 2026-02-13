@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { TextField, Button, Container, Typography, Box, MenuItem, Select, FormControl, InputLabel, Autocomplete } from '@mui/material';
+import { TextField, Button, Container, Typography, Box, MenuItem, Select, FormControl, InputLabel, Autocomplete, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import '../styles/AddStocks.css';
 import apiClient from '../../api/client';
@@ -15,6 +15,7 @@ const AddStocks = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState(null);
   
   // Bond-specific state
@@ -120,6 +121,7 @@ const AddStocks = () => {
   };
 
   const addAssetAndTransaction = async () => {
+    setSubmitting(true);
     try {
       // Prepare transaction data with asset information
       const transactionData = {
@@ -162,6 +164,8 @@ const AddStocks = () => {
       return data;
     } catch (error) {
       alert('Error: ' + error.message);
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -178,6 +182,35 @@ const AddStocks = () => {
           <Typography variant="h4" component="h1" gutterBottom>
             Add Assets
           </Typography>
+          {submitting && (
+            <Box
+              sx={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: 'rgba(255, 255, 255, 0.85)',
+                zIndex: 1300,
+                gap: 2,
+              }}
+              aria-live="polite"
+              role="status"
+              aria-busy="true"
+            >
+              <CircularProgress size={48} />
+              <Typography variant="body1" color="text.secondary">
+                Adding asset to your portfolio…
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Please wait, this may take a moment.
+              </Typography>
+            </Box>
+          )}
           <form onSubmit={handleSubmit} style={{ width: '100%' }}>
           <FormControl fullWidth margin="normal">
             <InputLabel>Asset Type</InputLabel>
@@ -558,6 +591,8 @@ const AddStocks = () => {
             fullWidth
             value={_price}
             onChange={(e) => setPrice(e.target.value)}
+            helperText="Leave empty to use the closing price for the selected date"
+            inputProps={{ step: '0.01', min: '0' }}
           />
           <TextField
             label="Date"
@@ -576,9 +611,10 @@ const AddStocks = () => {
             variant="contained"
             color="primary"
             fullWidth
+            disabled={submitting}
             style={{ marginTop: '16px' }}
           >
-            Add Assets
+            {submitting ? 'Adding…' : 'Add Assets'}
           </Button>
           </form>
         </Box>
