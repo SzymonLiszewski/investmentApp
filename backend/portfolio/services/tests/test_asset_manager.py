@@ -9,7 +9,7 @@ from decimal import Decimal
 from base.models import Asset
 from portfolio.models import UserAsset, Transactions
 from portfolio.services.asset_manager import AssetManager
-from portfolio.services.calculators import StockCalculator
+from portfolio.services.calculators import StockCalculator, BondCalculator
 
 
 class TestAssetManager(TestCase):
@@ -235,8 +235,13 @@ class TestAssetManager(TestCase):
         self.assertIsNotNone(calculator)
         self.assertIsInstance(calculator, StockCalculator)
 
-        # Test getting calculator for unsupported type
+        # Test getting bond calculator
         calculator = self.manager._get_calculator_for_asset_type('bonds')
+        self.assertIsNotNone(calculator)
+        self.assertIsInstance(calculator, BondCalculator)
+
+        # Test getting calculator for unsupported type
+        calculator = self.manager._get_calculator_for_asset_type('other')
         self.assertIsNone(calculator)
 
     def test_add_calculator(self):
@@ -260,31 +265,22 @@ class TestAssetManager(TestCase):
         calculator = self.manager.get_calculator('nonexistent')
         self.assertIsNone(calculator)
 
-    @patch('base.infrastructure.yfinance_fetchers.yf.Ticker')
+    @patch('portfolio.services.asset_manager.get_default_stock_fetcher')
     @patch('portfolio.services.currency_converter.yf.Ticker')
     def test_get_portfolio_composition_with_currency_conversion(
-        self, mock_fx_ticker_cls, mock_stock_ticker
+        self, mock_fx_ticker_cls, mock_stock_fetcher
     ):
         """Test portfolio composition with currency conversion to PLN."""
-        # Mock yfinance stock responses
-        def mock_ticker_side_effect(symbol):
-            mock_instance = Mock()
-            if symbol == 'AAPL':
-                mock_instance.info = {
-                    'currentPrice': 150.00,
-                    'currency': 'USD'
-                }
-            elif symbol == 'GOOGL':
-                mock_instance.info = {
-                    'currentPrice': 100.00,
-                    'currency': 'USD'
-                }
-            return mock_instance
-
-        mock_stock_ticker.side_effect = mock_ticker_side_effect
-
-        # Mock FX ticker (1 USD = 4 PLN)
         import pandas as pd
+        # Mock stock fetcher: AAPL=150 USD, GOOGL=100 USD
+        mock_fetcher = Mock()
+        mock_fetcher.get_current_price.side_effect = (
+            lambda s: Decimal('150') if s == 'AAPL' else Decimal('100')
+        )
+        mock_fetcher.get_currency.return_value = 'USD'
+        mock_stock_fetcher.return_value = mock_fetcher
+
+        # Mock FX: 1 USD = 4 PLN
         mock_fx = Mock()
         mock_fx.history.return_value = pd.DataFrame(
             {'Close': [4.0]},
@@ -292,13 +288,9 @@ class TestAssetManager(TestCase):
         )
         mock_fx_ticker_cls.return_value = mock_fx
 
-        # Create new manager to use mocked FX rates
         manager = AssetManager(default_currency='PLN')
-
-        # Test with PLN as target currency
         composition = manager.get_portfolio_composition(self.user, target_currency='PLN')
 
-        # Assert - values should be converted to PLN
         self.assertIsNotNone(composition)
         self.assertEqual(composition['currency'], 'PLN')
         # 10*150*4 + 5*100*4 = 6000 + 2000 = 8000 PLN
