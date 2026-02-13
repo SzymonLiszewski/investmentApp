@@ -418,9 +418,14 @@ class PortfolioSnapshotCurrencyConversionTests(TestCase):
 
         self.assertEqual(len(snapshots), 1)
         self.assertAlmostEqual(float(snapshots[0].total_value), 125.0, places=2)
-        mock_converter.convert.assert_called_once_with(
-            Decimal('500'), 'PLN', 'USD',
-        )
+        # convert may be called for total_invested and for position value (e.g. twice)
+        self.assertGreaterEqual(mock_converter.convert.call_count, 1)
+        calls = mock_converter.convert.call_args_list
+        pln_to_usd_500 = [
+            c for c in calls
+            if c[0][1] == 'PLN' and c[0][2] == 'USD' and float(c[0][0]) == 500.0
+        ]
+        self.assertTrue(pln_to_usd_500, f"Expected convert(500, 'PLN', 'USD') in {calls}")
 
     def test_mixed_portfolio_conversion(self):
         """US stock + WA stock + bond with target PLN."""

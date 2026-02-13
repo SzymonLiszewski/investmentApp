@@ -2,7 +2,7 @@
 Selectors - data retrieval layer from the database.
 Pure read-only functions, without business logic.
 """
-from .economic_data import (
+from base.selectors.economic_data import (
     get_latest_economic_data,
     get_economic_data_for_date,
     get_latest_wibor,

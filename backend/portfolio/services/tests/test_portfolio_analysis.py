@@ -167,16 +167,16 @@ class CalculateIndicatorsTests(TestCase):
         self.assertIsNone(alpha)
 
     def test_computes_indicators_with_sufficient_returns(self):
-        # Three days -> two returns
-        dates = [date(2025, 1, 1), date(2025, 1, 2), date(2025, 1, 3)]
-        port = _value_series(dates, [1000.0, 1010.0, 1005.0])   # +1%, -0.5%
-        bench = _value_series(dates, [100.0, 101.0, 102.0])     # +1%, ~+0.99%
+        # Four days -> three returns; two negative so downside std is defined
+        dates = [date(2025, 1, 1), date(2025, 1, 2), date(2025, 1, 3), date(2025, 1, 4)]
+        port = _value_series(dates, [1000.0, 1010.0, 1005.0, 1000.0])   # +1%, -0.5%, -0.5%
+        bench = _value_series(dates, [100.0, 101.0, 102.0, 103.0])     # +1%, ~+0.99%, ~+0.98%
         sharpe, sortino, alpha, _ = calculateIndicators(port, bench)
         self.assertIsNotNone(sharpe)
         self.assertIsInstance(sharpe, float)
         self.assertIsNotNone(alpha)
         self.assertIsInstance(alpha, float)
-        # Portfolio has negative return on day 2 so Sortino should be computed
+        # Portfolio has negative returns so Sortino should be computed (need 2+ for std)
         self.assertIsNotNone(sortino)
         self.assertIsInstance(sortino, float)
 
