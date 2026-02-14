@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from typing import Optional, Dict, Any
 from decimal import Decimal
 from datetime import date, datetime, timedelta
-from base.services.market_data_fetcher import StockDataFetcher, CryptoDataFetcher
+from base.infrastructure.interfaces.market_data_fetcher import StockDataFetcher, CryptoDataFetcher
 from .currency_converter import CurrencyConverter
 from base.selectors.economic_data import (
     get_latest_wibor,

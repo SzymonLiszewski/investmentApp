@@ -13,7 +13,7 @@ import yfinance as yf
 from decimal import Decimal
 
 if TYPE_CHECKING:
-    from base.services.market_data_fetcher import FXDataFetcher
+    from base.infrastructure.interfaces.market_data_fetcher import FXDataFetcher
 
 logger = logging.getLogger(__name__)
 

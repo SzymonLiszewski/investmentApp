@@ -16,7 +16,7 @@ from django.contrib.auth.models import User
 from portfolio.models import PortfolioSnapshot
 from portfolio.models import Transactions
 from .asset_manager import AssetManager
-from base.services.market_data_fetcher import CryptoDataFetcher, StockDataFetcher
+from base.infrastructure.interfaces.market_data_fetcher import CryptoDataFetcher, StockDataFetcher
 from base.services import get_default_stock_fetcher, get_default_crypto_fetcher
 
 logger = logging.getLogger(__name__)

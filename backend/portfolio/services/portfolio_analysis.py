@@ -17,7 +17,7 @@ import time
 from base.services import get_default_stock_fetcher
 
 if TYPE_CHECKING:
-    from base.services.market_data_fetcher import StockDataFetcher
+    from base.infrastructure.interfaces.market_data_fetcher import StockDataFetcher
 
 DEFAULT_BENCHMARK_TICKER = '^GSPC'
 ANNUALIZATION_DAYS = 252

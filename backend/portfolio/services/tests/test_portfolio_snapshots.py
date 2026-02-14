@@ -13,7 +13,7 @@ from base.models import Asset
 from portfolio.models import Transactions
 from portfolio.models import PortfolioSnapshot
 from portfolio.services.asset_manager import AssetManager
-from base.services.market_data_fetcher import StockDataFetcher, CryptoDataFetcher
+from base.infrastructure.interfaces.market_data_fetcher import StockDataFetcher, CryptoDataFetcher
 from portfolio.services.portfolio_snapshots import PortfolioSnapshotService
 
 

@@ -5,10 +5,11 @@ from datetime import date
 from decimal import Decimal
 from typing import Dict, List, Optional
 
+from base.infrastructure.interfaces.price_repository import AbstractPriceRepository
 from base.models import Asset, PriceHistory
 
 
-class PriceRepository:
+class PriceRepository(AbstractPriceRepository):
     """Handles persistence and retrieval of historical price data."""
 
     def save_prices(
