@@ -80,3 +80,37 @@ class EconomicData(models.Model):
     
     def __str__(self):
         return f"Economic Data for {self.date}: WIBOR 3M={self.wibor_3m}%, WIBOR 6M={self.wibor_6m}%, Inflation={self.inflation_cpi}%"
+
+
+class PriceHistory(models.Model):
+    """
+    Stores historical OHLCV price data for an asset (stock, crypto, etc.).
+    """
+    asset = models.ForeignKey(
+        Asset,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="price_history",
+    )
+    symbol = models.CharField(max_length=50, db_index=True)
+    date = models.DateField(db_index=True)
+    open = models.DecimalField(max_digits=18, decimal_places=4, null=True, blank=True)
+    high = models.DecimalField(max_digits=18, decimal_places=4, null=True, blank=True)
+    low = models.DecimalField(max_digits=18, decimal_places=4, null=True, blank=True)
+    close = models.DecimalField(max_digits=18, decimal_places=4)
+    volume = models.BigIntegerField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-date"]
+        verbose_name = "Price History"
+        verbose_name_plural = "Price History"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["symbol", "date"],
+                name="unique_symbol_date",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.symbol} @ {self.date}: {self.close}"
