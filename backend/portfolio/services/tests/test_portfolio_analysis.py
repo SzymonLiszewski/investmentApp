@@ -92,9 +92,9 @@ class GetBenchmarkSeriesTests(TestCase):
         self.assertIsInstance(result, pd.Series)
         self.assertEqual(len(result), 3)
         mock_fetcher.get_historical_prices.assert_called_once_with(
-            symbols=[DEFAULT_BENCHMARK_TICKER],
-            start_date=date(2025, 1, 1),
-            end_date=date(2025, 1, 3),
+            [DEFAULT_BENCHMARK_TICKER],
+            date(2025, 1, 1),
+            date(2025, 1, 3),
         )
 
     @patch('portfolio.services.portfolio_analysis.get_default_stock_fetcher')

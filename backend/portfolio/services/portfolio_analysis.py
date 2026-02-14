@@ -14,6 +14,7 @@ from typing import Iterable, Optional, Tuple, TYPE_CHECKING
 
 import time
 
+from base.infrastructure.db import PriceRepository
 from base.services import get_default_stock_fetcher
 
 if TYPE_CHECKING:
@@ -42,24 +43,24 @@ def get_benchmark_series(
     """
     Fetch benchmark (e.g. S&P 500) price series for the given date range.
 
-    Uses StockDataFetcher (default implementation if not provided). Returns a
-    pandas Series with DatetimeIndex and close prices, or None if fetch fails
-    or returns empty.
+    Uses PriceRepository (DB + fetcher fallback). Returns a pandas Series with
+    DatetimeIndex and close prices, or None if fetch fails or returns empty.
     """
     fetcher = stock_data_fetcher or get_default_stock_fetcher()
     start = _to_date(start_date)
     end = _to_date(end_date)
     try:
-        result = fetcher.get_historical_prices(symbols=[ticker], start_date=start, end_date=end)
+        repo = PriceRepository()
+        prices = repo.get_price_history(ticker, start, end, fetcher)
     except Exception:
         return None
-    if not result or ticker not in result:
+    if not prices:
         return None
-    series = result[ticker].dropna()
+    series = pd.Series({d: float(v) for d, v in prices.items()})
     if series.empty:
         return None
     series.index = pd.DatetimeIndex(series.index)
-    return series
+    return series.sort_index()
 
 
 def calculateProfit(portfolio, userID, passwd):

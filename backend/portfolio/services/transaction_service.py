@@ -4,6 +4,7 @@ from typing import Optional
 import pandas as pd
 from rest_framework import serializers
 
+from base.infrastructure.db import PriceRepository
 from base.models import Asset
 from base.serializers import AssetSerializer
 from base.services import get_default_stock_fetcher, get_default_crypto_fetcher
@@ -112,19 +113,27 @@ def _get_price_at_date(
     """
     if price_series is None or price_series.empty:
         return None
-    if target_date in price_series.index:
-        val = price_series[target_date]
+    # Use date-only comparison to avoid "Invalid comparison between dtype=datetime64 and date"
+    def index_as_date(i):
+        return i.date() if hasattr(i, "date") else i
+
+    index_dates = [index_as_date(i) for i in price_series.index]
+    if target_date in index_dates:
+        pos = index_dates.index(target_date)
+        val = price_series.iloc[pos]
         if pd.notna(val):
             return float(val)
     # Prefer most recent earlier date
-    earlier = price_series[price_series.index <= target_date]
-    if not earlier.empty:
+    earlier_mask = [d <= target_date for d in index_dates]
+    if any(earlier_mask):
+        earlier = price_series.loc[earlier_mask]
         val = earlier.iloc[-1]
         if pd.notna(val):
             return float(val)
     # Fallback: nearest next trading day
-    later = price_series[price_series.index > target_date]
-    if not later.empty:
+    later_mask = [d > target_date for d in index_dates]
+    if any(later_mask):
+        later = price_series.loc[later_mask]
         val = later.iloc[0]
         if pd.notna(val):
             return float(val)
@@ -144,10 +153,10 @@ def resolve_price_for_date(
     crypto_fetcher=None,
 ) -> Optional[float]:
     """
-    Resolve missing transaction price using data fetchers: fetch closing price
-    for the given symbol on the given date. Fetches several days around the date;
-    if there is no quote on the exact day (e.g. weekend/holiday), uses the
-    previous or next available trading day.
+    Resolve missing transaction price using PriceRepository (DB + fetcher):
+    closing price for the given symbol on the given date. Fetches several days
+    around the date; if there is no quote on the exact day (e.g. weekend/holiday),
+    uses the previous or next available trading day.
     """
     if not symbol or asset_type not in ("stocks", "cryptocurrencies"):
         return None
@@ -155,11 +164,15 @@ def resolve_price_for_date(
     crypto_fetcher = crypto_fetcher or get_default_crypto_fetcher()
     start_date = target_date - timedelta(days=_PRICE_RESOLVE_DAYS_BACK)
     end_date = target_date + timedelta(days=_PRICE_RESOLVE_DAYS_FORWARD)
+    repo = PriceRepository()
     if asset_type == "stocks":
-        prices = stock_fetcher.get_historical_prices([symbol], start_date, end_date)
+        prices = repo.get_price_history(symbol, start_date, end_date, stock_fetcher)
     else:
-        prices = crypto_fetcher.get_historical_prices([symbol], start_date, end_date)
-    series = prices.get(symbol) if prices else None
+        prices = repo.get_price_history(symbol, start_date, end_date, crypto_fetcher)
+    if not prices:
+        return None
+    series = pd.Series({d: float(v) for d, v in prices.items()})
+    series.index = pd.DatetimeIndex(series.index)
     return _get_price_at_date(series, target_date)
 
 
