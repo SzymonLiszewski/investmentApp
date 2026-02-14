@@ -4,12 +4,13 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import generics
 from django.contrib.auth.models import User
 from django.db.models import Q
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 
 from .models import Asset, EconomicData
 from .serializers import UserSerializer, AssetSerializer
 from .selectors.economic_data import get_latest_economic_data
+from base.infrastructure.db import PriceRepository
 from base.services import (
     get_default_stock_fetcher,
     get_default_news_fetchers,
@@ -73,10 +74,24 @@ def searchAssets(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def stockDataView(request, ticker):
-    start_date = request.GET.get('start')
-    end_date = request.GET.get('end')
+    end_date_str = request.GET.get('end')
+    start_date_str = request.GET.get('start')
+    end_date = date.today()
+    if end_date_str:
+        try:
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return Response({'error': 'Invalid end date. Use YYYY-MM-DD'}, status=400)
+    start_date = end_date - timedelta(days=365)
+    if start_date_str:
+        try:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return Response({'error': 'Invalid start date. Use YYYY-MM-DD'}, status=400)
+    repo = PriceRepository()
     fetcher = get_default_stock_fetcher()
-    data = fetcher.get_stock_price_history(ticker, start_date, end_date)
+    prices = repo.get_price_history(ticker, start_date, end_date, fetcher)
+    data = {d.isoformat(): float(v) for d, v in prices.items()}
     return Response(data)
 
 
