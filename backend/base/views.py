@@ -10,6 +10,7 @@ from decimal import Decimal
 from .models import Asset, EconomicData
 from .serializers import UserSerializer, AssetSerializer
 from .selectors.economic_data import get_latest_economic_data
+from .services.stock_data_cache import get_stock_data_cached
 from base.infrastructure.db import PriceRepository
 from base.services import (
     get_default_stock_fetcher,
@@ -99,7 +100,7 @@ def stockDataView(request, ticker):
 @permission_classes([AllowAny])
 def basicInfoView(request, ticker):
     fetcher = get_default_stock_fetcher()
-    data = fetcher.get_basic_stock_info(ticker)
+    data = get_stock_data_cached(ticker, "basic_info", fetcher)
     return Response(data)
 
 
@@ -107,7 +108,7 @@ def basicInfoView(request, ticker):
 @permission_classes([AllowAny])
 def fundamentalAnalysisView(request, ticker):
     fetcher = get_default_stock_fetcher()
-    data = fetcher.get_fundamental_analysis(ticker)
+    data = get_stock_data_cached(ticker, "fundamental_analysis", fetcher)
     return Response(data)
 
 
@@ -115,7 +116,7 @@ def fundamentalAnalysisView(request, ticker):
 @permission_classes([AllowAny])
 def technicalAnalysisView(request, ticker):
     fetcher = get_default_stock_fetcher()
-    data = fetcher.get_technical_indicators(ticker)
+    data = get_stock_data_cached(ticker, "technical_indicators", fetcher)
     return Response(data)
 
 

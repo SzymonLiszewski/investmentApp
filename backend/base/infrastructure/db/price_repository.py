@@ -2,7 +2,7 @@
 Repository for persisting and querying PriceHistory records.
 """
 import logging
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Dict, List, Optional, Tuple, Union
 
@@ -13,13 +13,69 @@ from base.infrastructure.interfaces.market_data_fetcher import (
     CryptoDataFetcher,
 )
 from base.infrastructure.interfaces.price_repository import AbstractPriceRepository
-from base.models import Asset, PriceHistory
+from base.models import Asset, CurrentPrice, PriceHistory
 
 logger = logging.getLogger(__name__)
 
+# How long a current price from DB is considered fresh (then we refetch from API).
+CURRENT_PRICE_MAX_AGE = timedelta(minutes=15)
+
 
 class PriceRepository(AbstractPriceRepository):
-    """Handles persistence and retrieval of historical price data."""
+    """Handles persistence and retrieval of historical and current price data."""
+
+    def get_current_price(
+        self,
+        symbol: str,
+        fetcher: Union[StockDataFetcher, CryptoDataFetcher],
+        asset: Optional[Asset] = None,
+    ) -> Optional[Decimal]:
+        """
+        Return the current price for the symbol. Uses CurrentPrice from DB if present
+        and not older than CURRENT_PRICE_MAX_AGE, otherwise fetches from the fetcher,
+        saves to DB and returns.
+        """
+        try:
+            current = CurrentPrice.objects.filter(symbol=symbol).first()
+            if current is not None:
+                now = datetime.now(timezone.utc)
+                updated = current.updated_at
+                if updated.tzinfo is None:
+                    updated = updated.replace(tzinfo=timezone.utc)
+                if now - updated <= CURRENT_PRICE_MAX_AGE:
+                    return current.price
+        except Exception:
+            pass
+
+        logger.info("Fetching current price from external API: symbol=%s", symbol)
+        try:
+            price = fetcher.get_current_price(symbol)
+        except Exception as e:
+            logger.warning("Failed to fetch current price for %s: %s", symbol, e)
+            return None
+
+        if price is None:
+            return None
+
+        currency = "USD"
+        try:
+            currency = fetcher.get_currency(symbol) or "USD"
+        except Exception:
+            pass
+
+        try:
+            CurrentPrice.objects.update_or_create(
+                symbol=symbol,
+                defaults={
+                    "price": price,
+                    "currency": currency,
+                    "asset": asset,
+                },
+            )
+        except Exception as e:
+            logger.warning("Failed to save current price for %s: %s", symbol, e)
+
+        return price
 
     def get_price_history(
         self,

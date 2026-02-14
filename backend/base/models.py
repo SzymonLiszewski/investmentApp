@@ -114,3 +114,59 @@ class PriceHistory(models.Model):
 
     def __str__(self):
         return f"{self.symbol} @ {self.date}: {self.close}"
+
+
+class CurrentPrice(models.Model):
+    """
+    Stores the latest (current) price for a symbol. One record per symbol;
+    update when fetching fresh price from API.
+    """
+    asset = models.ForeignKey(
+        Asset,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="current_prices",
+    )
+    symbol = models.CharField(max_length=50, unique=True, db_index=True)
+    price = models.DecimalField(max_digits=18, decimal_places=4)
+    currency = models.CharField(max_length=10, default="USD")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["symbol"]
+        verbose_name = "Current Price"
+        verbose_name_plural = "Current Prices"
+
+    def __str__(self):
+        return f"{self.symbol}: {self.price} {self.currency}"
+
+
+class StockDataCache(models.Model):
+    """
+    Cache for stock data from fetcher (basic info, fundamental analysis, technical indicators).
+    One record per (symbol, data_type). Data stored as JSON; refetched when older than max age.
+    """
+    class DataType(models.TextChoices):
+        BASIC_INFO = "basic_info", "Basic Info"
+        FUNDAMENTAL_ANALYSIS = "fundamental_analysis", "Fundamental Analysis"
+        TECHNICAL_INDICATORS = "technical_indicators", "Technical Indicators"
+
+    symbol = models.CharField(max_length=50, db_index=True)
+    data_type = models.CharField(max_length=30, choices=DataType.choices, db_index=True)
+    data = models.JSONField(default=dict)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["symbol", "data_type"]
+        verbose_name = "Stock Data Cache"
+        verbose_name_plural = "Stock Data Cache"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["symbol", "data_type"],
+                name="unique_stock_data_cache_symbol_type",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.symbol} ({self.data_type})"
