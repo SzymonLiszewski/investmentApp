@@ -9,7 +9,7 @@ import pandas as pd
 from django.test import TestCase
 from django.contrib.auth.models import User
 
-from base.models import Asset
+from base.models import Asset, PriceHistory
 from portfolio.models import Transactions
 from portfolio.models import PortfolioSnapshot
 from portfolio.services.asset_manager import AssetManager
@@ -270,7 +270,9 @@ class PortfolioSnapshotServiceTests(TestCase):
             self.user, date(2026, 1, 1), date(2026, 1, 1), currency="USD",
         )
 
-        # Change price and rebuild
+        # Change price and rebuild. Clear cached prices so repository refetches
+        # and uses the new mock value (otherwise DB would still have 150).
+        PriceHistory.objects.filter(symbol="AAPL", date=date(2026, 1, 1)).delete()
         self.mock_stock_fetcher.get_historical_prices.return_value = {
             "AAPL": _make_price_series([date(2026, 1, 1)], [200.0]),
         }
