@@ -1,13 +1,21 @@
-import yfinance as yf
+from datetime import date, timedelta
+
 import pandas as pd
 import ta
 
+from .predictions import _get_historical_close_series
+
+
 def get_technical_indicators(ticker):
-    # downloading data
-    stock = yf.Ticker(ticker)
-    data = stock.history(period="1y")
-    
-    # check if downloaded
+    # fetch historical data via PriceRepository (same as predictions)
+    end_date = date.today()
+    start_date = end_date - timedelta(days=365)
+    close_series = _get_historical_close_series(
+        ticker, start_date.isoformat(), end_date.isoformat()
+    )
+    data = close_series.to_frame("Close")
+
+    # check if we have data
     if data.empty:
         return {"error": "Brak danych dla podanego tickeru"}
 

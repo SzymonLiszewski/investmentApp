@@ -1,20 +1,37 @@
 import os
 import pickle
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 import numpy as np
 import pandas as pd
-import yfinance as yf
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import MinMaxScaler
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 from django.conf import settings
 
+from base.infrastructure.db import PriceRepository
+from base.services import get_default_stock_fetcher
+
+
+def _get_historical_close_series(symbol: str, start_date: str, end_date: str) -> pd.Series:
+    """Fetch historical close prices from PriceRepository and return as pandas Series."""
+    start = datetime.strptime(start_date, "%Y-%m-%d").date()
+    end = datetime.strptime(end_date, "%Y-%m-%d").date()
+    repo = PriceRepository()
+    fetcher = get_default_stock_fetcher()
+    prices = repo.get_price_history(symbol, start, end, fetcher)
+    if not prices:
+        return pd.Series(dtype=float)
+    sorted_dates = sorted(prices.keys())
+    return pd.Series(
+        {d: float(prices[d]) for d in sorted_dates},
+        index=pd.DatetimeIndex(sorted_dates),
+    ).sort_index()
+
 
 def linear_regression_predict(ticker, start_date, end_date, predicted_days=30):
-    data = yf.download(ticker, start=start_date, end=end_date)
-    data = data['Close']
+    data = _get_historical_close_series(ticker, start_date, end_date)
 
     #* standarization
     scaler = MinMaxScaler(feature_range=(0, 1))
@@ -58,8 +75,7 @@ def load_lstm_model(ticker, start_date, end_date, predicted_days=30):
         )
     from tensorflow import keras
 
-    data = yf.download(ticker, start=start_date, end=end_date)
-    close_prices = data['Close']
+    close_prices = _get_historical_close_series(ticker, start_date, end_date)
 
     # __file__ is analytics/services/predictions.py -> parent = analytics
     _analytics_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -91,8 +107,7 @@ def load_lstm_model(ticker, start_date, end_date, predicted_days=30):
     return predicted_df
 
 def sarima(ticker, start_date, end_date, predicted_days=30):
-    data = yf.download(ticker, start=start_date, end=end_date)
-    close_prices = data['Close']
+    close_prices = _get_historical_close_series(ticker, start_date, end_date)
 
     #* Preparing SARIMA model
     model = SARIMAX(close_prices, order=(1, 1, 1), seasonal_order=(1, 1, 1, 12))
