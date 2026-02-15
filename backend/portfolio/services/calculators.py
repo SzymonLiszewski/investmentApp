@@ -5,7 +5,8 @@ from abc import ABC, abstractmethod
 from typing import Optional, Dict, Any
 from decimal import Decimal
 from datetime import date, datetime, timedelta
-from base.services.market_data_fetcher import StockDataFetcher, CryptoDataFetcher
+from base.infrastructure.interfaces.market_data_fetcher import StockDataFetcher, CryptoDataFetcher
+from base.infrastructure.db import PriceRepository
 from .currency_converter import CurrencyConverter
 from base.selectors.economic_data import (
     get_latest_wibor,
@@ -79,8 +80,9 @@ class StockCalculator(AssetCalculator):
             if not isinstance(quantity, Decimal):
                 quantity = Decimal(str(quantity))
 
-            # Get current price from data fetcher
-            current_price = self.data_fetcher.get_current_price(symbol)
+            # Get current price from repository (DB or fetcher)
+            repo = PriceRepository()
+            current_price = repo.get_current_price(symbol, self.data_fetcher)
 
             if current_price is None:
                 return None
@@ -173,7 +175,8 @@ class CryptoCalculator(AssetCalculator):
             if not isinstance(quantity, Decimal):
                 quantity = Decimal(str(quantity))
 
-            current_price = self.data_fetcher.get_current_price(symbol)
+            repo = PriceRepository()
+            current_price = repo.get_current_price(symbol, self.data_fetcher)
 
             if current_price is None:
                 return None

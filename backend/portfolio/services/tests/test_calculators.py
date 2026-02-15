@@ -7,7 +7,7 @@ from decimal import Decimal
 from datetime import date
 
 from portfolio.services.calculators import StockCalculator, BondCalculator, CryptoCalculator
-from base.services.market_data_fetcher import StockDataFetcher, CryptoDataFetcher
+from base.infrastructure.interfaces.market_data_fetcher import StockDataFetcher, CryptoDataFetcher
 from portfolio.services.currency_converter import CurrencyConverter
 
 

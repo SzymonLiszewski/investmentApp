@@ -33,6 +33,7 @@ services:
       ALLOWED_HOSTS: "localhost,127.0.0.1,backend"
       ENABLE_ML_FUNCTIONS: "false"
       DEBUG: "true"
+      USE_MOCK_DATA_FETCHER: "true"
     volumes:
       - ../backend:/app
     ports:

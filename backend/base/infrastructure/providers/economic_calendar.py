@@ -7,7 +7,7 @@ from typing import List
 
 from decouple import config
 
-from base.services.economic_calendar import EconomicCalendarFetcher
+from base.infrastructure.interfaces.economic_calendar import EconomicCalendarFetcher
 
 _ALPHAVANTAGE_API_KEY = config('ALPHAVANTAGE_API_KEY', default="default_api_key")
 

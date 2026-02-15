@@ -59,7 +59,7 @@ class TestAssetManager(TestCase):
         self.assertIn('stocks', self.manager.calculators)
         self.assertIsInstance(self.manager.calculators['stocks'], StockCalculator)
 
-    @patch('base.infrastructure.yfinance_fetchers.yf.Ticker')
+    @patch('base.infrastructure.providers.yfinance_fetchers.yf.Ticker')
     def test_get_portfolio_composition_success(self, mock_ticker):
         """Test getting portfolio composition successfully."""
         # Mock yfinance responses
@@ -114,7 +114,7 @@ class TestAssetManager(TestCase):
         self.assertEqual(googl_asset['current_value'], 500.00)
         self.assertEqual(googl_asset['percentage'], 25.00)
 
-    @patch('base.infrastructure.yfinance_fetchers.yf.Ticker')
+    @patch('base.infrastructure.providers.yfinance_fetchers.yf.Ticker')
     def test_get_portfolio_composition_includes_cost_and_profit(self, mock_ticker):
         """Composition includes average_purchase_price, total_cost, profit, profit_percentage when transactions exist."""
         def mock_ticker_side_effect(symbol):
@@ -154,7 +154,7 @@ class TestAssetManager(TestCase):
         self.assertEqual(googl['profit'], 100.0)
         self.assertEqual(googl['profit_percentage'], 25.0)
 
-    @patch('base.infrastructure.yfinance_fetchers.yf.Ticker')
+    @patch('base.infrastructure.providers.yfinance_fetchers.yf.Ticker')
     def test_get_portfolio_composition_cost_basis_after_sell(self, mock_ticker):
         """After BUY 10 @ 100 and SELL 5, remaining 5 have cost basis 500 (avg 100)."""
         def mock_ticker_side_effect(symbol):
@@ -204,7 +204,7 @@ class TestAssetManager(TestCase):
         self.assertEqual(len(composition['composition_by_type']), 0)
         self.assertEqual(len(composition['composition_by_asset']), 0)
 
-    @patch('base.infrastructure.yfinance_fetchers.yf.Ticker')
+    @patch('base.infrastructure.providers.yfinance_fetchers.yf.Ticker')
     def test_get_portfolio_composition_skips_unavailable_prices(self, mock_ticker):
         """Test that assets with unavailable prices are skipped."""
         # Mock yfinance to return price for AAPL but not GOOGL
@@ -296,7 +296,7 @@ class TestAssetManager(TestCase):
         # 10*150*4 + 5*100*4 = 6000 + 2000 = 8000 PLN
         self.assertEqual(composition['total_value'], 8000.00)
 
-    @patch('base.infrastructure.yfinance_fetchers.yf.Ticker')
+    @patch('base.infrastructure.providers.yfinance_fetchers.yf.Ticker')
     def test_get_portfolio_composition_uses_default_currency(self, mock_ticker):
         """Test that portfolio composition uses default currency when not specified."""
         # Mock yfinance responses

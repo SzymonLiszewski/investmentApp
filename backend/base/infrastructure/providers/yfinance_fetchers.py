@@ -9,7 +9,7 @@ from decimal import Decimal
 import pandas as pd
 import yfinance as yf
 
-from base.services.market_data_fetcher import StockDataFetcher, CryptoDataFetcher, FXDataFetcher
+from base.infrastructure.interfaces.market_data_fetcher import StockDataFetcher, CryptoDataFetcher, FXDataFetcher
 
 logger = logging.getLogger(__name__)
 

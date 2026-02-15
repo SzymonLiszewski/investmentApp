@@ -2,8 +2,8 @@
 Service for building and managing daily portfolio value snapshots.
 
 Snapshots are calculated by reconstructing positions from transactions,
-fetching historical prices via ``StockDataFetcher`` / ``CryptoDataFetcher``,
-and valuing the positions via ``AssetManager.value_positions``.
+fetching historical prices via ``PriceRepository`` (which uses data fetchers
+internally and persists to DB), and valuing the positions via ``AssetManager.value_positions``.
 """
 import logging
 from datetime import date, timedelta
@@ -16,10 +16,20 @@ from django.contrib.auth.models import User
 from portfolio.models import PortfolioSnapshot
 from portfolio.models import Transactions
 from .asset_manager import AssetManager
-from base.services.market_data_fetcher import CryptoDataFetcher, StockDataFetcher
+from base.infrastructure.interfaces.market_data_fetcher import CryptoDataFetcher, StockDataFetcher
+from base.infrastructure.db import PriceRepository
 from base.services import get_default_stock_fetcher, get_default_crypto_fetcher
 
 logger = logging.getLogger(__name__)
+
+
+def _price_dict_to_series(prices: Dict[date, Decimal]) -> pd.Series:
+    """Convert Dict[date, Decimal] from PriceRepository to pd.Series for _get_price_at_date."""
+    if not prices:
+        return pd.Series(dtype=float)
+    s = pd.Series({d: float(v) for d, v in prices.items()})
+    s.index = pd.DatetimeIndex(s.index)
+    return s.sort_index()
 
 
 class PortfolioSnapshotService:
@@ -31,11 +41,13 @@ class PortfolioSnapshotService:
         stock_data_fetcher: Optional[StockDataFetcher] = None,
         crypto_data_fetcher: Optional[CryptoDataFetcher] = None,
         asset_manager: Optional[AssetManager] = None,
+        price_repository: Optional[PriceRepository] = None,
     ):
         self.currency = currency
         self.stock_data_fetcher = stock_data_fetcher or get_default_stock_fetcher()
         self.crypto_data_fetcher = crypto_data_fetcher or get_default_crypto_fetcher()
         self.asset_manager = asset_manager or AssetManager(default_currency=currency)
+        self.price_repository = price_repository if price_repository is not None else PriceRepository()
 
     # ------------------------------------------------------------------
     # Public API
@@ -149,27 +161,23 @@ class PortfolioSnapshotService:
         end_date: date,
     ) -> Dict[str, pd.Series]:
         """
-        Fetch historical prices for stocks and crypto separately using
-        the dedicated data fetchers, then merge results into a single dict.
-
-        Each fetcher receives symbols in their native format:
-        - ``StockDataFetcher``: ``['AAPL', 'MSFT.WA']``
-        - ``CryptoDataFetcher``: ``['BTC', 'ETH']`` (DB format;
-          the implementation handles provider-specific mapping)
+        Fetch historical prices via PriceRepository (DB + fetcher fallback).
+        Returns a dict symbol -> pd.Series (date index, close prices) for use with _get_price_at_date.
         """
         result: Dict[str, pd.Series] = {}
+        repo = self.price_repository
 
-        if stock_symbols:
-            stock_prices = self.stock_data_fetcher.get_historical_prices(
-                stock_symbols, start_date, end_date,
+        for symbol in stock_symbols:
+            prices = repo.get_price_history(
+                symbol, start_date, end_date, self.stock_data_fetcher,
             )
-            result.update(stock_prices)
+            result[symbol] = _price_dict_to_series(prices)
 
-        if crypto_symbols:
-            crypto_prices = self.crypto_data_fetcher.get_historical_prices(
-                crypto_symbols, start_date, end_date,
+        for symbol in crypto_symbols:
+            prices = repo.get_price_history(
+                symbol, start_date, end_date, self.crypto_data_fetcher,
             )
-            result.update(crypto_prices)
+            result[symbol] = _price_dict_to_series(prices)
 
         return result
 
@@ -230,13 +238,20 @@ class PortfolioSnapshotService:
         if price_series is None or price_series.empty:
             return None
 
-        if target_date in price_series.index:
-            val = price_series[target_date]
+        # Use date-only comparison to avoid "Invalid comparison between dtype=datetime64 and date"
+        def index_as_date(i):
+            return i.date() if hasattr(i, "date") else i
+
+        index_dates = [index_as_date(i) for i in price_series.index]
+        if target_date in index_dates:
+            pos = index_dates.index(target_date)
+            val = price_series.iloc[pos]
             if pd.notna(val):
                 return float(val)
 
-        earlier = price_series[price_series.index <= target_date]
-        if earlier.empty:
+        earlier_mask = [d <= target_date for d in index_dates]
+        if not any(earlier_mask):
             return None
+        earlier = price_series.loc[earlier_mask]
         val = earlier.iloc[-1]
         return float(val) if pd.notna(val) else None

@@ -32,6 +32,9 @@ ALLOWED_HOSTS = [h.strip() for h in os.environ["ALLOWED_HOSTS"].split(",") if h.
 # and LSTM predictions are skipped or no-op; set ENABLE_ML_FUNCTIONS=true in prod.
 ENABLE_ML_FUNCTIONS = os.environ.get('ENABLE_ML_FUNCTIONS', 'false').lower() == 'true'
 
+# Use mock stock/crypto data fetchers (no external API). For local dev and tests.
+USE_MOCK_DATA_FETCHER = os.environ.get('USE_MOCK_DATA_FETCHER', 'false').lower() == 'true'
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
        'rest_framework_simplejwt.authentication.JWTAuthentication',

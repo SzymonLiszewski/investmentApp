@@ -6,7 +6,7 @@ from decouple import config
 from newsdataapi import NewsDataApiClient
 from typing import Dict, List
 
-from base.services.news_fetcher import NewsFetcher
+from base.infrastructure.interfaces.news_fetcher import NewsFetcher
 
 _NEWSDATA_API_KEY = config('NEWSDATA_API_KEY', default="default_api_key")
 
