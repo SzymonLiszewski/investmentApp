@@ -1,0 +1,69 @@
+# Demo – pre-built images from GHCR, no .env or API keys required for stock/crypto/FX (mock data).
+# News and economic calendar still call external APIs when used; for full demo without keys they may return errors unless mock fetchers are added for those too.
+# Usage (from repo root): docker compose -f docker/docker-compose.demo.yml --project-directory . up -d
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: stocksense
+      POSTGRES_USER: stocksense
+      POSTGRES_PASSWORD: stocksense
+    volumes:
+      - postgres_data_demo:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stocksense -d stocksense"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    image: ghcr.io/szymonliszewski/investmentapp-backend:latest
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: stocksense
+      POSTGRES_USER: stocksense
+      POSTGRES_PASSWORD: stocksense
+      ALLOWED_HOSTS: "localhost,127.0.0.1,backend"
+      ENABLE_ML_FUNCTIONS: "false"
+      DEBUG: "true"
+      SECRET_KEY: "demo-secret-key-not-for-production"
+      USE_MOCK_DATA_FETCHER: "true"
+    expose:
+      - "8000"
+    restart: unless-stopped
+    command: >
+      sh -c "python manage.py migrate --noinput
+      && python manage.py seed_polish_stocks
+      && python manage.py seed_crypto
+      && python manage.py seed_economic_data
+      && python manage.py seed_polish_bonds
+      && python manage.py seed_nasdaq_stocks
+      && python manage.py collectstatic --noinput --clear
+      && gunicorn backend.wsgi:application --bind 0.0.0.0:8000 --workers 2 --threads 2"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    image: ghcr.io/szymonliszewski/investmentapp-frontend:latest
+    environment:
+      VITE_PROXY_TARGET: "http://backend:8000"
+    expose:
+      - "5173"
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+  nginx:
+    image: ghcr.io/szymonliszewski/investmentapp-nginx:latest
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    depends_on:
+      - backend
+      - frontend
+
+volumes:
+  postgres_data_demo:

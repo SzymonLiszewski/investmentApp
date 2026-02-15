@@ -1,6 +1,6 @@
 # Production – build images from source (no registry).
 # Usage (from repo root): docker compose -f docker/docker-compose.prod.build.yml --project-directory . up -d --build
-# Set POSTGRES_PASSWORD and SECRET_KEY via env file or environment.
+# Set POSTGRES_PASSWORD and SECRET_KEY in .env. For prices, news and economic calendar, set ALPHAVANTAGE_API_KEY and NEWSDATA_API_KEY (see .env.example).
 services:
   db:
     image: postgres:16-alpine

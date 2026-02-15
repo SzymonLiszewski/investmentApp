@@ -1,4 +1,5 @@
-# Development override.
+# Development override. Uses USE_MOCK_DATA_FETCHER=true for stock/crypto/FX.
+# For prices, news and economic calendar, set ALPHAVANTAGE_API_KEY and NEWSDATA_API_KEY in .env if needed (see .env.example).
 # Usage (from repo root): docker compose -f docker/docker-compose.yml -f docker/docker-compose.dev.yml --project-directory . up -d
 # Paths are relative to project directory (repo root); --project-directory . is required on Windows.
 services:
