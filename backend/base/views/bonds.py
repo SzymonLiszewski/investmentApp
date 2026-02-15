@@ -1,157 +1,13 @@
-from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework import generics
-from django.contrib.auth.models import User
-from django.db.models import Q
-from datetime import date, datetime, timedelta
+from datetime import datetime
 from decimal import Decimal
 
-from .models import Asset, EconomicData
-from .serializers import UserSerializer, AssetSerializer
-from .selectors.economic_data import get_latest_economic_data
-from .services.stock_data_cache import get_stock_data_cached
-from base.infrastructure.db import PriceRepository
-from base.services import (
-    get_default_stock_fetcher,
-    get_default_news_fetchers,
-    get_default_economic_calendar_fetcher,
-)
+from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 
+from ..models import Asset, EconomicData
+from ..selectors.economic_data import get_latest_economic_data
 
-# ---- Auth views ----
-
-class CreateUserView(generics.CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = [AllowAny]
-
-
-# ---- Asset views ----
-
-class AssetCreate(generics.ListCreateAPIView):
-    queryset = Asset.objects.all()
-    serializer_class = AssetSerializer
-    permission_classes = [AllowAny]
-
-    def get_queryset(self):
-        queryset = Asset.objects.all()
-        symbol = self.request.query_params.get('symbol', None)
-        name = self.request.query_params.get('name', None)
-        asset_type = self.request.query_params.get('asset_type', None)
-        if symbol:
-            queryset = queryset.filter(symbol=symbol)
-        if name:
-            queryset = queryset.filter(name=name)
-        if asset_type:
-            queryset = queryset.filter(asset_type=asset_type)
-        return queryset
-
-    def perform_create(self, serializer):
-        return super().perform_create(serializer)
-
-
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def searchAssets(request):
-    """Search for assets by symbol or name (partial match, case-insensitive)."""
-    query = request.query_params.get('q', '').strip()
-    asset_type = request.query_params.get('asset_type', None)
-    limit = min(int(request.query_params.get('limit', 20)), 50)
-    if len(query) < 2:
-        return Response({'error': 'Search query must be at least 2 characters long'}, status=400)
-    queryset = Asset.objects.filter(
-        Q(symbol__icontains=query) | Q(name__icontains=query)
-    )
-    if asset_type:
-        queryset = queryset.filter(asset_type=asset_type)
-    queryset = queryset.order_by('symbol', 'name')[:limit]
-    serializer = AssetSerializer(queryset, many=True)
-    return Response(serializer.data)
-
-
-# ---- Market data views ----
-
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def stockDataView(request, ticker):
-    end_date_str = request.GET.get('end')
-    start_date_str = request.GET.get('start')
-    end_date = date.today()
-    if end_date_str:
-        try:
-            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
-        except ValueError:
-            return Response({'error': 'Invalid end date. Use YYYY-MM-DD'}, status=400)
-    start_date = end_date - timedelta(days=365)
-    if start_date_str:
-        try:
-            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-        except ValueError:
-            return Response({'error': 'Invalid start date. Use YYYY-MM-DD'}, status=400)
-    repo = PriceRepository()
-    fetcher = get_default_stock_fetcher()
-    prices = repo.get_price_history(ticker, start_date, end_date, fetcher)
-    data = {d.isoformat(): float(v) for d, v in prices.items()}
-    return Response(data)
-
-
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def basicInfoView(request, ticker):
-    fetcher = get_default_stock_fetcher()
-    data = get_stock_data_cached(ticker, "basic_info", fetcher)
-    return Response(data)
-
-
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def fundamentalAnalysisView(request, ticker):
-    fetcher = get_default_stock_fetcher()
-    data = get_stock_data_cached(ticker, "fundamental_analysis", fetcher)
-    return Response(data)
-
-
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def technicalAnalysisView(request, ticker):
-    fetcher = get_default_stock_fetcher()
-    data = get_stock_data_cached(ticker, "technical_indicators", fetcher)
-    return Response(data)
-
-
-# ---- Calendar views ----
-
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def CalendarEarningsView(request):
-    fetcher = get_default_economic_calendar_fetcher()
-    data = fetcher.get_earnings()
-    return Response(data)
-
-
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def CalendarIPOView(request):
-    fetcher = get_default_economic_calendar_fetcher()
-    data = fetcher.get_ipo()
-    return Response(data)
-
-
-# ---- News (raw, no sentiment) ----
-
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def getNews(request):
-    ticker = request.GET.get('ticker')
-    fetchers = get_default_news_fetchers()
-    news = []
-    for fetcher in fetchers:
-        news.extend(fetcher.get_news(ticker, count=5))
-    return Response({"news": news})
-
-
-# ---- Bond data views ----
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -278,14 +134,3 @@ def getEconomicDataHistory(request):
             'inflation_cpi': float(entry.inflation_cpi),
         })
     return Response(history)
-
-
-@api_view(['GET', 'POST'])
-def getRoutes(request):
-    routes = [
-        {'Endpoint': '/overview', 'method': 'GET', 'body': None, 'description': 'Returns overview of stock'},
-        {'Endpoint': '/overview/ticker', 'method': 'GET', 'body': None, 'description': 'Returns overview of stock'},
-        {'Endpoint': '/fundamental/ticker', 'method': 'GET', 'body': None, 'description': 'Returns fundamental analysis of stock'},
-        {'Endpoint': '/technical/ticker', 'method': 'GET', 'body': None, 'description': 'Returns technical analysis of stock'},
-    ]
-    return Response(routes)
