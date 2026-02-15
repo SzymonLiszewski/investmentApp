@@ -1,5 +1,6 @@
 # Production – use pre-built images from container registry (e.g. GHCR).
 # Usage (from repo root): docker compose -f docker/docker-compose.prod.yml --project-directory . up -d
+# Set POSTGRES_PASSWORD and SECRET_KEY in .env. For prices, news and economic calendar, set ALPHAVANTAGE_API_KEY and NEWSDATA_API_KEY (see .env.example).
 services:
   db:
     image: postgres:16-alpine
