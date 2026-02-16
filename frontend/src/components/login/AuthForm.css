@@ -23,6 +23,23 @@
   gap: 1rem;
 }
 
+.auth-error {
+  margin: 0;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.875rem;
+  color: #b91c1c;
+  background: #fef2f2;
+  border-radius: 10px;
+  border: 1px solid #fecaca;
+}
+
+.auth-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: #6b7280;
+  line-height: 1.3;
+}
+
 .auth-input {
   width: 100%;
   height: 2.75rem;
