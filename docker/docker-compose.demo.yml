@@ -35,11 +35,13 @@ services:
     restart: unless-stopped
     command: >
       sh -c "python manage.py migrate --noinput
+      && python manage.py seed_demo_user
       && python manage.py seed_polish_stocks
       && python manage.py seed_crypto
       && python manage.py seed_economic_data
       && python manage.py seed_polish_bonds
       && python manage.py seed_nasdaq_stocks
+      && python manage.py seed_demo_transactions
       && python manage.py collectstatic --noinput --clear
       && gunicorn backend.wsgi:application --bind 0.0.0.0:8000 --workers 2 --threads 2"
     depends_on:
