@@ -58,10 +58,12 @@ services:
     depends_on:
       - backend
 
-  nginx:
-    image: ghcr.io/szymonliszewski/investmentapp-nginx:latest
+  caddy:
+    image: caddy:alpine
     ports:
       - "80:80"
+    volumes:
+      - ../caddy/Caddyfile:/etc/caddy/Caddyfile:ro
     restart: unless-stopped
     depends_on:
       - backend

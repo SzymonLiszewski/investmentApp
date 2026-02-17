@@ -1,6 +1,7 @@
 # Production – use pre-built images from container registry (e.g. GHCR).
 # Usage (from repo root): docker compose -f docker/docker-compose.prod.yml --project-directory . up -d
-# Set POSTGRES_PASSWORD and SECRET_KEY in .env. For prices, news and economic calendar, set ALPHAVANTAGE_API_KEY and NEWSDATA_API_KEY (see .env.example).
+# Set POSTGRES_PASSWORD and SECRET_KEY in .env. For HTTPS, set DOMAIN (e.g. app.example.com) and add it to ALLOWED_HOSTS.
+# For prices, news and economic calendar, set ALPHAVANTAGE_API_KEY and NEWSDATA_API_KEY (see .env.example).
 services:
   db:
     image: postgres:16-alpine
@@ -25,7 +26,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-stocksense}
       POSTGRES_USER: ${POSTGRES_USER:-stocksense}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
-      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,backend}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,backend,${DOMAIN}}
       ENABLE_ML_FUNCTIONS: ${ENABLE_ML_FUNCTIONS:-false}
       DEBUG: "false"
       SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY}
@@ -50,10 +51,16 @@ services:
     depends_on:
       - backend
 
-  nginx:
-    image: ghcr.io/szymonliszewski/investmentapp-nginx:latest
+  caddy:
+    image: caddy:alpine
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN for production HTTPS (e.g. app.example.com)}
     ports:
       - "80:80"
+      - "443:443"
+    volumes:
+      - ../caddy/Caddyfile.prod:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
     restart: unless-stopped
     depends_on:
       - backend
@@ -61,3 +68,4 @@ services:
 
 volumes:
   postgres_data_prod:
+  caddy_data:
