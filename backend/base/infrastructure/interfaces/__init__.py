@@ -2,6 +2,7 @@ from .market_data_fetcher import StockDataFetcher, CryptoDataFetcher, FXDataFetc
 from .economic_calendar import EconomicCalendarFetcher
 from .news_fetcher import NewsFetcher
 from .price_repository import AbstractPriceRepository
+from .asset_repository import AbstractAssetRepository
 
 __all__ = [
     'StockDataFetcher',
@@ -10,4 +11,5 @@ __all__ = [
     'EconomicCalendarFetcher',
     'NewsFetcher',
     'AbstractPriceRepository',
+    'AbstractAssetRepository',
 ]
