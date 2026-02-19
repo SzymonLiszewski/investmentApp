@@ -52,6 +52,7 @@ services:
     image: ghcr.io/szymonliszewski/investmentapp-frontend:latest
     environment:
       VITE_PROXY_TARGET: "http://backend:8000"
+      VITE_USE_MOCK_DATA_FETCHER: "true"
     expose:
       - "5173"
     restart: unless-stopped

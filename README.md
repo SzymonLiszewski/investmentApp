@@ -1,23 +1,24 @@
-# StockSense
+# Captrivio
 
-StockSense is an application for retail investors whose **main focus is portfolio tracking**. Add positions (stocks, bonds, ETFs), view portfolio composition and allocation by asset class, track returns over time, and monitor risk metrics (Sharpe, Sortino) and performance (Alpha) in your chosen currency. The app also provides access to quotes, technical and fundamental indicators, simple price forecasts, and financial news with sentiment analysis — all in one place.
+Captrivio is an application for retail investors whose **main focus is portfolio tracking**. Add positions (stocks, bonds, ETFs), view portfolio composition and allocation by asset class, track returns over time, and monitor risk metrics and performance in your chosen currency. The app also provides access to quotes, technical and fundamental indicators, simple price forecasts, and financial news with sentiment analysis - all in one place.
 
 **Main features:**
 
-- **Portfolio** — record transactions, view composition and allocation, value history, risk indicators (Sharpe, Sortino) and Alpha.
-- **Quotes and market data** — stock and index prices, fundamental data (P/E, dividend) and technical indicators (RSI, moving averages).
-- **Forecasts** — simple price forecasts based on historical trends.
-- **News and sentiment** — financial news with sentiment scoring (optional ML).
-- **Calendar** — earnings report dates and IPO calendar.
-- **Bonds** — government bond series and macro data (e.g. rates) for valuation.
+- **Portfolio** - record transactions, view composition and allocation, value history, risk indicators (Sharpe, Sortino) and Alpha.
+- **Quotes and market data** - stock and index prices, fundamental data (P/E, dividend) and technical indicators (RSI, moving averages).
+- **Forecasts** - simple price forecasts based on historical trends.
+- **News and sentiment** - financial news with sentiment scoring (optional ML).
+- **Calendar** - earnings report dates and IPO calendar.
+
+**Live demo:** A live demo is available at https://captrivio.com
 
 ---
 
 ## Running the app
 
-### Docker — demo (no config, no API keys)
+### Docker - demo (no config, no API keys)
 
-Runs the same stack as production using **pre-built images from GHCR**, with all required environment variables set and **mock data fetcher** enabled — no `.env` or API keys needed. Useful for a quick try-out or demos.
+Runs the same stack as production using **pre-built images from GHCR**, with all required environment variables set and **mock data fetcher** enabled - no `.env` or API keys needed. Useful for a quick try-out or demos.
 
 ```bash
 docker compose -f docker/docker-compose.demo.yml --project-directory . up -d
@@ -56,12 +57,12 @@ Database and seed data are stored in volume `postgres_data_dev`.
    pip install -r requirements.txt
    ```
 
-3. (Optional) Mock mode — no API keys:
+3. (Optional) Mock mode - no API keys:
    - Set `USE_MOCK_DATA_FETCHER=true` in your environment or `.env`. Fetchers will return deterministic test data.
 
-4. API keys — needed only if you use the live APIs for **news** and **economic calendar** (see `.env.example`). Copy `.env.example` to `.env` and set:
-   - **ALPHAVANTAGE_API_KEY** — for stock prices and economic calendar (earnings, IPO dates).
-   - **NEWSDATA_API_KEY** — for NewsData-based news fetching.
+4. API keys - needed only if you use the live APIs for **news** and **economic calendar** (see `.env.example`). Copy `.env.example` to `.env` and set:
+   - **ALPHAVANTAGE_API_KEY** - for stock prices and economic calendar (earnings, IPO dates).
+   - **NEWSDATA_API_KEY** - for NewsData-based news fetching.
    - With `USE_MOCK_DATA_FETCHER=true`, stock/crypto/FX use mock data and do not need these; news and calendar still call the real APIs when used, so set the keys if you want those features to work.
    - **Linux:** `export ALPHAVANTAGE_API_KEY=... NEWSDATA_API_KEY=...`
    - **Windows:** `set ALPHAVANTAGE_API_KEY=...` and `set NEWSDATA_API_KEY=...`
@@ -74,7 +75,7 @@ Database and seed data are stored in volume `postgres_data_dev`.
    python manage.py runserver
    ```
 
-6. In a second terminal — frontend:
+6. In a second terminal - frontend:
    ```bash
    cd frontend
    npm install
@@ -83,7 +84,7 @@ Database and seed data are stored in volume `postgres_data_dev`.
 
 7. Open in browser: http://localhost:5173
 
-### Docker — production
+### Docker - production
 
 Copy `.env.example` to `.env` and set at least `POSTGRES_PASSWORD` and `SECRET_KEY`. To use live data for **news** and **economic calendar**, set `ALPHAVANTAGE_API_KEY` and `NEWSDATA_API_KEY` in `.env` as well (see `.env.example`).
 
@@ -99,18 +100,18 @@ Nginx listens on port 80 and proxies `/api/`, `/admin/`, `/static/` to the backe
 
 ### Overview
 
-- **Frontend (React)** — SPA talking to the Django API over REST; JWT authentication (token + refresh).
-- **Backend (Django)** — REST API split into apps: `base`, `portfolio`, `analytics`.
-- **Database** — SQLite for local development without Docker; **PostgreSQL** with Docker and in production.
-- **External APIs** — Alpha Vantage, Yahoo Finance, newsdata, XTB (market data and account integration).
+- **Frontend (React)** - SPA talking to the Django API over REST; JWT authentication (token + refresh).
+- **Backend (Django)** - REST API split into apps: `base`, `portfolio`, `analytics`.
+- **Database** - SQLite for local development without Docker; **PostgreSQL** with Docker and in production.
+- **External APIs** - Alpha Vantage, Yahoo Finance, newsdata, XTB (market data and account integration).
 
 ### Backend apps (`base` / `portfolio` / `analytics`)
 
 **App responsibilities:**
 
-- **`base`** — Users, registration, JWT; assets (stocks/indices) and search; market data (quotes, fundamental, technical); news; calendar (earnings, IPO); bonds (series, macro).
-- **`portfolio`** — Transactions, composition, allocation, value history, risk indicators (Sharpe, Sortino) and Alpha, transaction updates, XTB integration, bond valuation.
-- **`analytics`** — Advanced analytics (e.g. forecasts, optional ML); may use `saved_models/` for persisted models.
+- **`base`** - Users, registration, JWT; assets (stocks/indices) and search; market data (quotes, fundamental, technical); news; calendar (earnings, IPO); bonds (series, macro).
+- **`portfolio`** - Transactions, composition, allocation, value history, risk indicators (Sharpe, Sortino) and Alpha, transaction updates, XTB integration, bond valuation.
+- **`analytics`** - Advanced analytics (e.g. forecasts, optional ML); may use `saved_models/` for persisted models.
 
 
 

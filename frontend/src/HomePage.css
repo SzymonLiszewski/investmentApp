@@ -56,6 +56,11 @@ h4{
     margin-left: 10%;
 }
 
+.search-container a {
+    color: black;
+    text-decoration: underline;
+}
+
 
 .search-container {
     position: relative;
