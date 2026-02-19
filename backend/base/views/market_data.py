@@ -4,9 +4,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 
-from ..services.stock_data_cache import get_stock_data_cached
-from base.infrastructure.db import PriceRepository
+from base.infrastructure.db import PriceRepository, AssetRepository
 from base.services import get_default_stock_fetcher
+from ..services.stock_data_cache import get_stock_data_cached
 
 
 @api_view(['GET'])
@@ -36,8 +36,9 @@ def stockDataView(request, ticker):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def basicInfoView(request, ticker):
+    repo = AssetRepository()
     fetcher = get_default_stock_fetcher()
-    data = get_stock_data_cached(ticker, "basic_info", fetcher)
+    data = repo.get_basic_info(ticker, fetcher)
     return Response(data)
 
 
