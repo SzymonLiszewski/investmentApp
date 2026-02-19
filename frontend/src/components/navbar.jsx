@@ -6,7 +6,7 @@ function NavBar(){
     const { isLoggedIn, logout } = useAuth();
     return (
         <nav className="navigation">
-            <Link to="/" className="site-title">StockSense</Link>
+            <Link to="/" className="site-title">Captrivio</Link>
             <ul>
                 <li>
                     <Link to="/analysis2/aapl">analysis</Link>

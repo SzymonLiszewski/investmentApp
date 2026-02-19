@@ -1,11 +1,13 @@
 import '../HomePage.css';
 import React, {useState} from 'react';
+import { Link } from 'react-router-dom';
 import SearchBox from '../components/SearchBox';
 import StockSection from '../components/StockSection';
 import homePageImage from '../assets/image1.png'
 
 function HomePage (){
     const [showSearchBox, setShowSearchBox] = useState(false);
+    const isDemoMode = import.meta.env.VITE_USE_MOCK_DATA_FETCHER === 'true';
     
 
     const toggleSearchBox = () => {
@@ -39,9 +41,16 @@ function HomePage (){
         <div className="homepage">
             <div className="mainItem">
               <div className="search-container">
-                  <h1>StockSense</h1>
-                  <h3>Unlock the power of investment insights</h3>
-                  <h4>Choose Interesting stocks, discover our analysis and invest confidently </h4>
+                  <h1>Captrivio</h1>
+                  <h3>Keep your investments under control.</h3>
+                  <h4>
+                    <Link to="/login">Sign in</Link> to unlock portfolio insights.
+                  </h4>
+                  {isDemoMode && (
+                    <p className="demo-banner">
+                      Demo version - prices and predictions are for illustrative purposes only.
+                    </p>
+                  )}
                   <SearchBox navigation={'analysis2'}/>
               </div>
               <img src={homePageImage}></img>

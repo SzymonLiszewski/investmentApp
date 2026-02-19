@@ -4,6 +4,7 @@
     margin-top: 0px;
     border-radius: 8px;
     top:0;
+    text-align: left;
 }
 
 .about-container h1 {
@@ -35,6 +36,15 @@
 .about-container h2 {
     color: #444;
     margin-top: 30px;
+}
+
+.about-container a {
+    color: black;
+    text-decoration: underline;
+}
+
+.source-code-text {
+    color: black;
 }
 
 .about-container ul {

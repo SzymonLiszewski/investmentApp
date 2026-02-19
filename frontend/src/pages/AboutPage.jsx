@@ -1,6 +1,5 @@
 import React from 'react';
 import '../components/styles/AboutPage.css';
-import {Link} from 'react-router-dom';
 
 const AboutPage = () => {
     return (
@@ -20,15 +19,10 @@ const AboutPage = () => {
                 <li>Advanced forecasting techniques for better investment decisions.</li>
                 <li>Access to IPO calendars and market news.</li>
             </ul>
-            <h2>Creators</h2>
-            <div className="team-section">
-                <div className="team-info">
-                    <div className="team-member">
-                        <h3>Szymon Liszewski</h3>
-                        <p>github: <Link to='https://github.com/SzymonLiszewski'>https://github.com/SzymonLiszewski</Link></p>
-                    </div>
-                </div>
-            </div>
+            <h2>Source code</h2>
+            <p className="source-code-text">
+                Check out the source code: <a href="https://github.com/SzymonLiszewski/investmentApp" target="_blank" rel="noopener noreferrer">GitHub repository</a>
+            </p>
         </div>
     );
 };
