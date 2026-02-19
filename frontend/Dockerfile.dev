@@ -1,4 +1,5 @@
-# Build context: project root
+# Development – Vite dev server. Build context: project root.
+# Used by docker-compose.dev.yml.
 FROM node:20-alpine
 
 WORKDIR /app

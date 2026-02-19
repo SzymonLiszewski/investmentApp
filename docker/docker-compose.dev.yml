@@ -47,7 +47,7 @@ services:
   frontend:
     build:
       context: ..
-      dockerfile: ./frontend/Dockerfile
+      dockerfile: ./frontend/Dockerfile.dev
     environment:
       VITE_PROXY_TARGET: "http://backend:8000"
     volumes:
