@@ -53,7 +53,10 @@ function HomePage (){
                   )}
                   <SearchBox navigation={'analysis2'}/>
               </div>
-              <img src={homePageImage}></img>
+              <div className="homepage-image-wrapper">
+                <img src={homePageImage} alt="Investment illustration" />
+                <p className="image-credit">Designed by Freepik</p>
+              </div>
             </div>
             <div className='stock-info-container'>
               <StockSection stocks={stocks} />

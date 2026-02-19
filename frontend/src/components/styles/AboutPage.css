@@ -47,6 +47,10 @@
     color: black;
 }
 
+.attributions-text {
+    color: black;
+}
+
 .about-container ul {
     list-style-type: disc;
     margin-left: 20px;
