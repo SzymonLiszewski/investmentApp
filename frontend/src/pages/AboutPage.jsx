@@ -23,6 +23,10 @@ const AboutPage = () => {
             <p className="source-code-text">
                 Check out the source code: <a href="https://github.com/SzymonLiszewski/investmentApp" target="_blank" rel="noopener noreferrer">GitHub repository</a>
             </p>
+            <h2>Attributions</h2>
+            <p className="attributions-text">
+                Logos provided by <a href="https://logo.dev" target="_blank" rel="noopener noreferrer">Logo.dev</a>.
+            </p>
         </div>
     );
 };
