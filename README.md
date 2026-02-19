@@ -54,7 +54,7 @@ Database and seed data are stored in volume `postgres_data_dev`.
 
 2. Install backend dependencies:
    ```bash
-   pip install -r requirements.txt
+   pip install -r backend/requirements.txt
    ```
 
 3. (Optional) Mock mode - no API keys:
