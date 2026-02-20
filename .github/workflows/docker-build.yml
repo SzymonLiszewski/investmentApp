@@ -15,6 +15,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set lowercase image repo name
+        id: image-repo
+        run: |
+          OWNER_LC=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          NAME_LC=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')
+          echo "frontend_image=ghcr.io/${OWNER_LC}/${NAME_LC}-frontend" >> $GITHUB_OUTPUT
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -73,7 +80,7 @@ jobs:
           build-args: |
             VITE_USE_MOCK_DATA_FETCHER=true
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-frontend:demo
+          tags: ${{ steps.image-repo.outputs.frontend_image }}:demo
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
