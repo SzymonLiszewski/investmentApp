@@ -54,7 +54,7 @@ jobs:
             type=sha,prefix=
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
 
-      - name: Build and push frontend image
+      - name: Build and push frontend image (prod)
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -62,6 +62,18 @@ jobs:
           push: true
           tags: ${{ steps.meta-frontend.outputs.tags }}
           labels: ${{ steps.meta-frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push frontend image (demo)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./frontend/Dockerfile.prod
+          build-args: |
+            VITE_USE_MOCK_DATA_FETCHER=true
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}-frontend:demo
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

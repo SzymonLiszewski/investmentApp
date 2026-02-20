@@ -49,12 +49,9 @@ services:
         condition: service_healthy
 
   frontend:
-    image: ghcr.io/szymonliszewski/investmentapp-frontend:latest
-    environment:
-      VITE_PROXY_TARGET: "http://backend:8000"
-      VITE_USE_MOCK_DATA_FETCHER: "true"
+    image: ghcr.io/szymonliszewski/investmentapp-frontend:demo
     expose:
-      - "5173"
+      - "3000"
     restart: unless-stopped
     depends_on:
       - backend

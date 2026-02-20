@@ -9,6 +9,10 @@ RUN npm ci
 
 COPY frontend .
 
+# Optional: set at build time for demo image (e.g. VITE_USE_MOCK_DATA_FETCHER=true)
+ARG VITE_USE_MOCK_DATA_FETCHER
+ENV VITE_USE_MOCK_DATA_FETCHER=${VITE_USE_MOCK_DATA_FETCHER}
+
 RUN npm run build
 
 FROM node:20-alpine
