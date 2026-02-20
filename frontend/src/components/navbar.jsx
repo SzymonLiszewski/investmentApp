@@ -9,7 +9,7 @@ function NavBar(){
             <Link to="/" className="site-title">Captrivio</Link>
             <ul>
                 <li>
-                    <Link to="/analysis2/aapl">analysis</Link>
+                    <Link to="/analysis2/AAPL">analysis</Link>
                 </li>
                 <li>
                     <Link to="/news/aapl">news</Link>

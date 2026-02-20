@@ -43,7 +43,6 @@ body, html{
 #priceChange{
     grid-area: 2 / 3 / 3 / 4;
     text-align: right;
-    color: #82ca9d;
     margin: 0%;
     padding: 0%;
     font-size: 200%;
