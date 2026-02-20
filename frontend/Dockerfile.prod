@@ -1,0 +1,28 @@
+# Production – build and serve static assets. Build context: project root.
+# Used by GitHub Actions and docker-compose.prod.yml.
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+
+COPY frontend .
+
+# Optional: set at build time for demo image (e.g. VITE_USE_MOCK_DATA_FETCHER=true)
+ARG VITE_USE_MOCK_DATA_FETCHER
+ENV VITE_USE_MOCK_DATA_FETCHER=${VITE_USE_MOCK_DATA_FETCHER}
+
+RUN npm run build
+
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY --from=builder /app/dist ./dist
+
+RUN npm install -g serve
+
+EXPOSE 3000
+
+CMD ["serve", "-s", "dist", "-l", "3000"]

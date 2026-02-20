@@ -16,8 +16,8 @@
         reverse_proxy backend:8000
     }
 
-    # Frontend (SPA + Vite dev server)
+    # Frontend (SPA – static build served on 3000, same as prod)
     handle {
-        reverse_proxy frontend:5173
+        reverse_proxy frontend:3000
     }
 }
