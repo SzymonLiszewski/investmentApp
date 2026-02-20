@@ -25,6 +25,7 @@ const RegisterForm = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const navigate = useNavigate();
 
   const registerUser = async (username, password) => {
@@ -54,6 +55,7 @@ const RegisterForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -65,8 +67,8 @@ const RegisterForm = () => {
     }
     try {
       await registerUser(username, password);
-      alert('Register successful');
-      navigate('/login');
+      setSuccess('Account created. Redirecting to login…');
+      setTimeout(() => navigate('/login'), 1500);
     } catch (err) {
       setError(err.message);
     }
@@ -79,6 +81,11 @@ const RegisterForm = () => {
         {error && (
           <div className="auth-error" role="alert">
             {error}
+          </div>
+        )}
+        {success && (
+          <div className="auth-success" role="status">
+            {success}
           </div>
         )}
         <input

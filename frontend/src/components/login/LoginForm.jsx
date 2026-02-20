@@ -6,10 +6,14 @@ import './AuthForm.css';
 const LoginForm = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const navigate = useNavigate();
   const { login } = useAuth();
 
   const loginUser = async (username, password) => {
+    setError('');
+    setSuccess('');
     try {
       const response = await fetch('api/token/', {
         method: 'POST',
@@ -23,14 +27,14 @@ const LoginForm = () => {
       });
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.username || 'Network response was not ok');
+        throw new Error(data.username || data.detail || 'Invalid username or password');
       }
-      alert('Login successful');
+      setSuccess('Login successful');
       login();
       navigate('/');
       return data;
-    } catch (error) {
-      alert(error);
+    } catch (err) {
+      setError(err.message || 'Login failed');
     }
   };
 
@@ -47,6 +51,16 @@ const LoginForm = () => {
     <div className="auth-card">
       <h1 className="auth-title">Login</h1>
       <form className="auth-form" onSubmit={handleSubmit}>
+        {error && (
+          <div className="auth-error" role="alert">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="auth-success" role="status">
+            {success}
+          </div>
+        )}
         <input
           className="auth-input"
           placeholder="username"
