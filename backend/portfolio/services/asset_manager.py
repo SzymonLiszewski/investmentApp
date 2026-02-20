@@ -177,20 +177,34 @@ class AssetManager:
 
             # Cost basis and profit (in target currency)
             quantity_float = float(user_asset.quantity)
-            cost_basis = self._get_cost_basis(user, asset, user_asset.quantity)
             total_cost_dec = None
-            if cost_basis is not None and cost_basis > 0:
-                native_currency = self._get_native_currency(asset)
-                if native_currency != currency:
+            average_purchase_price = None
+            if quantity_float > 0 and user_asset.average_purchase_price is not None and user_asset.currency:
+                # Use stored average and currency when available
+                cost_basis_stored = Decimal(str(user_asset.average_purchase_price)) * Decimal(str(quantity_float))
+                if user_asset.currency != currency:
                     total_cost_dec = self.currency_converter.convert(
-                        cost_basis, native_currency, currency,
+                        cost_basis_stored, user_asset.currency, currency,
                     )
                 else:
-                    total_cost_dec = cost_basis
+                    total_cost_dec = cost_basis_stored
+                average_purchase_price = float(user_asset.average_purchase_price)
+            if total_cost_dec is None:
+                # Fallback: compute from transactions
+                cost_basis = self._get_cost_basis(user, asset, user_asset.quantity)
+                if cost_basis is not None and cost_basis > 0:
+                    native_currency = self._get_native_currency(asset)
+                    if native_currency != currency:
+                        total_cost_dec = self.currency_converter.convert(
+                            cost_basis, native_currency, currency,
+                        )
+                    else:
+                        total_cost_dec = cost_basis
+                    if quantity_float:
+                        average_purchase_price = float(cost_basis / Decimal(str(quantity_float)))
             total_cost_float = float(total_cost_dec) if total_cost_dec is not None else None
-            average_purchase_price = (
-                (total_cost_float / quantity_float) if total_cost_float and quantity_float else None
-            )
+            if average_purchase_price is None and total_cost_float and quantity_float:
+                average_purchase_price = total_cost_float / quantity_float
             profit = (float(current_value) - total_cost_float) if total_cost_float is not None else None
             profit_percentage = (
                 (profit / total_cost_float * 100) if total_cost_float and total_cost_float > 0 and profit is not None else None

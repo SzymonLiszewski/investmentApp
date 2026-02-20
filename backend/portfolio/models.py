@@ -6,9 +6,26 @@ from base.models import Asset
 
 
 class UserAsset(models.Model):
+    """
+    Currently open positions of the user: for each asset, the quantity held and
+    the average purchase price (and its currency) for that position.
+    """
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="ownedAssets")
     ownedAsset = models.ForeignKey(Asset, on_delete=models.CASCADE)
     quantity = models.FloatField(default=0)
+    average_purchase_price = models.DecimalField(
+        max_digits=18,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        help_text="Average cost per unit of this position, in the given currency.",
+    )
+    currency = models.CharField(
+        max_length=10,
+        null=True,
+        blank=True,
+        help_text="Currency of average_purchase_price (e.g. PLN, USD).",
+    )
 
 
 class Transactions(models.Model):

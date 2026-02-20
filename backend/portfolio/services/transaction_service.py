@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+from decimal import Decimal
 from typing import Optional
 
 import pandas as pd
@@ -8,7 +9,8 @@ from base.infrastructure.db import PriceRepository
 from base.models import Asset
 from base.serializers import AssetSerializer
 from base.services import get_default_stock_fetcher, get_default_crypto_fetcher
-from portfolio.models import UserAsset, PortfolioSnapshot
+from portfolio.models import UserAsset, PortfolioSnapshot, Transactions
+from portfolio.services.asset_manager import AssetManager
 
 
 def get_or_create_asset(
@@ -177,14 +179,64 @@ def resolve_price_for_date(
 
 
 def update_user_asset(transaction):
-    """Update or create UserAsset based on transaction."""
+    """
+    Update or create UserAsset from a transaction.
+    Quantity: BUY adds, SELL subtracts.
+    Average purchase price: updated incrementally on BUY as weighted average
+    (prev_avg * prev_qty + price * buy_qty) / (prev_qty + buy_qty); unchanged on SELL.
+    If the new transaction's currency differs from the existing position currency,
+    average and currency are recomputed from all transactions (via cost basis).
+    """
     user_product, created = UserAsset.objects.get_or_create(
         owner=transaction.owner,
-        ownedAsset=transaction.product
+        ownedAsset=transaction.product,
     )
-    if created:
-        user_product.quantity = transaction.quantity
-    else:
-        user_product.quantity += transaction.quantity
+    am = AssetManager()
+    is_buy = transaction.transactionType == Transactions.transaction_type.BUY
+    delta = transaction.quantity if is_buy else -transaction.quantity
+    new_quantity = max(0.0, (0.0 if created else user_product.quantity) + delta)
+
+    tx_currency = (
+        (transaction.currency or "").strip() or am._get_native_currency(transaction.product)
+    )
+
+    if new_quantity <= 0:
+        user_product.quantity = 0.0
+        user_product.average_purchase_price = None
+        user_product.currency = None
+        user_product.save()
+        return user_product
+
+    # Different currency than existing position → full recalc from all transactions
+    existing_currency = (user_product.currency or "").strip()
+    if not created and existing_currency and tx_currency and existing_currency != tx_currency:
+        cost_basis = am._get_cost_basis(
+            transaction.owner, transaction.product, new_quantity
+        )
+        if cost_basis is not None and cost_basis > 0:
+            user_product.average_purchase_price = cost_basis / Decimal(str(new_quantity))
+            user_product.currency = tx_currency
+        else:
+            user_product.average_purchase_price = None
+            user_product.currency = None
+        user_product.quantity = new_quantity
+        user_product.save()
+        return user_product
+
+    # Incremental update: BUY = weighted average, SELL = average unchanged
+    if is_buy:
+        if created or user_product.average_purchase_price is None or not existing_currency:
+            user_product.average_purchase_price = Decimal(str(transaction.price))
+            user_product.currency = tx_currency or user_product.currency
+        else:
+            prev_avg = user_product.average_purchase_price
+            prev_qty = Decimal(str(user_product.quantity))
+            buy_qty = Decimal(str(transaction.quantity))
+            buy_cost = Decimal(str(transaction.price)) * buy_qty
+            new_qty = prev_qty + buy_qty
+            user_product.average_purchase_price = (prev_avg * prev_qty + buy_cost) / new_qty
+    # SELL: average and currency unchanged, only quantity already reduced to new_quantity
+
+    user_product.quantity = new_quantity
     user_product.save()
     return user_product
