@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+  ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 
 
@@ -12,10 +12,16 @@ const UserEarningsChart = ({ data, currency = 'PLN' }) => {
   const formatValue = (value) =>
     typeof value === 'number' ? value.toLocaleString(undefined, { maximumFractionDigits: 2 }) : value;
 
+  const chartData = data.map((point) => ({
+    ...point,
+    total_value: point.total_value ?? 0,
+    total_invested: point.total_invested ?? 0,
+  }));
+
   return (
     <ResponsiveContainer width="100%" height={400}>
-      <AreaChart
-        data={data}
+      <ComposedChart
+        data={chartData}
         margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
       >
         <defs>
@@ -38,9 +44,10 @@ const UserEarningsChart = ({ data, currency = 'PLN' }) => {
         />
         <Tooltip
           contentStyle={{ fontSize: 14 }}
-          formatter={(value) => [`${formatValue(value)} ${currency}`, 'Portfolio Value']}
+          formatter={(value, name) => [`${formatValue(value)} ${currency}`, name]}
           labelFormatter={(label) => `Date: ${label}`}
         />
+        <Legend />
         <Area
           type="monotone"
           dataKey="total_value"
@@ -50,7 +57,16 @@ const UserEarningsChart = ({ data, currency = 'PLN' }) => {
           fill="url(#colorValue)"
           activeDot={{ r: 6 }}
         />
-      </AreaChart>
+        <Line
+          type="monotone"
+          dataKey="total_invested"
+          name="Total Invested"
+          stroke="#ff7c43"
+          strokeWidth={2}
+          dot={false}
+          activeDot={{ r: 5 }}
+        />
+      </ComposedChart>
     </ResponsiveContainer>
   );
 };
