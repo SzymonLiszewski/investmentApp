@@ -5,18 +5,24 @@ import csv
 import requests
 from typing import List
 
-from decouple import config
-
 from base.infrastructure.interfaces.economic_calendar import EconomicCalendarFetcher
 
-_ALPHAVANTAGE_API_KEY = config('ALPHAVANTAGE_API_KEY', default="default_api_key")
+
+class NoOpEconomicCalendarFetcher(EconomicCalendarFetcher):
+    """Fetcher that does not call any API. Returns empty lists. Use when API is disabled or key not set."""
+
+    def get_earnings(self) -> List:
+        return []
+
+    def get_ipo(self) -> List:
+        return []
 
 
 class AlphaVantageEconomicCalendarFetcher(EconomicCalendarFetcher):
-    """Fetch economic calendar data from Alpha Vantage."""
+    """Fetch economic calendar data from Alpha Vantage. Requires api_key (e.g. from settings)."""
 
-    def __init__(self, api_key: str = None):
-        self._api_key = api_key or _ALPHAVANTAGE_API_KEY
+    def __init__(self, api_key: str):
+        self._api_key = api_key
 
     def get_earnings(self) -> List:
         url = f'https://www.alphavantage.co/query?function=EARNINGS_CALENDAR&horizon=3month&apikey={self._api_key}'

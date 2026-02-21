@@ -35,11 +35,16 @@ services:
       ENABLE_ML_FUNCTIONS: "false"
       DEBUG: "true"
       USE_MOCK_DATA_FETCHER: "true"
+      ALPHAVANTAGE_API_KEY: ${ALPHAVANTAGE_API_KEY:-}
+      NEWSDATA_API_KEY: ${NEWSDATA_API_KEY:-}
+      USE_ECONOMIC_CALENDAR_API: ${USE_ECONOMIC_CALENDAR_API:-true}
+      USE_YAHOO_NEWS_API: ${USE_YAHOO_NEWS_API:-true}
+      USE_NEWSDATA_NEWS_API: ${USE_NEWSDATA_NEWS_API:-true}
     volumes:
       - ../backend:/app
     ports:
       - "8000:8000"
-    command: sh -c "python manage.py migrate --noinput && python manage.py seed_polish_stocks && python manage.py seed_crypto && python manage.py seed_economic_data && python manage.py seed_polish_bonds && python manage.py seed_nasdaq_stocks && python manage.py runserver 0.0.0.0:8000"
+    command: sh -c "python manage.py migrate --noinput && python manage.py seed_polish_stocks && python manage.py seed_crypto && python manage.py seed_economic_data && python manage.py seed_polish_bonds && python manage.py seed_nasdaq_stocks && python manage.py seed_economic_calendar && python manage.py runserver 0.0.0.0:8000"
     depends_on:
       db:
         condition: service_healthy

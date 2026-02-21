@@ -31,6 +31,11 @@ services:
       POSTGRES_PASSWORD: stocksense
       ALLOWED_HOSTS: "localhost,127.0.0.1,backend"
       ENABLE_ML_FUNCTIONS: "false"
+      ALPHAVANTAGE_API_KEY: ${ALPHAVANTAGE_API_KEY:-}
+      NEWSDATA_API_KEY: ${NEWSDATA_API_KEY:-}
+      USE_ECONOMIC_CALENDAR_API: ${USE_ECONOMIC_CALENDAR_API:-true}
+      USE_YAHOO_NEWS_API: ${USE_YAHOO_NEWS_API:-true}
+      USE_NEWSDATA_NEWS_API: ${USE_NEWSDATA_NEWS_API:-true}
     ports:
       - "8000:8000"
     command: sh -c "python manage.py migrate --noinput && python manage.py seed_polish_stocks && python manage.py seed_crypto && python manage.py seed_economic_data && python manage.py seed_polish_bonds && python manage.py seed_nasdaq_stocks && python manage.py runserver 0.0.0.0:8000"

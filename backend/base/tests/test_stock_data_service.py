@@ -1,15 +1,15 @@
-# Tests for get_stock_data_cached
+# Tests for get_stock_data (stock_data_service)
 from datetime import datetime, timezone, timedelta
 from unittest.mock import Mock
 
 from django.test import TestCase
 
 from base.models import StockDataCache
-from base.services.stock_data_cache import get_stock_data_cached
+from base.services.stock_data_service import get_stock_data
 
 
-class TestGetStockDataCached(TestCase):
-    """Tests for get_stock_data_cached."""
+class TestGetStockData(TestCase):
+    """Tests for get_stock_data."""
 
     def test_returns_from_cache_when_fresh(self):
         """When cache exists and is within max_age, returns cached data without calling fetcher."""
@@ -22,7 +22,7 @@ class TestGetStockDataCached(TestCase):
             data=cached_data,
         )
         fetcher = Mock()
-        result = get_stock_data_cached(symbol, data_type, fetcher)
+        result = get_stock_data(symbol, data_type, fetcher)
         self.assertEqual(result, cached_data)
         fetcher.get_basic_stock_info.assert_not_called()
 
@@ -34,7 +34,7 @@ class TestGetStockDataCached(TestCase):
         fetcher = Mock()
         fetcher.get_fundamental_analysis.return_value = fetched
 
-        result = get_stock_data_cached(symbol, data_type, fetcher)
+        result = get_stock_data(symbol, data_type, fetcher)
 
         fetcher.get_fundamental_analysis.assert_called_once_with(symbol)
         self.assertEqual(result, fetched)
@@ -58,7 +58,7 @@ class TestGetStockDataCached(TestCase):
         fetcher = Mock()
         fetcher.get_technical_indicators.return_value = new_data
 
-        result = get_stock_data_cached(symbol, data_type, fetcher)
+        result = get_stock_data(symbol, data_type, fetcher)
 
         fetcher.get_technical_indicators.assert_called_once_with(symbol)
         self.assertEqual(result, new_data)

@@ -89,7 +89,7 @@ class MockStockDataFetcher(StockDataFetcher):
             result[sym] = _mock_historical_series(sym, start_date, end_date)
         return result
 
-    # ---- Used by get_stock_data_cached (basic_info, fundamental_analysis, technical_indicators) ----
+    # ---- Used by get_stock_data / stock_data_service (basic_info, fundamental_analysis, technical_indicators) ----
 
     def get_basic_stock_info(self, ticker: str) -> dict:
         price = float(_mock_price_for_symbol(ticker))

@@ -4,16 +4,16 @@ or from the fetcher when cache is missing or stale.
 """
 import logging
 from datetime import datetime, timezone, timedelta
+from typing import Any, Optional
 
-from base.models import StockDataCache
+from base.infrastructure.db.stock_data_cache_repository import StockDataCacheRepository
 
 logger = logging.getLogger(__name__)
 
-# How long cached stock data is considered fresh (then we refetch).
 STOCK_DATA_CACHE_MAX_AGE = timedelta(minutes=15)
 
 
-def _to_json_serializable(obj):
+def _to_json_serializable(obj: Any) -> Any:
     """Convert dict values to JSON-serializable types (e.g. numpy -> float)."""
     if hasattr(obj, "item") and callable(getattr(obj, "item")):
         return float(obj)
@@ -24,17 +24,24 @@ def _to_json_serializable(obj):
     return obj
 
 
-def get_stock_data_cached(symbol: str, data_type: str, fetcher, max_age: timedelta = None) -> dict:
+def get_stock_data(
+    symbol: str,
+    data_type: str,
+    fetcher: Any,
+    repository: Optional[StockDataCacheRepository] = None,
+    max_age: Optional[timedelta] = None,
+) -> dict:
     """
-    Return stock data for symbol and data_type. Uses StockDataCache if present and
-    not older than max_age; otherwise fetches from fetcher, saves to cache and returns.
+    Return stock data for symbol and data_type. Uses cache if present and not older than max_age;
+    otherwise fetches from fetcher, saves via repository and returns.
 
     data_type: one of 'basic_info', 'fundamental_analysis', 'technical_indicators'.
     fetcher: must have get_basic_stock_info, get_fundamental_analysis, get_technical_indicators.
     """
+    repo = repository or StockDataCacheRepository()
     max_age = max_age or STOCK_DATA_CACHE_MAX_AGE
     try:
-        cached = StockDataCache.objects.filter(symbol=symbol, data_type=data_type).first()
+        cached = repo.get(symbol, data_type)
         if cached is not None:
             now = datetime.now(timezone.utc)
             updated = cached.updated_at
@@ -66,11 +73,7 @@ def get_stock_data_cached(symbol: str, data_type: str, fetcher, max_age: timedel
 
     data_serializable = _to_json_serializable(data)
     try:
-        StockDataCache.objects.update_or_create(
-            symbol=symbol,
-            data_type=data_type,
-            defaults={"data": data_serializable},
-        )
+        repo.save(symbol, data_type, data_serializable)
     except Exception as e:
         logger.warning("Failed to save cache for %s %s: %s", symbol, data_type, e)
 

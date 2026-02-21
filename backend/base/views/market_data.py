@@ -6,7 +6,7 @@ from rest_framework.permissions import AllowAny
 
 from base.infrastructure.db import PriceRepository, AssetRepository
 from base.services import get_default_stock_fetcher
-from ..services.stock_data_cache import get_stock_data_cached
+from base.services.stock_data_service import get_stock_data
 
 
 @api_view(['GET'])
@@ -46,7 +46,7 @@ def basicInfoView(request, ticker):
 @permission_classes([AllowAny])
 def fundamentalAnalysisView(request, ticker):
     fetcher = get_default_stock_fetcher()
-    data = get_stock_data_cached(ticker, "fundamental_analysis", fetcher)
+    data = get_stock_data(ticker, "fundamental_analysis", fetcher)
     return Response(data)
 
 
@@ -54,5 +54,5 @@ def fundamentalAnalysisView(request, ticker):
 @permission_classes([AllowAny])
 def technicalAnalysisView(request, ticker):
     fetcher = get_default_stock_fetcher()
-    data = get_stock_data_cached(ticker, "technical_indicators", fetcher)
+    data = get_stock_data(ticker, "technical_indicators", fetcher)
     return Response(data)

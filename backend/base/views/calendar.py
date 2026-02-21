@@ -3,13 +3,14 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 
 from base.services import get_default_economic_calendar_fetcher
+from base.services.economic_calendar_service import get_earnings, get_ipo
 
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def CalendarEarningsView(request):
     fetcher = get_default_economic_calendar_fetcher()
-    data = fetcher.get_earnings()
+    data = get_earnings(fetcher)
     return Response(data)
 
 
@@ -17,5 +18,5 @@ def CalendarEarningsView(request):
 @permission_classes([AllowAny])
 def CalendarIPOView(request):
     fetcher = get_default_economic_calendar_fetcher()
-    data = fetcher.get_ipo()
+    data = get_ipo(fetcher)
     return Response(data)
