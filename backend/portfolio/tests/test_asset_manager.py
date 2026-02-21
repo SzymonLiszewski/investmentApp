@@ -272,12 +272,13 @@ class TestAssetManager(TestCase):
     ):
         """Test portfolio composition with currency conversion to PLN."""
         import pandas as pd
+        from base.infrastructure.interfaces.market_data_fetcher import CurrentPriceResult
         # Mock stock fetcher: AAPL=150 USD, GOOGL=100 USD
         mock_fetcher = Mock()
         mock_fetcher.get_current_price.side_effect = (
-            lambda s: Decimal('150') if s == 'AAPL' else Decimal('100')
+            lambda s: CurrentPriceResult(Decimal('150'), 'USD') if s == 'AAPL'
+            else CurrentPriceResult(Decimal('100'), 'USD')
         )
-        mock_fetcher.get_currency.return_value = 'USD'
         mock_stock_fetcher.return_value = mock_fetcher
 
         # Mock FX: 1 USD = 4 PLN

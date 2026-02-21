@@ -4,7 +4,7 @@ Abstract base classes for fetching market data.
 import logging
 from abc import ABC, abstractmethod
 from datetime import date
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, NamedTuple
 from decimal import Decimal
 
 import pandas as pd
@@ -12,12 +12,19 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
+class CurrentPriceResult(NamedTuple):
+    """Result of fetching current price: price and its currency in one API response."""
+
+    price: Decimal
+    currency: Optional[str]
+
+
 class StockDataFetcher(ABC):
     """Abstract base class for fetching stock market data."""
 
     @abstractmethod
-    def get_current_price(self, symbol: str) -> Optional[Decimal]:
-        """Get the current price of a stock."""
+    def get_current_price(self, symbol: str) -> Optional[CurrentPriceResult]:
+        """Get the current price and currency of a stock (single API call)."""
         pass
 
     @abstractmethod
@@ -25,10 +32,10 @@ class StockDataFetcher(ABC):
         """Get detailed information about a stock."""
         pass
 
-    @abstractmethod
     def get_currency(self, symbol: str) -> Optional[str]:
-        """Get the currency of a stock."""
-        pass
+        """Get the currency of a stock. Default: from get_current_price result."""
+        result = self.get_current_price(symbol)
+        return result.currency if result else None
 
     @abstractmethod
     def get_historical_prices(
@@ -45,14 +52,14 @@ class CryptoDataFetcher(ABC):
     """Abstract base class for fetching cryptocurrency market data."""
 
     @abstractmethod
-    def get_current_price(self, symbol: str) -> Optional[Decimal]:
-        """Get the current price of a cryptocurrency pair."""
+    def get_current_price(self, symbol: str) -> Optional[CurrentPriceResult]:
+        """Get the current price and quote currency of a cryptocurrency pair (single API call)."""
         pass
 
-    @abstractmethod
     def get_currency(self, symbol: str) -> Optional[str]:
-        """Get the quote currency of the pair."""
-        pass
+        """Get the quote currency of the pair. Default: from get_current_price result."""
+        result = self.get_current_price(symbol)
+        return result.currency if result else None
 
     @abstractmethod
     def get_historical_prices(
@@ -66,14 +73,13 @@ class CryptoDataFetcher(ABC):
 
     def get_crypto_info(self, symbol: str) -> Optional[Dict[str, Any]]:
         """Get detailed information about a cryptocurrency (optional)."""
-        price = self.get_current_price(symbol)
-        currency = self.get_currency(symbol)
-        if price is None or currency is None:
+        result = self.get_current_price(symbol)
+        if result is None:
             return None
         return {
             'symbol': symbol,
-            'current_price': price,
-            'currency': currency,
+            'current_price': result.price,
+            'currency': result.currency or 'USD',
         }
 
 

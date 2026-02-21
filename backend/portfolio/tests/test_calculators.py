@@ -7,7 +7,11 @@ from decimal import Decimal
 from datetime import date
 
 from portfolio.services.calculators import StockCalculator, BondCalculator, CryptoCalculator
-from base.infrastructure.interfaces.market_data_fetcher import StockDataFetcher, CryptoDataFetcher
+from base.infrastructure.interfaces.market_data_fetcher import (
+    StockDataFetcher,
+    CryptoDataFetcher,
+    CurrentPriceResult,
+)
 from portfolio.services.currency_converter import CurrencyConverter
 
 
@@ -28,8 +32,9 @@ class TestStockCalculator(TestCase):
 
     def test_get_current_value_success(self):
         """Test calculating current value successfully."""
-        # Mock the data fetcher to return a price
-        self.mock_fetcher.get_current_price.return_value = Decimal('150.50')
+        self.mock_fetcher.get_current_price.return_value = CurrentPriceResult(
+            Decimal('150.50'), 'USD'
+        )
 
         # Test data
         asset_data = {
@@ -47,8 +52,9 @@ class TestStockCalculator(TestCase):
 
     def test_get_current_value_with_decimal_quantity(self):
         """Test calculating current value with Decimal quantity."""
-        # Mock the data fetcher to return a price
-        self.mock_fetcher.get_current_price.return_value = Decimal('100.00')
+        self.mock_fetcher.get_current_price.return_value = CurrentPriceResult(
+            Decimal('100.00'), 'USD'
+        )
 
         # Test data with Decimal quantity
         asset_data = {
@@ -65,10 +71,9 @@ class TestStockCalculator(TestCase):
 
     def test_get_current_value_with_currency_conversion(self):
         """Test calculating current value with currency conversion."""
-        # Mock the data fetcher
-        self.mock_fetcher.get_current_price.return_value = Decimal('100.00')
-        self.mock_fetcher.get_currency.return_value = 'USD'
-        
+        self.mock_fetcher.get_current_price.return_value = CurrentPriceResult(
+            Decimal('100.00'), 'USD'
+        )
         # Mock currency converter
         self.mock_converter.convert.return_value = Decimal('400.00')
 
@@ -92,8 +97,9 @@ class TestStockCalculator(TestCase):
 
     def test_get_current_value_without_currency_conversion(self):
         """Test calculating current value without currency conversion."""
-        # Mock the data fetcher
-        self.mock_fetcher.get_current_price.return_value = Decimal('100.00')
+        self.mock_fetcher.get_current_price.return_value = CurrentPriceResult(
+            Decimal('100.00'), 'USD'
+        )
 
         # Test data
         asset_data = {
@@ -111,10 +117,9 @@ class TestStockCalculator(TestCase):
 
     def test_get_current_value_same_currency(self):
         """Test calculating current value when currencies match."""
-        # Mock the data fetcher
-        self.mock_fetcher.get_current_price.return_value = Decimal('100.00')
-        self.mock_fetcher.get_currency.return_value = 'USD'
-
+        self.mock_fetcher.get_current_price.return_value = CurrentPriceResult(
+            Decimal('100.00'), 'USD'
+        )
         # Test data
         asset_data = {
             'symbol': 'AAPL',
@@ -266,7 +271,9 @@ class TestCryptoCalculator(TestCase):
 
     def test_get_current_value_success_no_target_currency(self):
         """Test get_current_value in crypto currency (no conversion)."""
-        self.mock_fetcher.get_current_price.return_value = Decimal('50000.00')
+        self.mock_fetcher.get_current_price.return_value = CurrentPriceResult(
+            Decimal('50000.00'), 'USD'
+        )
 
         asset_data = {'symbol': 'BTC-USD', 'quantity': Decimal('0.5')}
 
@@ -279,8 +286,9 @@ class TestCryptoCalculator(TestCase):
 
     def test_get_current_value_with_currency_conversion(self):
         """Test get_current_value with target_currency uses CurrencyConverter."""
-        self.mock_fetcher.get_current_price.return_value = Decimal('4000.00')
-        self.mock_fetcher.get_currency.return_value = 'USD'
+        self.mock_fetcher.get_current_price.return_value = CurrentPriceResult(
+            Decimal('4000.00'), 'USD'
+        )
         self.mock_converter.convert.return_value = Decimal('16000.00')
 
         asset_data = {'symbol': 'ETH-USD', 'quantity': 2}

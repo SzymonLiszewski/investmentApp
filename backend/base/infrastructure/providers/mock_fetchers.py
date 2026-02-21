@@ -14,6 +14,7 @@ from base.infrastructure.interfaces.market_data_fetcher import (
     StockDataFetcher,
     CryptoDataFetcher,
     FXDataFetcher,
+    CurrentPriceResult,
 )
 
 
@@ -60,23 +61,22 @@ class MockStockDataFetcher(StockDataFetcher):
     Use for local development or tests when external API is unavailable.
     """
 
-    def get_current_price(self, symbol: str) -> Optional[Decimal]:
-        return _mock_price_for_symbol(symbol)
+    def get_current_price(self, symbol: str) -> Optional[CurrentPriceResult]:
+        return CurrentPriceResult(_mock_price_for_symbol(symbol), "USD")
 
     def get_stock_info(self, symbol: str) -> Optional[Dict[str, Any]]:
-        price = self.get_current_price(symbol)
+        result = self.get_current_price(symbol)
+        if result is None:
+            return None
         return {
             "symbol": symbol,
             "name": f"{symbol} Inc.",
-            "current_price": price,
-            "currency": "USD",
+            "current_price": result.price,
+            "currency": result.currency or "USD",
             "market_cap": 1_000_000_000,
             "sector": "Technology",
             "industry": "Software",
         }
-
-    def get_currency(self, symbol: str) -> Optional[str]:
-        return "USD"
 
     def get_historical_prices(
         self,
@@ -137,15 +137,11 @@ class MockCryptoDataFetcher(CryptoDataFetcher):
     Use for local development or tests when external API is unavailable.
     """
 
-    def get_current_price(self, symbol: str) -> Optional[Decimal]:
+    def get_current_price(self, symbol: str) -> Optional[CurrentPriceResult]:
         # Normalize BTC, ETH etc. to consistent mock price
         base = symbol.split("-")[0] if "-" in symbol else symbol
-        return _mock_price_for_symbol(base)
-
-    def get_currency(self, symbol: str) -> Optional[str]:
-        if "-" in symbol:
-            return symbol.split("-")[-1].upper()
-        return "USD"
+        currency = symbol.split("-")[-1].upper() if "-" in symbol else "USD"
+        return CurrentPriceResult(_mock_price_for_symbol(base), currency)
 
     def get_historical_prices(
         self,

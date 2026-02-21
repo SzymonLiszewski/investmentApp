@@ -80,32 +80,26 @@ class StockCalculator(AssetCalculator):
             if not isinstance(quantity, Decimal):
                 quantity = Decimal(str(quantity))
 
-            # Get current price from repository (DB or fetcher)
+            # Get current price and currency from repository (DB or single fetcher call)
             repo = PriceRepository()
-            current_price = repo.get_current_price(symbol, self.data_fetcher)
-
-            if current_price is None:
+            result = repo.get_current_price(symbol, self.data_fetcher)
+            if result is None:
                 return None
+            current_price, asset_currency = result.price, result.currency
 
             # Calculate total value in native currency
             total_value = current_price * quantity
 
             # Convert to target currency if specified
-            if target_currency:
-                asset_currency = self.data_fetcher.get_currency(symbol)
-                
-                if asset_currency and asset_currency != target_currency:
-                    converted_value = self.currency_converter.convert(
-                        total_value,
-                        asset_currency,
-                        target_currency
-                    )
-                    
-                    if converted_value is None:
-                        # If conversion fails, return None
-                        return None
-                    
-                    total_value = converted_value
+            if target_currency and asset_currency and asset_currency != target_currency:
+                converted_value = self.currency_converter.convert(
+                    total_value,
+                    asset_currency,
+                    target_currency
+                )
+                if converted_value is None:
+                    return None
+                total_value = converted_value
 
             return total_value
 
@@ -144,22 +138,6 @@ class CryptoCalculator(AssetCalculator):
         self.data_fetcher = data_fetcher
         self.currency_converter = currency_converter or CurrencyConverter()
 
-    def _convert_to_target_currency(
-        self,
-        total_value: Decimal,
-        symbol: str,
-        target_currency: str,
-    ) -> Optional[Decimal]:
-        """Convert total_value from asset currency to target_currency. Returns None if conversion fails."""
-        asset_currency = self.data_fetcher.get_currency(symbol)
-        if not asset_currency or asset_currency == target_currency:
-            return total_value
-        return self.currency_converter.convert(
-            total_value,
-            asset_currency,
-            target_currency,
-        )
-
     def get_current_value(
         self,
         asset_data: Dict[str, Any],
@@ -176,16 +154,18 @@ class CryptoCalculator(AssetCalculator):
                 quantity = Decimal(str(quantity))
 
             repo = PriceRepository()
-            current_price = repo.get_current_price(symbol, self.data_fetcher)
-
-            if current_price is None:
+            result = repo.get_current_price(symbol, self.data_fetcher)
+            if result is None:
                 return None
+            current_price, asset_currency = result.price, result.currency
 
             total_value = current_price * quantity
 
-            if target_currency:
-                total_value = self._convert_to_target_currency(
-                    total_value, symbol, target_currency
+            if target_currency and asset_currency and asset_currency != target_currency:
+                total_value = self.currency_converter.convert(
+                    total_value,
+                    asset_currency,
+                    target_currency,
                 )
                 if total_value is None:
                     return None

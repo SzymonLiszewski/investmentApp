@@ -9,7 +9,12 @@ from decimal import Decimal
 import pandas as pd
 import yfinance as yf
 
-from base.infrastructure.interfaces.market_data_fetcher import StockDataFetcher, CryptoDataFetcher, FXDataFetcher
+from base.infrastructure.interfaces.market_data_fetcher import (
+    StockDataFetcher,
+    CryptoDataFetcher,
+    FXDataFetcher,
+    CurrentPriceResult,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +25,7 @@ class YfinanceStockDataFetcher(StockDataFetcher):
     def __init__(self):
         self._cache = {}
 
-    def get_current_price(self, symbol: str) -> Optional[Decimal]:
+    def get_current_price(self, symbol: str) -> Optional[CurrentPriceResult]:
         try:
             ticker = yf.Ticker(symbol)
             info = ticker.info
@@ -30,7 +35,8 @@ class YfinanceStockDataFetcher(StockDataFetcher):
                 if not hist.empty:
                     price = hist['Close'].iloc[-1]
             if price is not None:
-                return Decimal(str(price))
+                currency = info.get('currency', 'USD')
+                return CurrentPriceResult(Decimal(str(price)), currency)
             return None
         except Exception as e:
             logger.warning("Error fetching price for %s: %s", symbol, e)
@@ -38,28 +44,22 @@ class YfinanceStockDataFetcher(StockDataFetcher):
 
     def get_stock_info(self, symbol: str) -> Optional[Dict[str, Any]]:
         try:
+            result = self.get_current_price(symbol)
+            if result is None:
+                return None
             ticker = yf.Ticker(symbol)
             info = ticker.info
             return {
                 'symbol': symbol,
                 'name': info.get('longName', ''),
-                'current_price': self.get_current_price(symbol),
-                'currency': info.get('currency', 'USD'),
+                'current_price': result.price,
+                'currency': result.currency or 'USD',
                 'market_cap': info.get('marketCap'),
                 'sector': info.get('sector', ''),
                 'industry': info.get('industry', ''),
             }
         except Exception as e:
             logger.warning("Error fetching info for %s: %s", symbol, e)
-            return None
-
-    def get_currency(self, symbol: str) -> Optional[str]:
-        try:
-            ticker = yf.Ticker(symbol)
-            info = ticker.info
-            return info.get('currency', 'USD')
-        except Exception as e:
-            logger.warning("Error fetching currency for %s: %s", symbol, e)
             return None
 
     def get_historical_prices(
@@ -210,7 +210,7 @@ class YfinanceCryptoDataFetcher(CryptoDataFetcher):
             return symbol
         return f"{symbol}-USD"
 
-    def get_current_price(self, symbol: str) -> Optional[Decimal]:
+    def get_current_price(self, symbol: str) -> Optional[CurrentPriceResult]:
         try:
             yf_symbol = self._yfinance_symbol(symbol)
             ticker = yf.Ticker(yf_symbol)
@@ -221,19 +221,11 @@ class YfinanceCryptoDataFetcher(CryptoDataFetcher):
                 if not hist.empty:
                     price = hist['Close'].iloc[-1]
             if price is not None:
-                return Decimal(str(price))
+                currency = symbol.split('-')[-1].upper() if '-' in symbol else 'USD'
+                return CurrentPriceResult(Decimal(str(price)), currency)
             return None
         except Exception as e:
             logger.warning("Error fetching crypto price for %s: %s", symbol, e)
-            return None
-
-    def get_currency(self, symbol: str) -> Optional[str]:
-        try:
-            if '-' in symbol:
-                return symbol.split('-')[-1].upper()
-            return 'USD'
-        except Exception as e:
-            logger.warning("Error fetching crypto currency for %s: %s", symbol, e)
             return None
 
     def get_historical_prices(

@@ -11,6 +11,7 @@ import pandas as pd
 from base.infrastructure.interfaces.market_data_fetcher import (
     StockDataFetcher,
     CryptoDataFetcher,
+    CurrentPriceResult,
 )
 from base.infrastructure.interfaces.price_repository import AbstractPriceRepository
 from base.models import Asset, CurrentPrice, PriceHistory
@@ -29,11 +30,11 @@ class PriceRepository(AbstractPriceRepository):
         symbol: str,
         fetcher: Union[StockDataFetcher, CryptoDataFetcher],
         asset: Optional[Asset] = None,
-    ) -> Optional[Decimal]:
+    ) -> Optional[CurrentPriceResult]:
         """
-        Return the current price for the symbol. Uses CurrentPrice from DB if present
-        and not older than CURRENT_PRICE_MAX_AGE, otherwise fetches from the fetcher,
-        saves to DB and returns.
+        Return current price and currency for the symbol. Uses CurrentPrice from DB if present
+        and not older than CURRENT_PRICE_MAX_AGE, otherwise fetches from the fetcher
+        (single API call), saves to DB and returns.
         """
         try:
             current = CurrentPrice.objects.filter(symbol=symbol).first()
@@ -43,25 +44,22 @@ class PriceRepository(AbstractPriceRepository):
                 if updated.tzinfo is None:
                     updated = updated.replace(tzinfo=timezone.utc)
                 if now - updated <= CURRENT_PRICE_MAX_AGE:
-                    return current.price
+                    currency = getattr(current, "currency", None) or "USD"
+                    return CurrentPriceResult(current.price, currency)
         except Exception:
             pass
 
         logger.info("Fetching current price from external API: symbol=%s", symbol)
         try:
-            price = fetcher.get_current_price(symbol)
+            result = fetcher.get_current_price(symbol)
         except Exception as e:
             logger.warning("Failed to fetch current price for %s: %s", symbol, e)
             return None
 
-        if price is None:
+        if result is None:
             return None
 
-        currency = "USD"
-        try:
-            currency = fetcher.get_currency(symbol) or "USD"
-        except Exception:
-            pass
+        price, currency = result.price, result.currency or "USD"
 
         try:
             CurrentPrice.objects.update_or_create(
@@ -75,7 +73,7 @@ class PriceRepository(AbstractPriceRepository):
         except Exception as e:
             logger.warning("Failed to save current price for %s: %s", symbol, e)
 
-        return price
+        return CurrentPriceResult(price, currency)
 
     def get_price_history(
         self,

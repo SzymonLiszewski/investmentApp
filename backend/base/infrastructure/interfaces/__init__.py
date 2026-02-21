@@ -1,4 +1,9 @@
-from .market_data_fetcher import StockDataFetcher, CryptoDataFetcher, FXDataFetcher
+from .market_data_fetcher import (
+    StockDataFetcher,
+    CryptoDataFetcher,
+    FXDataFetcher,
+    CurrentPriceResult,
+)
 from .economic_calendar import EconomicCalendarFetcher
 from .news_fetcher import NewsFetcher
 from .price_repository import AbstractPriceRepository
@@ -8,6 +13,7 @@ __all__ = [
     'StockDataFetcher',
     'CryptoDataFetcher',
     'FXDataFetcher',
+    'CurrentPriceResult',
     'EconomicCalendarFetcher',
     'NewsFetcher',
     'AbstractPriceRepository',
