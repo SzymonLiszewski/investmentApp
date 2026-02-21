@@ -8,8 +8,6 @@ __pycache__
 db.sqlite3
 media/
 static/
-*/migrations/*
-!*/migrations/__init__.py
 
 # Environment files
 .env

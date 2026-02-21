@@ -8,28 +8,12 @@ from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand
 
 from base.models import Asset
-from portfolio.models import Transactions, UserAsset
+from portfolio.models import Transactions
 from portfolio.services.portfolio_snapshots import PortfolioSnapshotService
+from portfolio.services.transaction_service import update_user_asset
 
 
 DEMO_USERNAME = "demo"
-
-
-def _sync_user_asset(transaction: Transactions) -> None:
-    """Update UserAsset from a transaction (BUY: add quantity, SELL: subtract)."""
-    user_asset, created = UserAsset.objects.get_or_create(
-        owner=transaction.owner,
-        ownedAsset=transaction.product,
-    )
-    if transaction.transactionType == Transactions.transaction_type.BUY:
-        delta = transaction.quantity
-    else:
-        delta = -transaction.quantity
-    if created:
-        user_asset.quantity = max(0.0, delta)
-    else:
-        user_asset.quantity = max(0.0, user_asset.quantity + delta)
-    user_asset.save()
 
 
 class Command(BaseCommand):
@@ -95,7 +79,7 @@ class Command(BaseCommand):
                 date=today - timedelta(days=30),
                 currency="PLN",
             )
-            _sync_user_asset(tx1)
+            update_user_asset(tx1)
             txs.append(tx1)
 
             # BUY more stock 1
@@ -108,7 +92,7 @@ class Command(BaseCommand):
                 date=today - timedelta(days=20),
                 currency="PLN",
             )
-            _sync_user_asset(tx2)
+            update_user_asset(tx2)
             txs.append(tx2)
 
             # SELL some stock 1
@@ -121,7 +105,7 @@ class Command(BaseCommand):
                 date=today - timedelta(days=10),
                 currency="PLN",
             )
-            _sync_user_asset(tx3)
+            update_user_asset(tx3)
             txs.append(tx3)
 
             if len(stocks) >= 2:
@@ -134,7 +118,7 @@ class Command(BaseCommand):
                     date=today - timedelta(days=15),
                     currency="PLN",
                 )
-                _sync_user_asset(tx4)
+                update_user_asset(tx4)
                 txs.append(tx4)
 
         if cryptos:
@@ -147,7 +131,7 @@ class Command(BaseCommand):
                 date=today - timedelta(days=14),
                 currency="PLN",
             )
-            _sync_user_asset(tx_crypto)
+            update_user_asset(tx_crypto)
             txs.append(tx_crypto)
 
         self.stdout.write(

@@ -4,7 +4,7 @@ from .models import UserAsset, Transactions, PortfolioSnapshot
 
 @admin.register(UserAsset)
 class UserAssetAdmin(admin.ModelAdmin):
-    list_display = ('owner', 'ownedAsset', 'quantity')
+    list_display = ('owner', 'ownedAsset', 'quantity', 'average_purchase_price', 'currency')
 
 
 @admin.register(Transactions)

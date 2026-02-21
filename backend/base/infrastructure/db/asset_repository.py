@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional
 
 from base.infrastructure.interfaces.asset_repository import AbstractAssetRepository
 from base.models import Asset
-from base.services.stock_data_cache import get_stock_data_cached
+from base.services.stock_data_service import get_stock_data
 
 
 class AssetRepository(AbstractAssetRepository):
@@ -20,7 +20,7 @@ class AssetRepository(AbstractAssetRepository):
         Return basic info dict. Company Name comes from Asset if present in DB;
         Current Price, Price Change, Percent Change come from cache/fetcher.
         """
-        data = get_stock_data_cached(symbol, "basic_info", fetcher)
+        data = get_stock_data(symbol, "basic_info", fetcher)
         if not data:
             return {}
 

@@ -76,7 +76,11 @@ function Analysis2(){
                         ? 'N/A' 
                         : `${Number(CurrentPrice).toFixed(2)} USD`}
                 </h1>
-                <p id="priceChange">
+                <p id="priceChange" style={{
+                    color: PriceChange !== 'N/A' && PriceChange != null && !isNaN(Number(PriceChange))
+                        ? (Number(PriceChange) >= 0 ? '#82ca9d' : '#c62828')
+                        : 'inherit'
+                }}>
                     {PriceChange === 'N/A' || PriceChange === null || isNaN(Number(PriceChange)) 
                         ? 'N/A' 
                         : `${Number(PriceChange).toFixed(2)} %`}

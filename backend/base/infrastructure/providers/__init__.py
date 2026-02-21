@@ -4,7 +4,7 @@ from .yfinance_fetchers import (
     YfinanceFXDataFetcher,
 )
 from .news_fetchers import YahooNewsFetcher, NewsDataNewsFetcher
-from .economic_calendar import AlphaVantageEconomicCalendarFetcher
+from .economic_calendar import NoOpEconomicCalendarFetcher, AlphaVantageEconomicCalendarFetcher
 
 __all__ = [
     'YfinanceStockDataFetcher',
@@ -12,5 +12,6 @@ __all__ = [
     'YfinanceFXDataFetcher',
     'YahooNewsFetcher',
     'NewsDataNewsFetcher',
+    'NoOpEconomicCalendarFetcher',
     'AlphaVantageEconomicCalendarFetcher',
 ]

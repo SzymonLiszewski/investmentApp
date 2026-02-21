@@ -35,6 +35,19 @@ ENABLE_ML_FUNCTIONS = os.environ.get('ENABLE_ML_FUNCTIONS', 'false').lower() == 
 # Use mock stock/crypto data fetchers (no external API). For local dev and tests.
 USE_MOCK_DATA_FETCHER = os.environ.get('USE_MOCK_DATA_FETCHER', 'false').lower() == 'true'
 
+# --- External API keys (empty = do not call that API) ---
+ALPHAVANTAGE_API_KEY = os.environ.get('ALPHAVANTAGE_API_KEY', '').strip()
+NEWSDATA_API_KEY = os.environ.get('NEWSDATA_API_KEY', '').strip()
+
+# --- Enable/disable flags per API (must have key set AND flag true to use API) ---
+USE_ECONOMIC_CALENDAR_API = os.environ.get('USE_ECONOMIC_CALENDAR_API', 'true').lower() == 'true'
+USE_YAHOO_NEWS_API = os.environ.get('USE_YAHOO_NEWS_API', 'true').lower() == 'true'
+USE_NEWSDATA_NEWS_API = os.environ.get('USE_NEWSDATA_NEWS_API', 'true').lower() == 'true'
+
+ECONOMIC_CALENDAR_API_ENABLED = bool(ALPHAVANTAGE_API_KEY) and USE_ECONOMIC_CALENDAR_API
+YAHOO_NEWS_API_ENABLED = USE_YAHOO_NEWS_API
+NEWSDATA_NEWS_API_ENABLED = bool(NEWSDATA_API_KEY) and USE_NEWSDATA_NEWS_API
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
        'rest_framework_simplejwt.authentication.JWTAuthentication',

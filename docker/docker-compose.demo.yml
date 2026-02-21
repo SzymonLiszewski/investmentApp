@@ -30,6 +30,11 @@ services:
       DEBUG: "true"
       SECRET_KEY: "demo-secret-key-not-for-production"
       USE_MOCK_DATA_FETCHER: "true"
+      ALPHAVANTAGE_API_KEY: ${ALPHAVANTAGE_API_KEY:-}
+      NEWSDATA_API_KEY: ${NEWSDATA_API_KEY:-}
+      USE_ECONOMIC_CALENDAR_API: ${USE_ECONOMIC_CALENDAR_API:-true}
+      USE_YAHOO_NEWS_API: ${USE_YAHOO_NEWS_API:-true}
+      USE_NEWSDATA_NEWS_API: ${USE_NEWSDATA_NEWS_API:-true}
     expose:
       - "8000"
     restart: unless-stopped

@@ -7,10 +7,10 @@ Captrivio is an application for retail investors whose **main focus is portfolio
 - **Portfolio** - record transactions, view composition and allocation, value history, risk indicators (Sharpe, Sortino) and Alpha.
 - **Quotes and market data** - stock and index prices, fundamental data (P/E, dividend) and technical indicators (RSI, moving averages).
 - **Forecasts** - simple price forecasts based on historical trends.
-- **News and sentiment** - financial news with sentiment scoring (optional ML).
+- **News and sentiment** - financial news with sentiment scoring (optional, use ENABLE_ML_FUNCTIONS=true).
 - **Calendar** - earnings report dates and IPO calendar.
 
-**Live demo:** A live demo is available at https://captrivio.com
+**Live demo:** A live demo is available at https://captrivio.com (this demo uses mock data for illustrative purposes only)
 
 ---
 
@@ -18,7 +18,7 @@ Captrivio is an application for retail investors whose **main focus is portfolio
 
 ### Docker - demo (no config, no API keys)
 
-Runs the same stack as production using **pre-built images from GHCR**, with all required environment variables set and **mock data fetcher** enabled - no `.env` or API keys needed. Useful for a quick try-out or demos.
+Runs the same stack as production using **pre-built images from GHCR**, with all required environment variables set and **mock data fetcher** enabled - no `.env` or API keys needed. Useful for a quick try-out or demos. For real data, disable the mock fetcher and set the relevant provider options, provide API keys where required - see .env.example for examples
 
 ```bash
 docker compose -f docker/docker-compose.demo.yml --project-directory . up -d
@@ -102,15 +102,15 @@ Nginx listens on port 80 and proxies `/api/`, `/admin/`, `/static/` to the backe
 
 - **Frontend (React)** - SPA talking to the Django API over REST; JWT authentication (token + refresh).
 - **Backend (Django)** - REST API split into apps: `base`, `portfolio`, `analytics`.
-- **Database** - SQLite for local development without Docker; **PostgreSQL** with Docker and in production.
-- **External APIs** - Alpha Vantage, Yahoo Finance, newsdata, XTB (market data and account integration).
+- **Database** -  PostgreSQL
+- **External APIs** - Alpha Vantage, Yahoo Finance, newsdata.
 
 ### Backend apps (`base` / `portfolio` / `analytics`)
 
 **App responsibilities:**
 
 - **`base`** - Users, registration, JWT; assets (stocks/indices) and search; market data (quotes, fundamental, technical); news; calendar (earnings, IPO); bonds (series, macro).
-- **`portfolio`** - Transactions, composition, allocation, value history, risk indicators (Sharpe, Sortino) and Alpha, transaction updates, XTB integration, bond valuation.
+- **`portfolio`** - Transactions, composition, allocation, value history, risk indicators (Sharpe, Sortino) and Alpha, transaction updates.
 - **`analytics`** - Advanced analytics (e.g. forecasts, optional ML); may use `saved_models/` for persisted models.
 
 
@@ -123,7 +123,7 @@ Nginx listens on port 80 and proxies `/api/`, `/admin/`, `/static/` to the backe
 | **`views/`** or **`views.py`** | HTTP handlers; expose REST endpoints (thin layer, delegate to services/selectors). |
 | **`serializers.py`** | DRF serializers for request/response (validation, (de)serialization). |
 | **`urls.py`** | URL routing to views. |
-| **`services/`** | Business logic and use cases (e.g. portfolio metrics, XTB sync). |
+| **`services/`** | Business logic and use cases (e.g. portfolio metrics). |
 | **`selectors/`** | Read-only queries and data assembly (no side effects). |
 | **`infrastructure/`** | DB access, interfaces, external data providers. |
 | **`admin.py`** | Django admin registration. |

@@ -170,3 +170,39 @@ class StockDataCache(models.Model):
 
     def __str__(self):
         return f"{self.symbol} ({self.data_type})"
+
+
+class EconomicCalendarEvent(models.Model):
+    """
+    Cached economic calendar events (earnings, IPO) from external API.
+    Refreshed periodically; API is called only when cache is stale or empty.
+    """
+    class EventType(models.TextChoices):
+        EARNINGS = "earnings", "Earnings"
+        IPO = "ipo", "IPO"
+
+    event_type = models.CharField(max_length=20, choices=EventType.choices, db_index=True)
+    symbol = models.CharField(max_length=50, db_index=True)
+    name = models.CharField(max_length=255, blank=True)
+    report_date = models.DateField(null=True, blank=True)
+    fiscal_date_ending = models.DateField(null=True, blank=True)
+    estimate = models.DecimalField(max_digits=18, decimal_places=4, null=True, blank=True)
+    currency = models.CharField(max_length=10, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["report_date", "symbol"]
+        verbose_name = "Economic Calendar Event"
+        verbose_name_plural = "Economic Calendar Events"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["event_type", "symbol", "report_date"],
+                name="unique_economic_calendar_event",
+            )
+        ]
+        indexes = [
+            models.Index(fields=["event_type", "report_date"]),
+        ]
+
+    def __str__(self):
+        return f"{self.event_type}: {self.symbol} @ {self.report_date}"
