@@ -6,6 +6,7 @@ PyJWT
 keras>=2.15.0
 numpy
 pandas
+openpyxl
 tensorflow
 tensorflow_intel
 yfinance
