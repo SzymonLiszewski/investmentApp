@@ -11,6 +11,7 @@ import Analysis2 from './pages/Analysis2';
 import ForecastView from './components/ForecastView';
 import EventsCalendar from './components/EventsCalendar';
 import Portfolio from './pages/Portfolio';
+import ImportTransactionsPage from './pages/ImportTransactionsPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage'
 import AddStocks from './components/portfolio/AddStocks';
@@ -31,6 +32,7 @@ const App = () => {
                         <Route path='/analysis2/:ticker/*' element={<Analysis2/>}/>
                         <Route path='/calendar' element={<EventsCalendar/>}/>
                         <Route path='/portfolio' element={<Portfolio/>}/>
+                        <Route path='/portfolio/import-transactions' element={<ImportTransactionsPage/>}/>
                         <Route path='/login' element={<LoginPage/>}/>
                         <Route path='/register' element={<RegisterPage/>}/>
                         <Route path='/addStock' element={<AddStocks/>}/>

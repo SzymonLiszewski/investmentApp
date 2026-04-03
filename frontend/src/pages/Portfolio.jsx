@@ -24,7 +24,7 @@ function Portfolio(){
             try {
                 const currency = selectedCurrency || 'PLN';
                 const response = await apiClient.get(
-                    `api/portfolio/value-history/?currency=${currency}&rebuild=true`
+                    `/api/portfolio/value-history/?currency=${currency}&rebuild=true`
                 );
                 setValueHistory(response.data);
             } catch (error) {
@@ -39,7 +39,7 @@ function Portfolio(){
         const fetchIndicators = async () => {
             try {
                 const currency = selectedCurrency || 'PLN';
-                const response = await apiClient.get('api/portfolio/indicators/', {
+                const response = await apiClient.get('/api/portfolio/indicators/', {
                     params: { currency },
                 });
                 const data = response.data;
@@ -75,6 +75,7 @@ function Portfolio(){
             <div style={{display: 'flex', gap: '10px'}}>
                 <button className="connectedAccountsButton"><Link to="/connectAccounts" style={{color: "#000000"}}>connected accounts</Link></button>
                 <button className="connectedAccountsButton"><Link to="/addStock" style={{color: "#000000"}}>add assets</Link></button>
+                <button className="connectedAccountsButton"><Link to="/portfolio/import-transactions" style={{color: "#000000"}}>import transactions</Link></button>
             </div>
             <CurrencySelector onCurrencyChange={handleCurrencyChange} />
         </div>

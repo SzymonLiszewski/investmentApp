@@ -1,0 +1,172 @@
+.importTxToolbar {
+  margin: 1rem 5vw 0;
+}
+
+.importTxBackLink {
+  color: #1a1a1a;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.importTxBackLink:hover {
+  text-decoration: underline;
+}
+
+.importTxCard {
+  max-width: 640px;
+  margin: 1.5rem 5vw 3rem;
+  padding: 2rem 2.25rem;
+  background: #ffffff;
+  border-radius: 40px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  color: #000000;
+}
+
+.importTxTitle {
+  margin: 0 0 1.25rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.importTxSubtitle {
+  margin: 1rem 0 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.importTxLead {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.importTxSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.importTxBrokerGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.importTxBrokerCard {
+  flex: 1;
+  min-width: 200px;
+  padding: 1.25rem 1.5rem;
+  text-align: left;
+  border: 2px solid #e0e0e0;
+  border-radius: 16px;
+  background: #fafafa;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.importTxBrokerCard:hover {
+  border-color: #bdbdbd;
+  background: #f5f5f5;
+}
+
+.importTxBrokerName {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.importTxBrokerDesc {
+  font-size: 0.9rem;
+  color: #424242;
+}
+
+.importTxInstructions {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: #212121;
+}
+
+.importTxInstructions p {
+  margin: 0 0 0.85rem;
+}
+
+.importTxInstructions code {
+  font-size: 0.88em;
+  padding: 0.1em 0.35em;
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+
+.importTxHint {
+  font-size: 0.9rem;
+  color: #616161;
+}
+
+.importTxUploadRow {
+  margin-top: 0.5rem;
+}
+
+.importTxFileInput {
+  font-size: 0.95rem;
+}
+
+.importTxPrimaryButton {
+  margin-top: 0.5rem;
+  padding: 0.65rem 1.35rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  background: #1a1a1a;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.importTxPrimaryButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.importTxGhostButton {
+  align-self: flex-start;
+  padding: 0.35rem 0;
+  border: none;
+  background: none;
+  color: #424242;
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.importTxAlert {
+  margin-top: 1.25rem;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+}
+
+.importTxAlertError {
+  background: #ffebee;
+  color: #b71c1c;
+}
+
+.importTxResult {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #eeeeee;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.importTxOutcomes ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.importTxMuted {
+  margin-top: 0.75rem;
+  color: #616161;
+  font-size: 0.9rem;
+}

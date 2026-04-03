@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../AuthContext';
+import { apiUrl } from '../../config/api';
 import './AuthForm.css';
 
 const LoginForm = () => {
@@ -15,7 +16,7 @@ const LoginForm = () => {
     setError('');
     setSuccess('');
     try {
-      const response = await fetch('api/token/', {
+      const response = await fetch(apiUrl('/api/token/'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

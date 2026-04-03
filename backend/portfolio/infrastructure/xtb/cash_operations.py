@@ -64,7 +64,7 @@ def parse_xtb_cash_operations_xlsx(
     :param file: Path or binary file-like object (``bytes`` buffer seekable at 0).
     :param sheet_name: Override sheet title (default: case-insensitive ``Cash Operations``).
     """
-    wb = load_workbook(file, read_only=True, data_only=True)
+    wb = load_workbook(file, read_only=False, data_only=True)
     try:
         ws = _select_cash_operations_sheet(wb, sheet_name)
         header_row_idx, col_map = _find_header_row(ws)

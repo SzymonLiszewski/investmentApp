@@ -21,3 +21,6 @@ forex-python
 # Analytics (linear regression, SARIMAX - no LSTM/transformers)
 scikit_learn
 statsmodels>=0.14.2
+
+# file processing
+openpyxl
