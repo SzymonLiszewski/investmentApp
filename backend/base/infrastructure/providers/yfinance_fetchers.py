@@ -3,15 +3,56 @@ Yfinance implementations of data fetcher abstractions.
 """
 import logging
 from datetime import date, timedelta
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Tuple
 from decimal import Decimal
 
 import pandas as pd
 import yfinance as yf
 
+from collections import defaultdict
+
 from base.infrastructure.interfaces.market_data_fetcher import StockDataFetcher, CryptoDataFetcher, FXDataFetcher
 
 logger = logging.getLogger(__name__)
+
+_RAW_BROKER_STOCK_SUFFIX_TO_YAHOO: Dict[str, str] = {
+    ".LSE": ".L",
+    ".UK": ".L",
+    ".LN": ".L",
+    ".US": "",
+    ".AMS": ".AS",
+    ".BRU": ".BR",
+    ".MIL": ".MI",
+    ".BIT": ".MI",
+    ".BME": ".MC",
+    ".PAR": ".PA",
+    ".EPA": ".PA",
+    ".XETRA": ".DE",
+    ".GER": ".DE",
+}
+_BROKER_TO_YAHOO_SUFFIX_ORDERED: Tuple[Tuple[str, str], ...] = tuple(
+    sorted(_RAW_BROKER_STOCK_SUFFIX_TO_YAHOO.items(), key=lambda kv: len(kv[0]), reverse=True)
+)
+
+
+def normalize_stock_symbol_for_yfinance(symbol: str) -> str:
+    """
+    Map broker-style tickers to Yahoo Finance symbols.
+
+    """
+    if not symbol or not isinstance(symbol, str):
+        return symbol
+    s = symbol.strip()
+    if not s:
+        return s
+    upper = s.upper()
+    for broker_suffix, yahoo_suffix in _BROKER_TO_YAHOO_SUFFIX_ORDERED:
+        if upper.endswith(broker_suffix):
+            base = s[: -len(broker_suffix)]
+            if not base:
+                return s
+            return f"{base}{yahoo_suffix}" if yahoo_suffix else base
+    return s
 
 
 class YfinanceStockDataFetcher(StockDataFetcher):
@@ -22,7 +63,8 @@ class YfinanceStockDataFetcher(StockDataFetcher):
 
     def get_current_price(self, symbol: str) -> Optional[Decimal]:
         try:
-            ticker = yf.Ticker(symbol)
+            yf_sym = normalize_stock_symbol_for_yfinance(symbol)
+            ticker = yf.Ticker(yf_sym)
             info = ticker.info
             price = info.get('currentPrice') or info.get('regularMarketPrice')
             if price is None:
@@ -38,7 +80,8 @@ class YfinanceStockDataFetcher(StockDataFetcher):
 
     def get_stock_info(self, symbol: str) -> Optional[Dict[str, Any]]:
         try:
-            ticker = yf.Ticker(symbol)
+            yf_sym = normalize_stock_symbol_for_yfinance(symbol)
+            ticker = yf.Ticker(yf_sym)
             info = ticker.info
             return {
                 'symbol': symbol,
@@ -55,7 +98,8 @@ class YfinanceStockDataFetcher(StockDataFetcher):
 
     def get_currency(self, symbol: str) -> Optional[str]:
         try:
-            ticker = yf.Ticker(symbol)
+            yf_sym = normalize_stock_symbol_for_yfinance(symbol)
+            ticker = yf.Ticker(yf_sym)
             info = ticker.info
             return info.get('currency', 'USD')
         except Exception as e:
@@ -70,15 +114,20 @@ class YfinanceStockDataFetcher(StockDataFetcher):
     ) -> Dict[str, pd.Series]:
         if not symbols:
             return {}
+        yf_to_origs: Dict[str, List[str]] = defaultdict(list)
+        for sym in symbols:
+            yf_sym = normalize_stock_symbol_for_yfinance(sym)
+            yf_to_origs[yf_sym].append(sym)
+        yf_symbols = list(yf_to_origs.keys())
         try:
             data = yf.download(
-                symbols,
+                yf_symbols,
                 start=start_date.isoformat(),
                 end=(end_date + timedelta(days=1)).isoformat(),
                 progress=False,
             )
         except Exception:
-            logger.exception("yfinance download failed for %s", symbols)
+            logger.exception("yfinance download failed for %s", yf_symbols)
             return {}
         if data is None or data.empty:
             return {}
@@ -87,15 +136,18 @@ class YfinanceStockDataFetcher(StockDataFetcher):
         except KeyError:
             return {}
         if isinstance(close, pd.Series):
-            close = close.to_frame(name=symbols[0])
+            close = close.to_frame(name=yf_symbols[0])
         if isinstance(close.columns, pd.MultiIndex):
             close.columns = close.columns.get_level_values(-1)
         close.index = pd.to_datetime(close.index).date
         close = close.ffill()
         result: Dict[str, pd.Series] = {}
-        for sym in symbols:
-            if sym in close.columns:
-                result[sym] = close[sym].dropna()
+        for yf_sym, orig_syms in yf_to_origs.items():
+            if yf_sym not in close.columns:
+                continue
+            series = close[yf_sym].dropna()
+            for orig in orig_syms:
+                result[orig] = series
         return result
 
     # ---- Additional methods (integrated from utils/dataFetcher) ----
@@ -112,7 +164,8 @@ class YfinanceStockDataFetcher(StockDataFetcher):
 
     def get_fundamental_analysis(self, ticker: str) -> dict:
         """Get fundamental analysis data for a ticker."""
-        stock = yf.Ticker(ticker)
+        yf_ticker = normalize_stock_symbol_for_yfinance(ticker)
+        stock = yf.Ticker(yf_ticker)
         info = stock.info
         dividends = stock.dividends
         if not dividends.empty:
@@ -175,7 +228,8 @@ class YfinanceStockDataFetcher(StockDataFetcher):
     def get_technical_indicators(self, ticker: str) -> dict:
         """Get technical analysis indicators for a ticker."""
         import ta as ta_lib
-        stock = yf.Ticker(ticker)
+        yf_ticker = normalize_stock_symbol_for_yfinance(ticker)
+        stock = yf.Ticker(yf_ticker)
         data = stock.history(period="1y")
         if data.empty:
             return {"error": "No data for the given ticker"}

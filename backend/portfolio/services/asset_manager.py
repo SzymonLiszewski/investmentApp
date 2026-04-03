@@ -2,6 +2,7 @@
 Asset manager for portfolio analysis and composition.
 """
 from datetime import date
+
 from typing import Callable, Dict, List, Optional, Any
 from decimal import Decimal
 from django.contrib.auth.models import User
@@ -40,20 +41,30 @@ class AssetManager:
             'cryptocurrencies': CryptoCalculator(self.crypto_data_fetcher, self.currency_converter),
         }
 
-    def _get_cost_basis(self, user: User, asset: 'Asset', current_quantity: float) -> Optional[Decimal]:
+    def _get_cost_basis(
+        self,
+        user: User,
+        asset: 'Asset',
+        current_quantity: float,
+        *,
+        as_of_date: Optional[date] = None,
+    ) -> Optional[Decimal]:
         """
         Compute cost basis (total cost of current position) from transactions.
         Uses average-cost method: on SELL, cost is reduced proportionally to quantity.
         Transaction amounts in non-native currency are converted to asset native currency.
 
+        Args:
+            as_of_date: When set, only transactions on or before this date are included.
+
         Returns:
             Total cost in asset's native currency, or None if no transactions.
         """
         native_currency = self._get_native_currency(asset)
-        txs = (
-            Transactions.objects.filter(owner=user, product=asset)
-            .order_by('date', 'id')
-        )
+        q = Transactions.objects.filter(owner=user, product=asset)
+        if as_of_date is not None:
+            q = q.filter(date__lte=as_of_date)
+        txs = q.order_by('date', 'id')
         qty = Decimal('0')
         cost = Decimal('0')
         for tx in txs:
@@ -188,7 +199,12 @@ class AssetManager:
                     )
                 else:
                     total_cost_dec = cost_basis_stored
-                average_purchase_price = float(user_asset.average_purchase_price)
+                if total_cost_dec is not None and quantity_float:
+                    average_purchase_price = float(
+                        total_cost_dec / Decimal(str(quantity_float))
+                    )
+                else:
+                    average_purchase_price = float(user_asset.average_purchase_price)
             if total_cost_dec is None:
                 # Fallback: compute from transactions
                 cost_basis = self._get_cost_basis(user, asset, user_asset.quantity)
@@ -200,8 +216,10 @@ class AssetManager:
                         )
                     else:
                         total_cost_dec = cost_basis
-                    if quantity_float:
-                        average_purchase_price = float(cost_basis / Decimal(str(quantity_float)))
+                    if quantity_float and total_cost_dec is not None:
+                        average_purchase_price = float(
+                            total_cost_dec / Decimal(str(quantity_float))
+                        )
             total_cost_float = float(total_cost_dec) if total_cost_dec is not None else None
             if average_purchase_price is None and total_cost_float and quantity_float:
                 average_purchase_price = total_cost_float / quantity_float

@@ -34,7 +34,7 @@ services:
       ALLOWED_HOSTS: "localhost,127.0.0.1,backend"
       ENABLE_ML_FUNCTIONS: "false"
       DEBUG: "true"
-      USE_MOCK_DATA_FETCHER: "true"
+      USE_MOCK_DATA_FETCHER: "false"
       ALPHAVANTAGE_API_KEY: ${ALPHAVANTAGE_API_KEY:-}
       NEWSDATA_API_KEY: ${NEWSDATA_API_KEY:-}
       USE_ECONOMIC_CALENDAR_API: ${USE_ECONOMIC_CALENDAR_API:-true}
