@@ -86,7 +86,7 @@ function ImportTransactionsPage() {
                 className="importTxBrokerCard"
                 onClick={chooseXtb}
               >
-                <span className="importTxBrokerName">XTB</span>
+                <span className="importTxBrokerName" style={{ color: "#000" }}>XTB</span>
                 <span className="importTxBrokerDesc">Excel export · Cash Operations sheet</span>
               </button>
             </div>
