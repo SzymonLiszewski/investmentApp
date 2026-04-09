@@ -1,0 +1,125 @@
+# Production stack for Docker Swarm (pre-built images from registry).
+
+version: "3.8"
+
+configs:
+  caddyfile:
+    file: ../caddy/Caddyfile.prod
+
+secrets:
+  postgres_password:
+    external: true
+  django_secret_key:
+    external: true
+  alphavantage_api_key:
+    external: true
+  newsdata_api_key:
+    external: true
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-stocksense}
+      POSTGRES_USER: ${POSTGRES_USER:-stocksense}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets:
+      - postgres_password
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    networks:
+      - app
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-stocksense} -d ${POSTGRES_DB:-stocksense}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 5s
+
+  backend:
+    image: ghcr.io/szymonliszewski/investmentapp-backend:latest
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: ${POSTGRES_DB:-stocksense}
+      POSTGRES_USER: ${POSTGRES_USER:-stocksense}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      SECRET_KEY_FILE: /run/secrets/django_secret_key
+      ALPHAVANTAGE_API_KEY_FILE: /run/secrets/alphavantage_api_key
+      NEWSDATA_API_KEY_FILE: /run/secrets/newsdata_api_key
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:?Set ALLOWED_HOSTS}
+      ENABLE_ML_FUNCTIONS: ${ENABLE_ML_FUNCTIONS:-false}
+      DEBUG: "false"
+      USE_ECONOMIC_CALENDAR_API: ${USE_ECONOMIC_CALENDAR_API:-true}
+      USE_YAHOO_NEWS_API: ${USE_YAHOO_NEWS_API:-true}
+      USE_NEWSDATA_NEWS_API: ${USE_NEWSDATA_NEWS_API:-true}
+    secrets:
+      - postgres_password
+      - django_secret_key
+      - alphavantage_api_key
+      - newsdata_api_key
+    networks:
+      - app
+    command: >
+      sh -c "python manage.py migrate --noinput
+      && python manage.py collectstatic --noinput --clear
+      && gunicorn backend.wsgi:application --bind 0.0.0.0:8000 --workers 2 --threads 2"
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 5s
+
+  frontend:
+    image: ghcr.io/szymonliszewski/investmentapp-frontend:latest
+    networks:
+      - app
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 5s
+
+  caddy:
+    image: caddy:alpine
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN}
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: ingress
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: ingress
+    volumes:
+      - caddy_data:/data
+    configs:
+      - source: caddyfile
+        target: /etc/caddy/Caddyfile
+    networks:
+      - app
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 5s
+
+networks:
+  app:
+    driver: overlay
+    attachable: true
+
+volumes:
+  postgres_data_prod:
+  caddy_data:
+
