@@ -54,6 +54,7 @@ services:
       NEWSDATA_API_KEY_FILE: /run/secrets/newsdata_api_key
       ALLOWED_HOSTS: ${ALLOWED_HOSTS:?Set ALLOWED_HOSTS}
       ENABLE_ML_FUNCTIONS: ${ENABLE_ML_FUNCTIONS:-false}
+      USE_MOCK_DATA_FETCHER: "true"
       DEBUG: "false"
       USE_ECONOMIC_CALENDAR_API: ${USE_ECONOMIC_CALENDAR_API:-false}
       USE_YAHOO_NEWS_API: ${USE_YAHOO_NEWS_API:-false}
