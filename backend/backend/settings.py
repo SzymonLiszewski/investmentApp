@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 import os
 from pathlib import Path
 
+from backend.secrets_util import load_from_file_or_env, load_optional_from_file_or_env
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -21,7 +23,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ["SECRET_KEY"]
+# Production (Swarm): set SECRET_KEY_FILE=/run/secrets/...
+SECRET_KEY = load_from_file_or_env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ["DEBUG"].lower() == "true"
@@ -36,8 +39,10 @@ ENABLE_ML_FUNCTIONS = os.environ.get('ENABLE_ML_FUNCTIONS', 'false').lower() == 
 USE_MOCK_DATA_FETCHER = os.environ.get('USE_MOCK_DATA_FETCHER', 'false').lower() == 'true'
 
 # --- External API keys (empty = do not call that API) ---
-ALPHAVANTAGE_API_KEY = os.environ.get('ALPHAVANTAGE_API_KEY', '').strip()
-NEWSDATA_API_KEY = os.environ.get('NEWSDATA_API_KEY', '').strip()
+ALPHAVANTAGE_API_KEY = load_optional_from_file_or_env(
+    "ALPHAVANTAGE_API_KEY", ""
+).strip()
+NEWSDATA_API_KEY = load_optional_from_file_or_env("NEWSDATA_API_KEY", "").strip()
 
 # --- Enable/disable flags per API (must have key set AND flag true to use API) ---
 USE_ECONOMIC_CALENDAR_API = os.environ.get('USE_ECONOMIC_CALENDAR_API', 'true').lower() == 'true'
@@ -117,7 +122,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.environ["POSTGRES_DB"],
         "USER": os.environ["POSTGRES_USER"],
-        "PASSWORD": os.environ["POSTGRES_PASSWORD"],
+        "PASSWORD": load_from_file_or_env("POSTGRES_PASSWORD"),
         "HOST": os.environ["POSTGRES_HOST"],
         "PORT": os.environ["POSTGRES_PORT"],
     }
