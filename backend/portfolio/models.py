@@ -51,7 +51,21 @@ class Transactions(models.Model):
         null=True,
         help_text='Currency of price when set (e.g. PLN). When null, price is in asset native currency.',
     )
-    external_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
+    external_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="Broker/importer stable id; unique per owner when set.",
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["owner", "external_id"],
+                condition=models.Q(external_id__isnull=False),
+                name="uniq_transactions_owner_external_id",
+            ),
+        ]
 
 
 class PortfolioSnapshot(models.Model):

@@ -34,7 +34,7 @@ services:
       ALLOWED_HOSTS: "localhost,127.0.0.1,backend"
       ENABLE_ML_FUNCTIONS: "false"
       DEBUG: "true"
-      USE_MOCK_DATA_FETCHER: "true"
+      USE_MOCK_DATA_FETCHER: "false"
       ALPHAVANTAGE_API_KEY: ${ALPHAVANTAGE_API_KEY:-}
       NEWSDATA_API_KEY: ${NEWSDATA_API_KEY:-}
       USE_ECONOMIC_CALENDAR_API: ${USE_ECONOMIC_CALENDAR_API:-true}
@@ -55,6 +55,8 @@ services:
       dockerfile: ./frontend/Dockerfile.dev
     environment:
       VITE_PROXY_TARGET: "http://backend:8000"
+      # Browser on the host calls Django via published port (bypasses Vite proxy for API).
+      VITE_API_BASE_URL: "http://127.0.0.1:8000"
     volumes:
       - ../frontend:/app
       - /app/node_modules

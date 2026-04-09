@@ -46,7 +46,7 @@ const AddStocks = () => {
         asset_type: assetType,
         limit: '20'
       });
-      const response = await apiClient.get(`api/assets/search/?${params}`);
+      const response = await apiClient.get(`/api/assets/search/?${params}`);
       setSuggestions(response.data);
     } catch (error) {
       console.error('Error searching assets:', error);
@@ -156,7 +156,7 @@ const AddStocks = () => {
         }
       }
 
-      const response = await apiClient.post('api/portfolio/transactions/', transactionData);
+      const response = await apiClient.post('/api/portfolio/transactions/', transactionData);
       const data = response.data;
 
       alert('Asset added successfully');

@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const REFRESH_ENDPOINT = '/api/token/refresh/';
+import { apiUrl, getApiRoot } from '../config/api';
+
 const TOKEN_STORAGE_KEYS = { access: 'access', refresh: 'refresh' };
 
 function getAccessToken() {
@@ -36,7 +37,11 @@ function doRefresh() {
   if (!refresh) {
     return Promise.reject(new Error('No refresh token'));
   }
-  return axios.post(REFRESH_ENDPOINT, { refresh }, { baseURL: '' });
+  return axios.post(
+    apiUrl('/api/token/refresh/'),
+    { refresh },
+    { headers: { 'Content-Type': 'application/json' } }
+  );
 }
 
 apiClient.interceptors.request.use(

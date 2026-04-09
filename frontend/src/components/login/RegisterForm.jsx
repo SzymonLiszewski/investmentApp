@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { apiUrl } from '../../config/api';
 import './AuthForm.css';
 
 const MIN_PASSWORD_LENGTH = 8;
@@ -29,7 +30,7 @@ const RegisterForm = () => {
   const navigate = useNavigate();
 
   const registerUser = async (username, password) => {
-    const response = await fetch('api/user/register/', {
+    const response = await fetch(apiUrl('/api/user/register/'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

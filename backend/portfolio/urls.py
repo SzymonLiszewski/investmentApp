@@ -2,6 +2,11 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path(
+        'import/xtb/',
+        views.XtbCashOperationsImportView.as_view(),
+        name='portfolio_import_xtb',
+    ),
     path('transactions/', views.CreateTransaction.as_view(), name="transactions"),
     path('composition/', views.getUserAssetComposition, name='portfolio_composition'),
     path('indicators/', views.indicatorsView, name='portfolio_indicators'),
