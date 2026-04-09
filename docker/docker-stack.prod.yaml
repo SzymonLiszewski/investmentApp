@@ -55,9 +55,9 @@ services:
       ALLOWED_HOSTS: ${ALLOWED_HOSTS:?Set ALLOWED_HOSTS}
       ENABLE_ML_FUNCTIONS: ${ENABLE_ML_FUNCTIONS:-false}
       DEBUG: "false"
-      USE_ECONOMIC_CALENDAR_API: ${USE_ECONOMIC_CALENDAR_API:-true}
-      USE_YAHOO_NEWS_API: ${USE_YAHOO_NEWS_API:-true}
-      USE_NEWSDATA_NEWS_API: ${USE_NEWSDATA_NEWS_API:-true}
+      USE_ECONOMIC_CALENDAR_API: ${USE_ECONOMIC_CALENDAR_API:-false}
+      USE_YAHOO_NEWS_API: ${USE_YAHOO_NEWS_API:-false}
+      USE_NEWSDATA_NEWS_API: ${USE_NEWSDATA_NEWS_API:-false}
     secrets:
       - postgres_password
       - django_secret_key
@@ -77,7 +77,7 @@ services:
         delay: 5s
 
   frontend:
-    image: ghcr.io/szymonliszewski/investmentapp-frontend:latest
+    image: ghcr.io/szymonliszewski/investmentapp-frontend:demo
     networks:
       - app
     deploy:
