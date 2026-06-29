@@ -44,17 +44,26 @@ function NewsList(){
         return (<h1>Loading...</h1>)
     }
     return(
-        <div>
-            <div  className='searchNews'>
-                <SearchBox navigation={'news'}/>
-            </div>
-            <div className="newsList"> 
+        // central, max-width container (styling in NewsBox.css)
+        <div className="newsPage">
+            <header className="newsHeader">
+                <h1 className="newsHeading">Market News</h1>
+                <div className='searchNews'>
+                    <SearchBox navigation={'news'}/>
+                </div>
+            </header>
+            <div className="newsList">
                 <div className="newsLeft">
-                    {news.map((item)=>(
-                        <NewsBox title={item.title} link={item.link} description=""/>
+                    {news.length === 0 ? (
+                        <NewsBox title="No news available for this ticker yet." link="" />
+                    ) : news.map((item, index)=>(
+                        <NewsBox key={index} title={item.title} link={item.link} description=""/>
                     ))}
                 </div>
-                <IndicatorsGaugeChart data={sentimentValue} range={[-1, 1]} name="Sentiment" interpretation={interpretSentiment} className="sentimentChart" />
+                {/* gauge wrapped in a card so it's readable on the purple background */}
+                <aside className="sentimentChart">
+                    <IndicatorsGaugeChart data={sentimentValue} range={[-1, 1]} name="Sentiment" interpretation={interpretSentiment} />
+                </aside>
             </div>
         </div>
     )

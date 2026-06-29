@@ -3,6 +3,7 @@ import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import Modal from 'react-modal';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import './styles/EventsCalendar.css'; // loaded AFTER the library CSS so our overrides win
 import 'moment/locale/en-gb';
 
 moment.locale('en-gb');
@@ -53,34 +54,35 @@ const addHours = (date, hours) => {
   };
 
   return (
-    <div>
-      <h1 style={{textAlign: 'center', marginTop: '50px'}}>Financial Events Calendar</h1>
-      <Calendar
-        localizer={localizer}
-        events={events}
-        startAccessor="ipoDate"
-        endAccessor="endDate"
-        style={{ height: '75vh',
-           marginLeft: '5vw',
-           marginRight: '5vw',
-           width: '90vw',
-          color: 'black'  }}
-        onSelectEvent={handleEventClick}
-      />
+    // central, max-width container (styling in styles/EventsCalendar.css)
+    <div className="calendarPage">
+      <h1 className="calendarHeading">Financial Events Calendar</h1>
+      {/* high-contrast white card so the grid is readable on the purple background */}
+      <div className="calendarCard">
+        {/* wrapper enables horizontal scroll on narrow screens */}
+        <div className="calendarScroll">
+          <Calendar
+            localizer={localizer}
+            events={events}
+            startAccessor="ipoDate"
+            endAccessor="endDate"
+            className="captrivioCalendar" /* height/sizing moved to CSS */
+            onSelectEvent={handleEventClick}
+          />
+        </div>
+      </div>
       {selectedEvent && (
         <Modal
           isOpen={!!selectedEvent}
           onRequestClose={closeModal}
           contentLabel="Event Details"
+          className="eventModal"
+          overlayClassName="eventModalOverlay"
         >
-          <h2 style={{color: 'black'}}>{selectedEvent.title}</h2>
-          <p style={{color: 'black'}}>
-            Start: {selectedEvent.ipoDate.toLocaleString()}
-          </p>
-          <p style={{color: 'black'}}>
-            End: {selectedEvent.endDate.toLocaleString()}
-          </p>
-          <button onClick={closeModal}>Close</button>
+          <h2>{selectedEvent.title}</h2>
+          <p>Start: {selectedEvent.ipoDate.toLocaleString()}</p>
+          <p>End: {selectedEvent.endDate.toLocaleString()}</p>
+          <button className="eventModalClose" onClick={closeModal}>Close</button>
         </Modal>
       )}
     </div>
