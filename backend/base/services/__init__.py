@@ -59,6 +59,9 @@ def get_default_fx_fetcher():
 def get_default_news_fetchers():
     """Factory: return a list of default NewsFetcher implementations. Yahoo/NewsData only when enabled."""
     from django.conf import settings
+    if getattr(settings, 'USE_MOCK_DATA_FETCHER', False):
+        from base.infrastructure.providers.mock_fetchers import MockNewsFetcher
+        return [MockNewsFetcher()]
     from base.infrastructure.providers.news_fetchers import YahooNewsFetcher, NewsDataNewsFetcher
     fetchers = []
     if getattr(settings, 'YAHOO_NEWS_API_ENABLED', True):
@@ -71,6 +74,9 @@ def get_default_news_fetchers():
 def get_default_economic_calendar_fetcher():
     """Factory: return EconomicCalendarFetcher. No-op when API key missing or USE_ECONOMIC_CALENDAR_API disabled."""
     from django.conf import settings
+    if getattr(settings, 'USE_MOCK_DATA_FETCHER', False):
+        from base.infrastructure.providers.mock_fetchers import MockEconomicCalendarFetcher
+        return MockEconomicCalendarFetcher()
     from base.infrastructure.providers.economic_calendar import (
         NoOpEconomicCalendarFetcher,
         AlphaVantageEconomicCalendarFetcher,
