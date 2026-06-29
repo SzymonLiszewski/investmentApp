@@ -15,6 +15,8 @@ from base.infrastructure.interfaces.market_data_fetcher import (
     CryptoDataFetcher,
     FXDataFetcher,
 )
+from base.infrastructure.interfaces.news_fetcher import NewsFetcher
+from base.infrastructure.interfaces.economic_calendar import EconomicCalendarFetcher
 
 
 def _mock_price_for_symbol(symbol: str) -> Decimal:
@@ -181,3 +183,104 @@ class MockFXDataFetcher(FXDataFetcher):
 
     def get_current_rate(self, from_currency: str, to_currency: str) -> Optional[Decimal]:
         return _mock_fx_rate(from_currency, to_currency)
+
+
+def _seed_from_text(text: str) -> int:
+    """Deterministic integer seed from a string (stable across runs)."""
+    return sum(ord(c) for c in (text or "").upper()) % (2**32)
+
+
+class MockNewsFetcher(NewsFetcher):
+    """
+    News fetcher that returns deterministic mock articles. No network calls.
+    Use for local development / demo when external news APIs are unavailable.
+    """
+
+    _HEADLINES = [
+        "{q} posts quarterly update",
+        "Analysts weigh in on {q} outlook",
+        "{q} announces strategic partnership",
+        "What {q} investors should watch this week",
+        "{q} shares move on sector news",
+        "{q} expands into new markets",
+        "Earnings preview: {q} in focus",
+        "{q} unveils product roadmap",
+    ]
+
+    def get_news(self, query: str, count: int = 5) -> List[Dict]:
+        query = (query or "MARKET").strip() or "MARKET"
+        rng = random.Random(_seed_from_text(query))
+        headlines = self._HEADLINES[:]
+        rng.shuffle(headlines)
+        news: List[Dict] = []
+        for i in range(max(0, count)):
+            headline = headlines[i % len(headlines)].format(q=query.upper())
+            news.append({
+                "title": headline,
+                "link": f"https://example.com/news/{query.upper()}/{i}",
+                "summary": (
+                    f"{query.upper()} — {headline}. This is sample demo content "
+                    f"generated offline for development; no live data is used."
+                ),
+            })
+        return news
+
+
+class MockEconomicCalendarFetcher(EconomicCalendarFetcher):
+    """
+    Economic calendar fetcher returning deterministic mock earnings/IPO events.
+    No network calls. Dates are spread around today so events show in the demo calendar.
+    """
+
+    # (symbol, name) roster used for both earnings and IPO mock events.
+    _ROSTER = [
+        ("AAPL", "Apple Inc."),
+        ("MSFT", "Microsoft Corporation"),
+        ("GOOGL", "Alphabet Inc."),
+        ("AMZN", "Amazon.com Inc."),
+        ("NVDA", "NVIDIA Corporation"),
+        ("META", "Meta Platforms Inc."),
+        ("TSLA", "Tesla Inc."),
+        ("NFLX", "Netflix Inc."),
+        ("AMD", "Advanced Micro Devices Inc."),
+        ("INTC", "Intel Corporation"),
+    ]
+
+    def get_earnings(self) -> List:
+        """Return 6-column rows: [symbol, name, reportDate, fiscalDateEnding, estimate, currency]."""
+        today = date.today()
+        rows: List[list] = []
+        for i, (symbol, name) in enumerate(self._ROSTER):
+            rng = random.Random(_seed_from_text(symbol) + today.toordinal())
+            report = today + timedelta(days=(i * 3) - 14)  # spread -14..+13 days
+            fiscal = report - timedelta(days=30)
+            estimate = round(rng.uniform(0.2, 4.5), 2)
+            rows.append([
+                symbol,
+                name,
+                report.strftime("%Y-%m-%d"),
+                fiscal.strftime("%Y-%m-%d"),
+                str(estimate),
+                "USD",
+            ])
+        return rows
+
+    def get_ipo(self) -> List:
+        """Return 7-column rows: [symbol, name, ipoDate, priceRangeLow, priceRangeHigh, currency, exchange]."""
+        today = date.today()
+        rows: List[list] = []
+        for i, (symbol, name) in enumerate(self._ROSTER):
+            rng = random.Random(_seed_from_text(symbol) + today.toordinal() + 7)
+            ipo_date = today + timedelta(days=(i * 4) - 10)  # spread -10..+26 days
+            low = round(rng.uniform(8.0, 30.0), 2)
+            high = round(low + rng.uniform(2.0, 10.0), 2)
+            rows.append([
+                f"{symbol}-IPO",
+                name,
+                ipo_date.strftime("%Y-%m-%d"),
+                str(low),
+                str(high),
+                "USD",
+                "NASDAQ",
+            ])
+        return rows

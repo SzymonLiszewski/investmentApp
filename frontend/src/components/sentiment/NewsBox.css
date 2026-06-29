@@ -1,58 +1,165 @@
-.newsBox{
-    background-color: #ffffff;
-    border-radius: 40px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    color: #000000;
+/* ============================================================
+   News screen — modern, high-contrast card layout
+   The page sits on a purple network background (set globally on
+   body/html), so every readable surface is a white "card".
+   ============================================================ */
+
+/* Central, max-width container so content never stretches edge-to-edge.
+   Replaces the old absolute-positioned, negative-margin layout. */
+.newsPage {
+    max-width: 1200px;
+    margin: 0 auto;          /* centers the column */
+    padding: 24px;           /* generous, consistent breathing room */
+    box-sizing: border-box;
+    text-align: left;        /* override #root's global center alignment */
 }
 
-.newsBox h1,
-.newsBox h3,
-.newsBox p {
-    color: #000000;
+/* Header row: page title on the left, search on the right.
+   Collapses to a stack on small screens. */
+.newsHeader {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
 }
 
-.newsLeft{
-    grid-area: 1 / 1 / 2 / 2;
+.newsHeading {
+    color: #ffffff;
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35); /* keeps the white title legible on purple */
 }
 
-.newsBox h3, p{
-    padding-left: 20px;
+/* Search wrapper — replaces the old `margin-top:-200px; margin-left:70vw`
+   hack with simple, predictable flow positioning. */
+.searchNews {
+    position: relative;
+    min-width: 240px;
+    width: 320px;
+    max-width: 100%;
+    margin: 0;
 }
 
-.newsLink{
-    padding-left: 20px;
-    color: #000000;
+/* The shared .search-box has an `.expanded` rule (in SearchBox.css) that
+   applies `width:40vw` + `transform: translate(-10vw,-25vh)` — tuned for the
+   HomePage and which shoots the box off-screen here. Neutralize it within
+   the news header so the box just fills its wrapper and stays put. */
+.searchNews .search-box,
+.searchNews .search-box.expanded {
+    position: relative;
+    width: 100%;
+    transform: none;
 }
 
-.newsLink:hover{
-    color: blue;
-}
-
-
-.newsList{
-    margin-left: 1vw;
-    position: absolute;
-    padding-top: 0;
-    margin-top: 100px;
-    top:0;
+/* Two-column grid: news feed (wide) + sentiment sidebar (narrow).
+   Replaces the old absolutely-positioned grid. */
+.newsList {
     display: grid;
     grid-template-columns: 2fr 1fr;
-    grid-template-rows: 1fr;
-    grid-column-gap: 10px;
-    grid-row-gap: 10px;
+    gap: 24px;
+    align-items: start;
+    position: static; /* was absolute — caused overlap with the navbar */
+    margin: 0;
+    padding: 0;
 }
 
-.sentimentChart{
-    grid-area: 1 / 2 / 2 / 3;
-    display: flex; 
-    flex-direction: row;
-    align-items: flex-start; 
-    justify-content: flex-start;
-    margin-top: 0;
-    padding-top: 0;
+/* The feed itself is a vertical stack of cards with consistent spacing. */
+.newsLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0; /* lets long links wrap instead of forcing overflow */
 }
 
-.searchNews{
-    margin-top: -200px;
-    margin-left: 70vw;
+/* --- News card ------------------------------------------------ */
+.newsBox {
+    background-color: rgba(255, 255, 255, 0.95); /* high contrast on purple */
+    border: 1px solid #eceef2;
+    border-radius: 12px;                          /* was an oversized 40px */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);    /* soft lift */
+    padding: 20px 24px;                           /* internal breathing room */
+    color: #111827;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.newsBox:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 22px rgba(0, 0, 0, 0.14);
+}
+
+/* Prominent, bold article title with comfortable spacing. */
+.newsBoxTitle {
+    margin: 0 0 8px 0;
+    padding: 0;                 /* removes old global `padding-left:20px` */
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.4;
+    color: #111827;
+}
+
+/* Readable description: muted-dark text, comfortable line-height. */
+.newsBoxDescription {
+    margin: 0 0 12px 0;
+    padding: 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #374151;
+}
+
+/* Link rendered as a small, muted "source" line. */
+.newsLink {
+    display: inline-block;
+    padding: 0;
+    font-size: 0.8125rem;
+    color: #6b7280;             /* muted */
+    word-break: break-word;     /* long URLs wrap instead of overflowing */
+}
+
+.newsLink:hover {
+    color: #4f46e5;             /* indigo accent on hover */
+    text-decoration: underline;
+}
+
+/* --- Sentiment sidebar --------------------------------------- */
+/* Wrapped in its own card so the gauge is also readable on purple. */
+.sentimentChart {
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 1px solid #eceef2;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    position: sticky;           /* stays in view while scrolling the feed */
+    top: 80px;                  /* clears the fixed 60px navbar */
+    display: flex;
+    justify-content: center;
+}
+
+/* --- Responsive: single column under 768px ------------------- */
+@media (max-width: 768px) {
+    .newsPage {
+        padding: 16px;
+    }
+
+    .newsHeader {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .searchNews {
+        width: 100%;
+    }
+
+    /* feed + sidebar collapse to one column */
+    .newsList {
+        grid-template-columns: 1fr;
+    }
+
+    /* sidebar no longer needs to stick when stacked */
+    .sentimentChart {
+        position: static;
+        top: auto;
+    }
 }
