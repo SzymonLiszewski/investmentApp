@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 import os
 from pathlib import Path
 
+from celery.schedules import crontab
+
 from backend.secrets_util import load_from_file_or_env, load_optional_from_file_or_env
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -172,3 +174,25 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+
+# --- Celery (background tasks: nightly model training) ---
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_TASK_IGNORE_RESULT = True  # tasks persist results to DB/volume, not the broker
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
+CELERY_BEAT_SCHEDULE = {
+    "nightly-sarima-forecasts": {
+        "task": "analytics.tasks.train_sarima_forecasts",
+        "schedule": crontab(hour=2, minute=30),
+    },
+    "nightly-regression-training": {
+        "task": "analytics.tasks.train_regression_model_task",
+        "schedule": crontab(hour=3, minute=30),
+    },
+}
+
+# Nightly-trained model artifacts (a shared Docker volume in containers).
+# Deliberately not analytics/saved_models, which holds checked-in pre-trained files.
+ML_MODELS_DIR = os.environ.get("ML_MODELS_DIR", str(BASE_DIR / "analytics" / "trained_models"))

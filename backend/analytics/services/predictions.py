@@ -1,17 +1,18 @@
 import os
 import pickle
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import MinMaxScaler
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 from django.conf import settings
 
 from base.infrastructure.db import PriceRepository
 from base.services import get_default_stock_fetcher
+
+# SMA-50 is the longest feature lookback; SARIMA needs a comparable minimum to fit.
+MIN_HISTORY_POINTS = 60
 
 
 def _get_historical_close_series(symbol: str, start_date: str, end_date: str) -> pd.Series:
@@ -29,44 +30,6 @@ def _get_historical_close_series(symbol: str, start_date: str, end_date: str) ->
         index=pd.DatetimeIndex(sorted_dates),
     ).sort_index()
 
-
-def linear_regression_predict(ticker, start_date, end_date, predicted_days=30):
-    data = _get_historical_close_series(ticker, start_date, end_date)
-
-    #* standarization
-    scaler = MinMaxScaler(feature_range=(0, 1))
-    scaled_data = scaler.fit_transform(data.values.reshape(-1, 1))
-
-    time_step = 100
-    X_train, y_train = create_dataset(scaled_data[:len(data)], time_step)
-
-    #* build linear regression model
-    linear_model = LinearRegression()
-
-    #* model training
-    linear_model.fit(X_train, y_train)
-
-    #* Prediction
-    future_days = predicted_days  
-    last_sequence = scaled_data[-time_step:]
-
-    future_predictions = []
-    for _ in range(future_days):
-        next_pred = linear_model.predict(last_sequence.reshape(1, -1))
-        future_predictions.append(next_pred[0])
-        next_pred = next_pred.reshape(-1, 1)  # Ensure next_pred has the same shape as last_sequence
-        last_sequence = np.append(last_sequence[1:], next_pred, axis=0)
-
-    future_predictions = scaler.inverse_transform(np.array(future_predictions).reshape(-1, 1))
-    
-    format_string = "%Y-%m-%d"
-    last_date = datetime.strptime(end_date, format_string)
-    future_dates = [(last_date + timedelta(days=i)).strftime(format_string) for i in range(1, predicted_days + 1)]
-    data_dict = {}
-
-    for i in range(len(future_dates)):
-        data_dict[future_dates[i]] = future_predictions[i][0]
-    return {list(data_dict.keys())[-1]:list(data_dict.values())[-1]}
 
 def load_lstm_model(ticker, start_date, end_date, predicted_days=30):
     if not getattr(settings, 'ENABLE_ML_FUNCTIONS', False):
@@ -89,7 +52,7 @@ def load_lstm_model(ticker, start_date, end_date, predicted_days=30):
 
     # Przewidywanie na przyszłość
     look_back = 100
-    future_days = predicted_days  
+    future_days = predicted_days
     last_sequence = scaled_data[-look_back:]
     predictions = []
 
@@ -106,34 +69,38 @@ def load_lstm_model(ticker, start_date, end_date, predicted_days=30):
     predicted_df = pd.DataFrame(predictions, columns=['Predicted_Close'], index=future_dates)
     return predicted_df
 
-def sarima(ticker, start_date, end_date, predicted_days=30):
-    close_prices = _get_historical_close_series(ticker, start_date, end_date)
 
-    #* Preparing SARIMA model
+def sarima_forecast(ticker, start_date, end_date, predicted_days=30):
+    """Fit SARIMAX on close prices and return the full forecast path.
+
+    Forecast steps are the next observations on the business-day history index,
+    labeled with consecutive calendar days after end_date (existing convention).
+
+    Returns a list of dicts:
+    [{"date": "YYYY-MM-DD", "predicted": float, "lower": float, "upper": float}, ...]
+    """
+    close_prices = _get_historical_close_series(ticker, start_date, end_date)
+    if len(close_prices) < MIN_HISTORY_POINTS:
+        raise ValueError(
+            f"Not enough price history for {ticker}: "
+            f"{len(close_prices)} points, need at least {MIN_HISTORY_POINTS}"
+        )
+
     model = SARIMAX(close_prices, order=(1, 1, 1), seasonal_order=(1, 1, 1, 12))
     model_fit = model.fit(disp=False)
 
-    #* Prediction
-    future_steps = predicted_days
-    future_predictions = model_fit.get_forecast(steps=future_steps)
-    forecast_ci = future_predictions.conf_int()
-    forecast_values = future_predictions.predicted_mean
+    forecast = model_fit.get_forecast(steps=predicted_days)
+    # conf_int() column names depend on the series name -> access positionally.
+    forecast_ci = forecast.conf_int()
+    forecast_values = forecast.predicted_mean
 
-    format_string = "%Y-%m-%d"
-    last_date = datetime.strptime(end_date, format_string)
-    future_dates = [(last_date + timedelta(days=i)).strftime(format_string) for i in range(1, predicted_days + 1)]
-
-    # Tworzenie słownika dat i prognozowanych cen
-    data_dict = {date: price for date, price in zip(future_dates[-2:-1], forecast_values[-2:-1])}
-    print(data_dict)
-
-    return data_dict
-
-
-#* prepare time series for regression
-def create_dataset(data, time_step=1):
-    X, y = [], []
-    for i in range(len(data) - time_step):
-        X.append(data[i:(i + time_step), 0])
-        y.append(data[i + time_step, 0])
-    return np.array(X), np.array(y)
+    last_date = datetime.strptime(end_date, "%Y-%m-%d")
+    return [
+        {
+            "date": (last_date + timedelta(days=i + 1)).strftime("%Y-%m-%d"),
+            "predicted": float(forecast_values.iloc[i]),
+            "lower": float(forecast_ci.iloc[i, 0]),
+            "upper": float(forecast_ci.iloc[i, 1]),
+        }
+        for i in range(predicted_days)
+    ]

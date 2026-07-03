@@ -49,6 +49,25 @@ services:
       db:
         condition: service_healthy
 
+  celery-worker:
+    user: "root"  # so volume mount has no permission issues
+    environment:
+      SECRET_KEY: "dev-secret-key-not-for-production"
+      DEBUG: "true"
+      USE_MOCK_DATA_FETCHER: "false"
+    volumes:
+      - ../backend:/app
+    # ml_models:/models carries over from the base file (merged by target path).
+    # NOTE: the worker does not auto-reload; restart it to pick up code changes.
+
+  celery-beat:
+    user: "root"
+    environment:
+      SECRET_KEY: "dev-secret-key-not-for-production"
+      DEBUG: "true"
+    volumes:
+      - ../backend:/app
+
   frontend:
     build:
       context: ..

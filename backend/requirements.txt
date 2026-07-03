@@ -21,3 +21,5 @@ statsmodels>=0.14.2
 torch
 forex-python
 psycopg2-binary
+celery[redis]>=5.4
+redis>=5.0

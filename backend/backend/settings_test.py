@@ -3,6 +3,7 @@ Django settings for running tests: SQLite in memory (no PostgreSQL required).
 Sets required env vars to test defaults before importing main settings.
 """
 import os
+import tempfile
 
 os.environ.setdefault("SECRET_KEY", "test-secret-key-not-for-production")
 os.environ.setdefault("DEBUG", "false")
@@ -21,3 +22,10 @@ DATABASES = {
         "NAME": ":memory:",
     }
 }
+
+# Celery: run tasks synchronously in-process, no broker needed.
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = True
+CELERY_BROKER_URL = "memory://"
+
+ML_MODELS_DIR = tempfile.mkdtemp(prefix="test_ml_models_")
