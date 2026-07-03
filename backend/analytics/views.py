@@ -4,7 +4,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 
-from .services.predictions import linear_regression_predict
+from .selectors.forecasts import get_stored_sarima_forecast
+from .services.predictions import sarima_forecast
+from .services.regression_model import predict_with_regression
 from .services.sentiment import analyze_sentiment
 from base.infrastructure.db import PriceRepository
 from base.services import get_default_stock_fetcher, get_default_news_fetchers
@@ -27,11 +29,32 @@ def predictView(request, ticker):
             start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
         except ValueError:
             return Response({'error': 'Invalid start date. Use YYYY-MM-DD'}, status=400)
+    model = request.GET.get('model', 'regression')
+    if model not in ('regression', 'sarima'):
+        return Response({'error': "Invalid model. Use 'regression' or 'sarima'"}, status=400)
+
     repo = PriceRepository()
     fetcher = get_default_stock_fetcher()
     prices = repo.get_price_history(ticker, start_date, end_date, fetcher)
     data = {d.isoformat(): float(v) for d, v in prices.items()}
-    prediction = linear_regression_predict(ticker, start_date.isoformat(), end_date.isoformat())
+
+    if model == 'sarima':
+        forecast = get_stored_sarima_forecast(ticker)
+        source = 'precomputed'
+        if forecast is None:
+            try:
+                forecast = sarima_forecast(ticker, start_date.isoformat(), end_date.isoformat())
+            except ValueError as exc:
+                return Response({'error': str(exc)}, status=400)
+            source = 'on_demand'
+        return Response({'history': data, 'forecast': forecast, 'source': source})
+
+    try:
+        prediction = predict_with_regression(
+            ticker, start_date.isoformat(), end_date.isoformat()
+        )
+    except ValueError as exc:
+        return Response({'error': str(exc)}, status=400)
     return Response(data | prediction)
 
 

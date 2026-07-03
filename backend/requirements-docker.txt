@@ -22,5 +22,9 @@ forex-python
 scikit_learn
 statsmodels>=0.14.2
 
+# Background tasks (nightly model training)
+celery[redis]>=5.4
+redis>=5.0
+
 # file processing
 openpyxl

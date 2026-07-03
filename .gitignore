@@ -9,6 +9,10 @@ db.sqlite3
 media/
 static/
 
+# Nightly-trained model artifacts (checked-in models live in analytics/saved_models)
+backend/analytics/trained_models/
+celerybeat-schedule*
+
 # Environment files
 .env
 .env.*

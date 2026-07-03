@@ -1,5 +1,7 @@
 # Demo – pre-built images from GHCR, no .env or API keys required for stock/crypto/FX (mock data).
 # News and economic calendar still call external APIs when used; for full demo without keys they may return errors unless mock fetchers are added for those too.
+# No Redis/Celery here on purpose: the predict endpoints fall back to on-demand
+# model fitting when no nightly-trained artifacts exist, so the demo stays zero-config.
 # Usage (from repo root): docker compose -f docker/docker-compose.demo.yml --project-directory . up -d
 services:
   db:
