@@ -1,33 +1,93 @@
-import React from 'react';
 import '../components/styles/AboutPage.css';
+
+const FEATURES = [
+    {
+        num: '01',
+        title: 'Portfolio analysis',
+        body: 'Key risk-adjusted indicators like Sharpe and Sortino ratios, explained in plain language.',
+    },
+    {
+        num: '02',
+        title: 'News sentiment',
+        body: 'Sentiment analysis of news related to the stocks you actually hold.',
+    },
+    {
+        num: '03',
+        title: 'Price forecasting',
+        body: 'SARIMA and regression models project prices 30 days ahead.',
+    },
+    {
+        num: '04',
+        title: 'Market calendar',
+        body: 'IPO dates and earnings announcements for the companies you follow.',
+    },
+];
 
 const AboutPage = () => {
     return (
-        <div className="about-container">
-            <h1>About Investment Analysis Tool</h1>
-            <div className="app-description">
+        <main className="about-page">
+            <div className="about-intro">
+                <div className="about-eyebrow">About Captrivio</div>
+                <h1>
+                    Investment analysis,
+                    <br />
+                    without the noise.
+                </h1>
                 <p>
-                    The Investment Analysis Tool is designed to help you analyze your investment portfolio using advanced techniques. 
-                    This includes fundamental and technical analysis, predictions based on regression, LSTM networks, and SARIMA models.
+                    Captrivio helps you analyze your portfolio with the techniques
+                    professionals use — fundamental and technical analysis, plus price
+                    forecasts from regression and SARIMA models — presented in plain
+                    language.
                 </p>
             </div>
-            <h2>Features</h2>
-            <ul>
-                <li>Portfolio analysis with key indicators like Sharpe and Sortino ratios.</li>
-                <li>Integration with popular brokers for automatic portfolio updates.</li>
-                <li>Sentiment analysis of news related to your investments.</li>
-                <li>Advanced forecasting techniques for better investment decisions.</li>
-                <li>Access to IPO calendars and market news.</li>
-            </ul>
-            <h2>Source code</h2>
-            <p className="source-code-text">
-                Check out the source code: <a href="https://github.com/SzymonLiszewski/investmentApp" target="_blank" rel="noopener noreferrer">GitHub repository</a>
-            </p>
-            <h2>Attributions</h2>
-            <p className="attributions-text">
-                Logos provided by <a href="https://logo.dev" target="_blank" rel="noopener noreferrer">Logo.dev</a>.
-            </p>
-        </div>
+
+            <div className="about-features">
+                <h2>What you get</h2>
+                <div className="feature-grid">
+                    {FEATURES.map((feature) => (
+                        <div key={feature.num} className="feature-card">
+                            <div className="feature-num">{feature.num}</div>
+                            <div className="feature-title">{feature.title}</div>
+                            <div className="feature-body">{feature.body}</div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div className="about-cards">
+                <div className="about-card-dark">
+                    <div className="about-card-title">Open source</div>
+                    <p>
+                        Captrivio is built in the open. Browse the code, report issues,
+                        or contribute.
+                    </p>
+                    <a
+                        href="https://github.com/SzymonLiszewski/investmentApp"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        View on GitHub →
+                    </a>
+                </div>
+                <div className="about-card-soft">
+                    <div className="about-card-title">Demo version</div>
+                    <p>
+                        Market data — prices, news and calendar events — is for
+                        illustrative purposes only and is not financial advice.
+                        <br />
+                        Company logos provided by{' '}
+                        <a
+                            href="https://logo.dev"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            Logo.dev
+                        </a>
+                        .
+                    </p>
+                </div>
+            </div>
+        </main>
     );
 };
 
