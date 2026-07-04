@@ -13,11 +13,12 @@ const HERO_HISTORY = [
 ];
 const HERO_FORECAST = [188, 186.5, 185, 185.5, 184, 183.5];
 
+// Prices and changes are fetched per card from /api/basic/<ticker>/.
 const STOCKS = [
-  { name: 'Apple', ticker: 'AAPL', price: '$188.86', change: '−4.97%', up: false },
-  { name: 'Google', ticker: 'GOOGL', price: '$279.76', change: '+2.65%', up: true },
-  { name: 'Microsoft', ticker: 'MSFT', price: '$217.14', change: '−0.32%', up: false },
-  { name: 'Tesla', ticker: 'TSLA', price: '$211.08', change: '+2.03%', up: true },
+  { name: 'Apple', ticker: 'AAPL' },
+  { name: 'Google', ticker: 'GOOGL' },
+  { name: 'Microsoft', ticker: 'MSFT' },
+  { name: 'Tesla', ticker: 'TSLA' },
 ];
 
 function HomePage() {
