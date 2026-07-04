@@ -45,7 +45,7 @@ function NavBar(){
     return (
         <header className="site-header">
             <div className="site-header-inner">
-                <Link to="/" className="brand">capt<span>rivio</span></Link>
+                <Link to="/" className="brand">cap<span>trivio</span></Link>
                 <nav className="desktop-nav" aria-label="Main">
                     {links.map((link) => (
                         <Link key={link.to} to={link.to}>{link.label}</Link>
@@ -76,7 +76,7 @@ function NavBar(){
                 aria-label="Mobile"
             >
                 <div className="drawer-head">
-                    <span className="brand" aria-hidden="true">capt<span>rivio</span></span>
+                    <span className="brand" aria-hidden="true">cap<span>trivio</span></span>
                     <button
                         type="button"
                         className="drawer-close"
