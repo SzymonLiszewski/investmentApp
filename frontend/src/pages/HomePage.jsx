@@ -1,68 +1,89 @@
 import '../HomePage.css';
-import React, {useState} from 'react';
 import { Link } from 'react-router-dom';
-import SearchBox from '../components/SearchBox';
-import StockSection from '../components/StockSection';
-import homePageImage from '../assets/image1.png'
+import HeroSearch from '../components/home/HeroSearch';
+import TickerCard from '../components/home/TickerCard';
+import HeroForecastChart from '../components/charts/HeroForecastChart';
 
-function HomePage (){
-    const [showSearchBox, setShowSearchBox] = useState(false);
-    const isDemoMode = import.meta.env.VITE_USE_MOCK_DATA_FETCHER === 'true';
-    
+// Purely illustrative series for the hero preview card; real quotes come from
+// the API on the analysis pages.
+const HERO_HISTORY = [
+  210, 214, 212, 218, 226, 231, 228, 236, 248, 255, 251, 262, 270, 266, 274,
+  281, 276, 268, 272, 258, 250, 255, 246, 192, 196, 190, 187, 191, 186, 183,
+  188, 186, 189,
+];
+const HERO_FORECAST = [188, 186.5, 185, 185.5, 184, 183.5];
 
-    const toggleSearchBox = () => {
-      setShowSearchBox(!showSearchBox);
-    };
+const STOCKS = [
+  { name: 'Apple', ticker: 'AAPL', price: '$188.86', change: '−4.97%', up: false },
+  { name: 'Google', ticker: 'GOOGL', price: '$279.76', change: '+2.65%', up: true },
+  { name: 'Microsoft', ticker: 'MSFT', price: '$217.14', change: '−0.32%', up: false },
+  { name: 'Tesla', ticker: 'TSLA', price: '$211.08', change: '+2.03%', up: true },
+];
 
-    const stocks = [
-        { name: 'Apple', price: 150, change: 1.2, ticker: 'AAPL'},
-        { name: 'Google', price: 2800, change: -0.5, ticker: 'GOOGL' },
-        { name: 'Microsoft', price: 45000, change: 5, ticker: 'MSFT' },
-        { name: 'Tesla', price: 3000, change: 3, ticker: 'TSLA' },
-      ];
+function HomePage() {
+  const isDemoMode = import.meta.env.VITE_USE_MOCK_DATA_FETCHER === 'true';
 
-      const cryptos = [
-        { name: 'Bitcoin', price: 45000, change: 5 },
-        { name: 'Ethereum', price: 3000, change: 3 },
-        { name: 'Ripple', price: 1, change: -2 }
-      ];
-      
-      const commodities = [
-        { name: 'Gold', price: 1800, change: 1.2 },
-        { name: 'Silver', price: 25, change: 2.1 },
-        { name: 'Oil', price: 70, change: -0.5 }
-      ];
-      //<div className='stock-info-container'>
-      //<StockSection stocks={stocks} />
-      //<StockSection stocks={cryptos} />
-      //<StockSection stocks={commodities} />
-      // </div>
-    return (
-        <div className="homepage">
-            <div className="mainItem">
-              <div className="search-container">
-                  <h1>Captrivio</h1>
-                  <h3>Keep your investments under control.</h3>
-                  <h4>
-                    <Link to="/login">Sign in</Link> to unlock portfolio insights.
-                  </h4>
-                  {isDemoMode && (
-                    <p className="demo-banner">
-                      Demo version - prices and predictions are for illustrative purposes only.
-                    </p>
-                  )}
-                  <SearchBox navigation={'analysis2'}/>
-              </div>
-              <div className="homepage-image-wrapper">
-                <img src={homePageImage} alt="Investment illustration" />
-                <p className="image-credit">Designed by Freepik</p>
-              </div>
-            </div>
-            <div className='stock-info-container'>
-              <StockSection stocks={stocks} />
-            </div>
-            
+  return (
+    <main className="home">
+      <section className="hero">
+        <div className="hero-copy">
+          <h1>
+            Keep your investments
+            <br />
+            under control.
+          </h1>
+          <p className="hero-lead">
+            Portfolio analysis, price forecasts and market sentiment - in one
+            clear dashboard. <Link to="/login">Sign in</Link> to unlock
+            portfolio insights.
+          </p>
+          <HeroSearch />
+          {isDemoMode && (
+            <p className="demo-note">
+              Demo version - prices and predictions are for illustrative
+              purposes only.
+            </p>
+          )}
         </div>
-    )
+
+        <div className="hero-card">
+          <div className="hero-card-head">
+            <div>
+              <div className="hero-card-company">Your stock</div>
+              <div className="hero-card-symbol">Example - illustrative data</div>
+            </div>
+            <div className="hero-card-quote">
+              <div className="hero-card-price">$188.86</div>
+              <div className="hero-card-change">−0.34%</div>
+            </div>
+          </div>
+          <div className="hero-card-chart">
+            <HeroForecastChart history={HERO_HISTORY} forecast={HERO_FORECAST} />
+          </div>
+          <div className="hero-card-legend">
+            <span>
+              <span className="legend-key legend-key-price" />
+              Price history
+            </span>
+            <span>
+              <span className="legend-key legend-key-forecast" />
+              30-day forecast
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <section className="popular">
+        <div className="popular-head">
+          <h2>Popular stocks</h2>
+        </div>
+        <div className="ticker-grid">
+          {STOCKS.map((stock) => (
+            <TickerCard key={stock.ticker} {...stock} />
+          ))}
+        </div>
+      </section>
+    </main>
+  );
 }
-export default HomePage
+export default HomePage;
