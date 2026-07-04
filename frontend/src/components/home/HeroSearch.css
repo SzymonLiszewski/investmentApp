@@ -66,6 +66,18 @@
   filter: brightness(1.1);
 }
 
+/* Compact variant: watchlist row on the stock page */
+.hero-search-compact {
+  width: 100%;
+  max-width: 260px;
+  flex-shrink: 0;
+}
+
+.hero-search-compact .hero-search-field {
+  height: 44px;
+  border-radius: 12px;
+}
+
 .hero-search-suggestions {
   position: absolute;
   top: calc(100% + 6px);

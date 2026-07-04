@@ -1,10 +1,17 @@
+/* eslint-disable react/prop-types */
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './HeroSearch.css';
 
 const MAX_SUGGESTIONS = 8;
 
-const HeroSearch = () => {
+// variant="compact" renders a smaller field without the Analyze button
+// (used in the stock-page watchlist row).
+const HeroSearch = ({
+  variant = 'hero',
+  placeholder = 'Search any stock — e.g. AAPL, Tesla…',
+  inputRef,
+}) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [allStocks, setAllStocks] = useState([]);
   const [suggestions, setSuggestions] = useState([]);
@@ -83,7 +90,11 @@ const HeroSearch = () => {
   };
 
   return (
-    <form className="hero-search" ref={rootRef} onSubmit={handleAnalyze}>
+    <form
+      className={`hero-search${variant === 'compact' ? ' hero-search-compact' : ''}`}
+      ref={rootRef}
+      onSubmit={handleAnalyze}
+    >
       <div className="hero-search-row">
         <div className="hero-search-field">
           <svg
@@ -98,14 +109,17 @@ const HeroSearch = () => {
           </svg>
           <input
             type="text"
+            ref={inputRef}
             value={searchTerm}
             onChange={handleInputChange}
             onFocus={() => setOpen(true)}
-            placeholder="Search any stock — e.g. AAPL, Tesla…"
+            placeholder={placeholder}
             aria-label="Search any stock"
           />
         </div>
-        <button type="submit" className="hero-search-button">Analyze</button>
+        {variant !== 'compact' && (
+          <button type="submit" className="hero-search-button">Analyze</button>
+        )}
       </div>
       {open && suggestions.length > 0 && (
         <div className="hero-search-suggestions">

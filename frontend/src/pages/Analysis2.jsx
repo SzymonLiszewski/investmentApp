@@ -1,99 +1,131 @@
+/* eslint-disable react/prop-types */
 import "../components/styles/Analysis2.css"
 import FundamentalAnalysis from "../components/FundamentalAnalysis"
 import AnalysisNavigation from "../components/AnalysisNavigation"
 import TechnicalAnalysis from "../components/TechnicalAnalysis";
-import {Route, Routes, useParams, Link} from 'react-router-dom';
+import { Route, Routes, useParams, Link } from 'react-router-dom';
 import ForecastView from "../components/ForecastView";
-import React, {useState, useEffect} from "react";
-import SearchBar from "../components/SearchBar";
-import StockBubble from "../components/StockBubble";
-import { Box, Typography } from '@mui/material';
+import { useState, useEffect, useRef } from "react";
+import HeroSearch from "../components/home/HeroSearch";
 
+// Example watchlist (in future the user can choose preferred stocks)
+const WATCHLIST = [
+    { symbol: 'AAPL', logo: 'https://img.logo.dev/apple.com?token=pk_F06zMPFbR5yUJmwRi1Y-Jg' },
+    { symbol: 'NVDA', logo: 'https://img.logo.dev/nvidia.com?token=pk_F06zMPFbR5yUJmwRi1Y-Jg' },
+    { symbol: 'MSFT', logo: 'https://img.logo.dev/microsoft.com?token=pk_F06zMPFbR5yUJmwRi1Y-Jg' },
+];
 
-function Analysis2(){
+const isNumeric = (value) =>
+    value !== null && value !== 'N/A' && !isNaN(Number(value));
 
-    //example stocks (in future user can chose preffered stocks in front page)
-    const stocks = [
-        { symbol: 'AAPL', logo: 'https://img.logo.dev/apple.com?token=pk_F06zMPFbR5yUJmwRi1Y-Jg' },
-        { symbol: 'NVDA', logo: 'https://img.logo.dev/nvidia.com?token=pk_F06zMPFbR5yUJmwRi1Y-Jg' },
-        { symbol: 'MSFT', logo: 'https://img.logo.dev/microsoft.com?token=pk_F06zMPFbR5yUJmwRi1Y-Jg' },
-    ];
-
-    const {ticker} = useParams();
-
-    let [CompanyName, setCompanyName] = useState('')
-    let [CurrentPrice, setCurrentPrice] = useState(null)
-    let [PriceChange, setPriceChange] = useState(null)
-
-    useEffect(()=>{
-        getData()
-    }, [ticker])
-
-    let getData = async () =>{
-        let response = await fetch(`/api/basic/${ticker}/`)
-        let data = await response.json()
-        //console.log('data:', data)
-        setCompanyName(data['Company Name'])
-        setCurrentPrice(data['Current Price'])
-        setPriceChange(data['Percent Change'])
+// Company logo inside a watchlist chip; falls back to the ticker initial.
+function ChipLogo({ symbol, logo }) {
+    const [failed, setFailed] = useState(false);
+    if (!logo || failed) {
+        return <span className="watch-chip-dot" aria-hidden="true">{symbol[0]}</span>;
     }
-
-    
     return (
-        <div className="analysis-container">
-            <div className="topAnalysisNavigation">
-                <Box display="flex" alignItems="center" p={2}>
-                    <SearchBar />
-                    {stocks.map(stock => (
-                        <Link to={`/analysis2/${stock.symbol}/`}>
-                        <StockBubble key={stock.symbol} logo={stock.logo} symbol={stock.symbol} />
-                        </Link>
-                    ))}
-                    <Box display="flex" alignItems="center" justifyContent="center"
-                        borderRadius="50%"
-                        boxShadow={3}
-                        p={1}
-                        m={1}
-                        bgcolor="#ffffff"
-                        width={48}
-                        height={48}
-                        sx={{
-                            '&:hover': {
-                        bgcolor: '#b8b8b8',
-                      }
-                        }}
+        <img
+            className="watch-chip-logo"
+            src={logo}
+            alt=""
+            onError={() => setFailed(true)}
+        />
+    );
+}
+
+function Analysis2() {
+    const { ticker } = useParams();
+
+    const [companyName, setCompanyName] = useState('');
+    const [currentPrice, setCurrentPrice] = useState(null);
+    const [priceChange, setPriceChange] = useState(null);
+    const [logoFailed, setLogoFailed] = useState(false);
+    const searchInputRef = useRef(null);
+
+    useEffect(() => {
+        const getData = async () => {
+            const response = await fetch(`/api/basic/${ticker}/`);
+            const data = await response.json();
+            setCompanyName(data['Company Name']);
+            setCurrentPrice(data['Current Price']);
+            setPriceChange(data['Percent Change']);
+        };
+        setLogoFailed(false);
+        getData();
+    }, [ticker]);
+
+    const symbol = (ticker || '').toUpperCase();
+    const changeUp = isNumeric(priceChange) && Number(priceChange) >= 0;
+    // logo.dev for the selected stock too: exact URL when it's a watchlist
+    // ticker, otherwise derive the domain from the company name.
+    const watchEntry = WATCHLIST.find((stock) => stock.symbol === symbol);
+    const logoUrl = watchEntry
+        ? watchEntry.logo
+        : companyName
+            ? `https://img.logo.dev/${companyName.replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, '').split(' ')[0]}.com?token=pk_F06zMPFbR5yUJmwRi1Y-Jg`
+            : null;
+
+    return (
+        <div className="stock-page">
+            <div className="watchlist-row">
+                <HeroSearch
+                    variant="compact"
+                    placeholder="Find your stock…"
+                    inputRef={searchInputRef}
+                />
+                {WATCHLIST.map((stock) => (
+                    <Link
+                        key={stock.symbol}
+                        to={`/analysis2/${stock.symbol}/`}
+                        className={`watch-chip${stock.symbol === symbol ? ' active' : ''}`}
                     >
-                        <Typography variant="h4" textAlign={"center"}>+</Typography>
-                    </Box>
-                </Box>
+                        <ChipLogo symbol={stock.symbol} logo={stock.logo} />
+                        {stock.symbol}
+                    </Link>
+                ))}
+                <button
+                    type="button"
+                    className="watch-add"
+                    aria-label="Find a stock to add"
+                    onClick={() => searchInputRef.current && searchInputRef.current.focus()}
+                >
+                    +
+                </button>
             </div>
-           
-            <div className="stock-name">
-                <img id="logo" src={`https://img.logo.dev/${CompanyName.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").split(" ")[0]}.com?token=pk_F06zMPFbR5yUJmwRi1Y-Jg`}/>
-                <h1 id="name">{CompanyName}</h1>
-                <h1 id="price">
-                    {CurrentPrice === 'N/A' || CurrentPrice === null || isNaN(Number(CurrentPrice)) 
-                        ? 'N/A' 
-                        : `${Number(CurrentPrice).toFixed(2)} USD`}
-                </h1>
-                <p id="priceChange" style={{
-                    color: PriceChange !== 'N/A' && PriceChange != null && !isNaN(Number(PriceChange))
-                        ? (Number(PriceChange) >= 0 ? '#82ca9d' : '#c62828')
-                        : 'inherit'
-                }}>
-                    {PriceChange === 'N/A' || PriceChange === null || isNaN(Number(PriceChange)) 
-                        ? 'N/A' 
-                        : `${Number(PriceChange).toFixed(2)} %`}
-                </p>
+
+            <div className="stock-head">
+                <div className="stock-identity">
+                    <div className="stock-logo">
+                        {logoUrl && !logoFailed ? (
+                            <img src={logoUrl} alt="" onError={() => setLogoFailed(true)} />
+                        ) : (
+                            <span>{symbol ? symbol[0] : '?'}</span>
+                        )}
+                    </div>
+                    <div>
+                        <h1 className="stock-name">{companyName || symbol}</h1>
+                        <div className="stock-sub">{symbol}</div>
+                    </div>
+                </div>
+                <div className="stock-quote">
+                    <div className="stock-price">
+                        {isNumeric(currentPrice) ? `$${Number(currentPrice).toFixed(2)}` : 'N/A'}
+                    </div>
+                    {isNumeric(priceChange) && (
+                        <div className={`stock-change ${changeUp ? 'up' : 'down'}`}>
+                            {changeUp ? '+' : '−'}{Math.abs(Number(priceChange)).toFixed(2)}% today
+                        </div>
+                    )}
+                </div>
             </div>
-            <div className="stock-analysis">
-            <AnalysisNavigation/>
+
+            <AnalysisNavigation ticker={symbol} />
             <Routes>
-                    <Route path='/' element={<ForecastView ticker={ticker}/>}/>
-                    <Route path='/fundamental/' element={<FundamentalAnalysis ticker={ticker}/>}/>
-                    <Route path="/technical/" element={<TechnicalAnalysis ticker={ticker}/>}/>
-                </Routes>
-            </div>
+                <Route path='/' element={<ForecastView ticker={ticker} />} />
+                <Route path='/fundamental/' element={<FundamentalAnalysis ticker={ticker} />} />
+                <Route path='/technical/' element={<TechnicalAnalysis ticker={ticker} />} />
+            </Routes>
         </div>
     )
 }
