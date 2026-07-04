@@ -1,91 +1,97 @@
+/* eslint-disable react/prop-types */
 import "./styles/FundamentalAnalysis.css"
 import DividendChart from "./DividendChart"
 import RevenueChart from "./RevenueChart"
-import React, {useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import { FaQuestionCircle } from 'react-icons/fa';
-import {Tooltip } from 'react-tooltip';
+import { Tooltip } from 'react-tooltip';
+import { formatNumberWithSuffix } from '../utils/format';
 
-function formatNumberWithSuffix(number) {
-    const suffixes = ["", "K", "M", "B", "T"]; 
-
-    let suffixIndex = 0;
-    while (number >= 1000 && suffixIndex < suffixes.length - 1) {
-        number /= 1000;
-        suffixIndex++;
-    }
-
-    return number.toFixed(2) + suffixes[suffixIndex];
+function StatLabel({ children, tip }) {
+    return (
+        <div className="indicator-label">
+            {children}
+            <FaQuestionCircle
+                className="questionCircle"
+                data-tooltip-id="indicator-tip"
+                data-tooltip-content={tip}
+            />
+        </div>
+    );
 }
 
-function FundamentalAnalysis({ticker}){
-    let [MarketCap, setMarketCap] = useState(0)
-    let [PERatio, setPERatio] = useState(0)
-    let [PSRatio, setPSRatio] = useState(0)
-    let [EPS, setEPS] = useState(0)
-    let [Revenue, setRevenue] = useState([])
-    let [Dividends, setDividends] = useState([])
+function FundamentalAnalysis({ ticker }) {
+    const [marketCap, setMarketCap] = useState(0);
+    const [peRatio, setPeRatio] = useState(0);
+    const [psRatio, setPsRatio] = useState(0);
+    const [eps, setEps] = useState(0);
+    const [revenue, setRevenue] = useState([]);
+    const [dividends, setDividends] = useState([]);
 
-    useEffect(()=>{
-        getData()
-    },[])
-    
-    let getData = async () =>{
-        let response = await fetch(`/api/fundamental/${ticker}/`)
-        let data = await response.json()
-        setMarketCap(data['Market Cap'])
-        setPSRatio(data['P/S Ratio'])
-        setPERatio(data['P/E Ratio'])
-        setEPS(data['EPS'])
-        setRevenue(data['Revenue History'])
-        setDividends(data['Dividend History'])
-        console.log('data2:',data)
-    }
+    useEffect(() => {
+        const getData = async () => {
+            const response = await fetch(`/api/fundamental/${ticker}/`);
+            const data = await response.json();
+            setMarketCap(data['Market Cap']);
+            setPsRatio(data['P/S Ratio']);
+            setPeRatio(data['P/E Ratio']);
+            setEps(data['EPS']);
+            setRevenue(data['Revenue History']);
+            setDividends(data['Dividend History']);
+        };
+        getData();
+    }, [ticker]);
 
-    return(
-            <div className="FundamentalAnalysisContainer">
-                <div className="FundamentalContainer" id="MarketCap"> 
-                    <h3><span className="fundamental-label">Market Capitalization</span>
-                    <FaQuestionCircle className="questionCircle" data-tooltip-id="marketCap" data-tooltip-content="The market value of the company. A higher market cap indicates greater stability but lower growth potential, while a lower market cap may suggest higher risk but also greater potential for returns." />
-                    <Tooltip id="marketCap" className="custom-tooltip"/>
-                    </h3>
-                    <h1>{formatNumberWithSuffix(MarketCap)}</h1>
+    return (
+        <div className="fundamental-view">
+            <div className="indicator-grid indicator-grid-4">
+                <div className="indicator-card">
+                    <StatLabel tip="The market value of the company. A higher market cap indicates greater stability but lower growth potential, while a lower market cap may suggest higher risk but also greater potential for returns.">
+                        Market capitalization
+                    </StatLabel>
+                    <div className="indicator-value">{formatNumberWithSuffix(marketCap)}</div>
                 </div>
-                <div className="FundamentalContainer" id="pe"> 
-                     <h3><span className="fundamental-label">P/E ratio</span>
-                    <FaQuestionCircle className="questionCircle" data-tooltip-id="marketCap" data-tooltip-content=" Indicates how much investors are willing to pay for each dollar of the company's earnings. A low P/E might suggest undervaluation, while a high P/E could indicate overvaluation or growth expectations."/>
-                     <Tooltip id="marketCap" className="custom-tooltip"/>
-                     </h3>
-                     <h1>{PERatio.toFixed(2)}x</h1>
+                <div className="indicator-card">
+                    <StatLabel tip="Indicates how much investors are willing to pay for each dollar of the company's earnings. A low P/E might suggest undervaluation, while a high P/E could indicate overvaluation or growth expectations.">
+                        P/E ratio
+                    </StatLabel>
+                    <div className="indicator-value">{(Number(peRatio) || 0).toFixed(2)}x</div>
                 </div>
-                <div className="FundamentalContainer" id="ps"> 
-                    <h3><span className="fundamental-label">P/S ratio</span>
-                    <FaQuestionCircle className="questionCircle" data-tooltip-id="marketCap" data-tooltip-content="Shows how much investors are paying for each dollar of the company's revenue. A low P/S might suggest a buying opportunity, while a high P/S reflects optimism about future revenue growth."/>
-                    <Tooltip id="marketCap" className="custom-tooltip"/>
-                    </h3>
-                    <h1>{PSRatio.toFixed(2)}x</h1>
+                <div className="indicator-card">
+                    <StatLabel tip="Shows how much investors are paying for each dollar of the company's revenue. A low P/S might suggest a buying opportunity, while a high P/S reflects optimism about future revenue growth.">
+                        P/S ratio
+                    </StatLabel>
+                    <div className="indicator-value">{(Number(psRatio) || 0).toFixed(2)}x</div>
                 </div>
-                <div className="FundamentalContainer" id="eps">
-                    <h3><span className="fundamental-label">Earnings Per Share</span>
-                    <FaQuestionCircle className="questionCircle" data-tooltip-id="marketCap" data-tooltip-content="The profit allocated to each share of stock. Increasing EPS may indicate strong financial health and potential stock price appreciation."/>
-                    <Tooltip id="marketCap" className="custom-tooltip"/>
-                    </h3>
-                    <h1>{EPS} USD</h1> 
-                </div>
-                <div className="FundamentalContainer" id="Dividends">
-                    <h3><span className="fundamental-label">Dividends</span>
-                    <FaQuestionCircle className="questionCircle" data-tooltip-id="marketCap" data-tooltip-content="Regular payouts from the company's profits. A high dividend can attract income-seeking investors but may limit the company's ability to reinvest in growth."/>
-                    <Tooltip id="marketCap" className="custom-tooltip"/>
-                    </h3>
-                    <DividendChart data={Dividends}/> 
-                </div>
-                <div className="FundamentalContainer" id="Earnings"> 
-                    <h3><span className="fundamental-label">Revenue</span>
-                    <FaQuestionCircle className="questionCircle" data-tooltip-id="marketCap" data-tooltip-content="The total income generated by the company. Revenue growth signals increasing demand for the company's products or services, which can be a positive sign for investors."/>
-                    <Tooltip id="marketCap" className="custom-tooltip"/>
-                    </h3>
-                    <RevenueChart data={Revenue}/>
+                <div className="indicator-card">
+                    <StatLabel tip="The profit allocated to each share of stock. Increasing EPS may indicate strong financial health and potential stock price appreciation.">
+                        Earnings per share
+                    </StatLabel>
+                    <div className="indicator-value">{eps} USD</div>
                 </div>
             </div>
+
+            <div className="fundamental-charts">
+                <div className="indicator-card">
+                    <StatLabel tip="Regular payouts from the company's profits. A high dividend can attract income-seeking investors but may limit the company's ability to reinvest in growth.">
+                        Dividends
+                    </StatLabel>
+                    <div className="indicator-chart">
+                        <DividendChart data={dividends} />
+                    </div>
+                </div>
+                <div className="indicator-card">
+                    <StatLabel tip="The total income generated by the company. Revenue growth signals increasing demand for the company's products or services, which can be a positive sign for investors.">
+                        Revenue
+                    </StatLabel>
+                    <div className="indicator-chart">
+                        <RevenueChart data={revenue} />
+                    </div>
+                </div>
+            </div>
+
+            <Tooltip id="indicator-tip" className="custom-tooltip" />
+        </div>
     )
 }
 

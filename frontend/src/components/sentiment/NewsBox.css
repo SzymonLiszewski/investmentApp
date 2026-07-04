@@ -26,11 +26,11 @@
 }
 
 .newsHeading {
-    color: #ffffff;
+    color: var(--ink);
+    font-family: var(--font-display);
     font-size: 2rem;
     font-weight: 700;
     margin: 0;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.35); /* keeps the white title legible on purple */
 }
 
 /* Search wrapper — replaces the old `margin-top:-200px; margin-left:70vw`

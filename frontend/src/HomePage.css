@@ -1,146 +1,238 @@
-/* src/HomePage.css */
-html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%; /* Ustawia wysokość na 100% okna przeglądarki */
-}
-body, html{
-    background-image: url("assets/background.png");
-    background-attachment: fixed;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-.homepage {
-    width: 90vw;
-    text-align: center;
-    font-family: Arial, sans-serif;
-    background: transparent;
-    z-index: 0;
-    justify-content: space-between;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    margin-left: 5vw;
+/* Homepage — mobile-first, breakpoints at 640px and 1024px */
+
+.home {
+  text-align: left;
+  background: linear-gradient(180deg, var(--bg-hero) 0%, var(--bg) 340px);
+  min-height: calc(100vh - 64px);
 }
 
-.mainItem{
-    width: 90vw;
-    text-align: center;
-    font-family: Arial, sans-serif;
-    background: transparent;
-    z-index: 0;
-    justify-content: space-between;
-    display: flex;
-    align-items: flex-start;
-    margin-right: 5vw;
+.home section {
+  max-width: 1720px;
+  margin: 0 auto;
+  padding-left: 16px;
+  padding-right: 16px;
+  box-sizing: border-box;
 }
 
-.homepage-image-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+/* Hero */
+.hero {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 36px;
+  align-items: center;
+  padding-top: 36px;
+  padding-bottom: 24px;
 }
 
-.homepage-image-wrapper img {
-    display: block;
+.hero-copy {
+  animation: fadeUp 0.5s ease both;
 }
 
-img{
-    width: 600px;
-    height: 400px;
+.hero-copy h1 {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 7vw, 52px);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 20px;
 }
 
-.image-credit {
-    font-size: 12px;
-    color: #666;
-    margin-top: -20px;
-    margin-bottom: 0;
+.hero-lead {
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin: 0 0 28px;
+  max-width: 46ch;
 }
 
-h1, h3, h4{
-    color: black;
-}
-h1{
-    font-size: 41px;
-}
-h3{
-    font-size: 32px;
-}
-h4{
-    font-size: 26px;
-    width: 80%;
-    margin-left: 10%;
+.demo-note {
+  font-size: 13px;
+  color: var(--ink-faint);
+  margin: 16px 0 0;
 }
 
-.search-container a {
-    color: black;
-    text-decoration: underline;
+/* Hero preview card */
+.hero-card {
+  animation: fadeUp 0.5s ease 0.1s both;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 20px 48px -20px rgba(76, 54, 140, 0.18),
+    0 2px 6px rgba(29, 26, 38, 0.05);
 }
 
-.demo-banner {
-    color: black;
+.hero-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+  gap: 12px;
 }
 
+.hero-card-company {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--ink);
+}
 
-.search-container {
-    position: relative;
-    display: inline-block;
-    width: 50%;
-    margin-left: 5vw;
+.hero-card-symbol {
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+
+.hero-card-quote {
+  text-align: right;
+}
+
+.hero-card-price {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 22px;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-card-change {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--down);
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-card-chart {
+  height: 170px;
+  margin: 8px 0 6px;
+}
+
+.hero-card-legend {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  font-size: 12px;
+  color: var(--ink-faint);
+  flex-wrap: wrap;
+}
+
+.hero-card-legend > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-key {
+  display: inline-block;
+  width: 16px;
+}
+
+.legend-key-price {
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+
+.legend-key-forecast {
+  height: 0;
+  border-top: 2px dashed var(--up-line);
+}
+
+/* Popular stocks */
+.popular {
+  padding-top: 24px;
+  padding-bottom: 64px;
+}
+
+.popular-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.popular-head h2 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 0;
+}
+
+.popular-view-all {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--accent);
+  text-decoration: none;
+  /* keep a comfortable touch target on mobile */
+  padding: 10px 0;
+}
+
+.ticker-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (min-width: 640px) {
+  .home section {
+    padding-left: 24px;
+    padding-right: 24px;
   }
 
-  .search-container .search-box{
-    left:30%;
+  .hero {
+    padding-top: 48px;
   }
 
-
-  .stock-section{
-    width:100%;
+  .hero-card {
+    padding: 28px;
   }
 
-.stock-info-container{
-    display: flex;
-    flex-direction: column;
-    width: 90%
+  .hero-card-chart {
+    height: 200px;
+  }
 
+  .ticker-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
 }
 
-  .stock-section .stock-list{
-    display: flex;
-    flex-direction: row;
+@media (min-width: 1024px) {
+  .home section {
+    padding-left: 56px;
+    padding-right: 56px;
   }
-  @media (max-width: 1000px) {
-    .homepage {
-        margin-top: 100vh;
-        flex-direction: column;
-        align-items: center;
-        justify-content: space-between;
-    }
-    .mainItem{
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-    .stock-section .stock-list{
-        display: flex;
-        flex-direction: column;
-    }
-    .search-container .search-box{
-        left: 30%;
-        width: 50%;
-      }
-      .search-container {
-        width: 100%;
-        margin-left: 0vw;
-      }
-      img{
-        width: 390px;
-        height: 260px;
-    }
-    .stock-section .stock-list .stock-info-box{
-        width: 70%;
-        margin: 5px;
-    }
-    
-    }
+
+  .hero {
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    padding-top: 64px;
+    padding-bottom: 32px;
+  }
+
+  .hero-lead {
+    font-size: 18px;
+  }
+
+  .popular {
+    padding-bottom: 80px;
+  }
+
+  .ticker-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

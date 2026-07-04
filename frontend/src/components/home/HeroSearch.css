@@ -1,0 +1,126 @@
+.hero-search {
+  position: relative;
+  max-width: 520px;
+  margin: 0;
+}
+
+.hero-search-row {
+  display: flex;
+  gap: 12px;
+}
+
+.hero-search-field {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  padding: 0 16px;
+  height: 52px;
+  box-shadow: 0 1px 2px rgba(29, 26, 38, 0.04);
+}
+
+.hero-search-field:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(109, 79, 210, 0.15);
+}
+
+.hero-search-icon {
+  color: #a49bbd;
+  flex-shrink: 0;
+}
+
+.hero-search-field input {
+  border: none;
+  outline: none;
+  background: transparent;
+  /* 16px minimum so iOS Safari doesn't zoom the page on focus */
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--ink);
+  width: 100%;
+  min-width: 0;
+}
+
+.hero-search-field input::placeholder {
+  color: var(--ink-faint);
+}
+
+.hero-search-button {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  min-height: 52px;
+  padding: 0 24px;
+  border-radius: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.hero-search-button:hover {
+  filter: brightness(1.1);
+}
+
+/* Compact variant: watchlist row on the stock page */
+.hero-search-compact {
+  width: 100%;
+  max-width: 260px;
+  flex-shrink: 0;
+}
+
+.hero-search-compact .hero-search-field {
+  height: 44px;
+  border-radius: 12px;
+}
+
+.hero-search-suggestions {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px -16px rgba(29, 26, 38, 0.25);
+  overflow: hidden;
+  z-index: 20;
+}
+
+.hero-search-suggestion {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.hero-search-suggestion:hover {
+  background: var(--accent-soft);
+}
+
+.hero-search-suggestion-symbol {
+  font-weight: 600;
+  color: var(--ink);
+  min-width: 56px;
+  flex-shrink: 0;
+}
+
+.hero-search-suggestion-name {
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

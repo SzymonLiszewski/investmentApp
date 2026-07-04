@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useState } from "react";
 import "./styles/ForecastView.css"
 import StockChart from "./StockPriceChart";
@@ -21,37 +22,88 @@ const MODELS = {
     },
 };
 
-function ForecastView({ticker}){
+const RANGES = [
+    { label: '1M', months: 1 },
+    { label: '6M', months: 6 },
+    { label: '1Y', months: 12 },
+    { label: 'All', months: 60 },
+];
+
+function ForecastView({ ticker }) {
     const [model, setModel] = useState("regression");
+    const [range, setRange] = useState('1Y');
+
     const today = new Date();
-    const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(today.getFullYear() - 1);
+    const start = new Date();
+    const months = RANGES.find((r) => r.label === range).months;
+    start.setMonth(today.getMonth() - months);
     const todayString = today.toISOString().split('T')[0];
-    const oneYearAgoString = oneYearAgo.toISOString().split('T')[0];
+    const startString = start.toISOString().split('T')[0];
+
     return (
-        <div className="ForecastContainer">
-            <div className="chart">
-                <StockChart startDate={oneYearAgoString} endDate={todayString} ticker={ticker} model={model} predictedDays={30}/>
-            </div>
-            <div className="description">
-                <div className="model-select">
-                    <label htmlFor="forecast-model">Forecast model</label>
-                    <select
-                        id="forecast-model"
-                        value={model}
-                        onChange={(e) => setModel(e.target.value)}
-                    >
-                        {Object.entries(MODELS).map(([value, {name}]) => (
-                            <option key={value} value={value}>{name}</option>
+        <div className="forecast-grid">
+            <div className="chart-card">
+                <div className="chart-card-head">
+                    <div className="chart-card-title">Price &amp; 30-day forecast</div>
+                    <div className="range-group" role="group" aria-label="History range">
+                        {RANGES.map((r) => (
+                            <button
+                                key={r.label}
+                                type="button"
+                                className={`range-btn${range === r.label ? ' active' : ''}`}
+                                onClick={() => setRange(r.label)}
+                            >
+                                {r.label}
+                            </button>
                         ))}
-                    </select>
+                    </div>
                 </div>
-                <h3>{MODELS[model].name}</h3>
-                <p>{MODELS[model].description}</p>
-                <p className="disclaimer">
+                <StockChart
+                    startDate={startString}
+                    endDate={todayString}
+                    ticker={ticker}
+                    model={model}
+                />
+                <div className="chart-legend">
+                    <span>
+                        <span className="legend-key legend-key-price" />
+                        Price
+                    </span>
+                    <span>
+                        <span className="legend-key legend-key-forecast" />
+                        Forecast ({MODELS[model].name})
+                    </span>
+                    {model === 'sarima' && (
+                        <span>
+                            <span className="legend-key legend-key-band" />
+                            Confidence band
+                        </span>
+                    )}
+                </div>
+            </div>
+
+            <div className="forecast-side">
+                <div className="model-card">
+                    <div className="model-card-title">Forecast model</div>
+                    <div className="model-options" role="group" aria-label="Forecast model">
+                        {Object.entries(MODELS).map(([value, { name }]) => (
+                            <button
+                                key={value}
+                                type="button"
+                                className={`model-btn${model === value ? ' active' : ''}`}
+                                onClick={() => setModel(value)}
+                            >
+                                {name}
+                            </button>
+                        ))}
+                    </div>
+                    <p className="model-desc">{MODELS[model].description}</p>
+                </div>
+
+                <div className="forecast-disclaimer">
                     Forecasts are statistical estimates based on historical data and are
                     not financial advice.
-                </p>
+                </div>
             </div>
         </div>
     )
