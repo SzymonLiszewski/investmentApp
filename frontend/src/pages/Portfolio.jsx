@@ -71,11 +71,11 @@ function Portfolio(){
 
     return (
         <Fragment>
-        <div style={{display: 'flex', gap: '10px', marginLeft: '5vw', marginRight: '5vw', marginBottom: '10px', alignItems: 'center', justifyContent: 'space-between'}}>
-            <div style={{display: 'flex', gap: '10px'}}>
-                <button className="connectedAccountsButton"><Link to="/connectAccounts" style={{color: "#000000"}}>connected accounts</Link></button>
-                <button className="connectedAccountsButton"><Link to="/addStock" style={{color: "#000000"}}>add assets</Link></button>
-                <button className="connectedAccountsButton"><Link to="/portfolio/import-transactions" style={{color: "#000000"}}>import transactions</Link></button>
+        <div className="portfolioToolbar">
+            <div className="portfolioToolbarLinks">
+                <Link className="portfolioActionBtn portfolioActionBtn--primary" to="/addStock">Add assets</Link>
+                <Link className="portfolioActionBtn" to="/portfolio/import-transactions">Import transactions</Link>
+                <Link className="portfolioActionBtn" to="/connectAccounts">Connected accounts</Link>
             </div>
             <CurrencySelector onCurrencyChange={handleCurrencyChange} />
         </div>

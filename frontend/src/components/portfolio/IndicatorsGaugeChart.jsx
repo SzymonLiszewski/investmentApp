@@ -9,7 +9,11 @@ const IndicatorsGaugeChart = ({ data, range, name, interpretation }) => {
     { name, value: filledDegrees, fill: '#8884d8' },
     { name: 'Remaining', value: 180 - filledDegrees, fill: '#e0e0e0' },
   ];
-  const chartSize = 200;
+  // Semicircle gauge: the arc only occupies the top half of the pie, so use a
+  // 200x120 canvas with the pie centre anchored near the bottom edge — this keeps
+  // the rendered box the same size as the visible arc (no invisible empty half).
+  const chartWidth = 200;
+  const chartHeight = 120;
   const displayValue = Number.isFinite(data) ? data.toFixed(2) : '—';
   if (data == null || data === -100) {
     return (
@@ -28,11 +32,12 @@ const IndicatorsGaugeChart = ({ data, range, name, interpretation }) => {
   return (
     <div className="indicatorGauge">
       <div className="indicatorChartWrap">
-        <PieChart width={chartSize} height={chartSize}>
+        <PieChart width={chartWidth} height={chartHeight}>
           <Pie
             data={gaugeData}
             startAngle={180}
             endAngle={0}
+            cy={100}
             innerRadius={60}
             outerRadius={80}
             dataKey="value"

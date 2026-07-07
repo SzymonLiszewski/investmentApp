@@ -5,10 +5,12 @@ import {
 import { useState, useEffect } from 'react';
 import { Box, CircularProgress } from '@mui/material';
 import apiClient from '../../api/client';
+import useMediaQuery from '../../hooks/useMediaQuery';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D', '#FFC658', '#FF6B6B'];
 
 function UserStocksChart({ currency }){
+    const narrow = useMediaQuery('(max-width: 640px)');
     const [userAsset, setUserAsset] = useState([]);
     const [portfolioCurrency, setPortfolioCurrency] = useState('PLN');
     const [loading, setLoading] = useState(true);
@@ -70,11 +72,11 @@ function UserStocksChart({ currency }){
     return (
         <div>
           <h3 style={titleStyle}>Allocation by asset</h3>
-          <ResponsiveContainer width="100%" height={400}>
+          <ResponsiveContainer width="100%" height={narrow ? 320 : 400}>
             <PieChart>
             <Pie
               data={userAsset}
-              cx="40%"
+              cx={narrow ? '50%' : '40%'}
               cy="50%"
               labelLine={false}
               label={({ name, percent, cx, cy, midAngle, innerRadius, outerRadius }) => {
@@ -106,7 +108,7 @@ function UserStocksChart({ currency }){
                   </text>
                 );
               }}
-              outerRadius={150}
+              outerRadius={narrow ? '58%' : 150}
               fill="#8884d8"
               dataKey="value"
             >
@@ -118,7 +120,12 @@ function UserStocksChart({ currency }){
               contentStyle={{ fontSize: 12 }} 
               formatter={(value, name) => [typeof value === 'number' ? value.toFixed(2) : value, name]}
             />
-            <Legend wrapperStyle={{ fontSize: 12 } } layout="vertical" verticalAlign="middle" align="right" />
+            <Legend
+              wrapperStyle={{ fontSize: 12 }}
+              layout={narrow ? 'horizontal' : 'vertical'}
+              verticalAlign={narrow ? 'bottom' : 'middle'}
+              align={narrow ? 'center' : 'right'}
+            />
           </PieChart>
         </ResponsiveContainer>
         </div>
