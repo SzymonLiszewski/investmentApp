@@ -2,9 +2,11 @@ import React from 'react';
 import {
   ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
+import useMediaQuery from '../../hooks/useMediaQuery';
 
 
 const UserEarningsChart = ({ data, currency = 'PLN' }) => {
+  const narrow = useMediaQuery('(max-width: 640px)');
   if (!data || data.length === 0) {
     return <p>No portfolio history available yet.</p>;
   }
@@ -19,10 +21,10 @@ const UserEarningsChart = ({ data, currency = 'PLN' }) => {
   }));
 
   return (
-    <ResponsiveContainer width="100%" height={400}>
+    <ResponsiveContainer width="100%" height={narrow ? 300 : 400}>
       <ComposedChart
         data={chartData}
-        margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+        margin={narrow ? { top: 16, right: 12, left: 0, bottom: 5 } : { top: 20, right: 30, left: 20, bottom: 5 }}
       >
         <defs>
           <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
@@ -33,14 +35,14 @@ const UserEarningsChart = ({ data, currency = 'PLN' }) => {
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis
           dataKey="date"
-          tick={{ fontSize: 14 }}
+          tick={{ fontSize: narrow ? 11 : 14 }}
           interval="preserveStartEnd"
-          tickCount={8}
+          tickCount={narrow ? 4 : 8}
         />
         <YAxis
-          tick={{ fontSize: 14 }}
+          tick={{ fontSize: narrow ? 11 : 14 }}
           tickFormatter={formatValue}
-          width={80}
+          width={narrow ? 56 : 80}
         />
         <Tooltip
           contentStyle={{ fontSize: 14 }}

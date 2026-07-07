@@ -87,7 +87,7 @@ function ActivePositionsTable({ currency }) {
     <div className="activePositionsContent" id="activePositions">
       <h3 style={{ marginBottom: 16, textAlign: 'center' }}>Active positions</h3>
       <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: 'none' }}>
-        <Table size="small" aria-label="Active positions">
+        <Table size="small" aria-label="Active positions" sx={{ minWidth: 760 }}>
           <TableHead>
             <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
               <TableCell><strong>Asset</strong></TableCell>
