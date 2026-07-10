@@ -124,21 +124,21 @@ def _get_price_at_date(
         pos = index_dates.index(target_date)
         val = price_series.iloc[pos]
         if pd.notna(val):
-            return float(val)
+            return Decimal(str(float(val)))
     # Prefer most recent earlier date
     earlier_mask = [d <= target_date for d in index_dates]
     if any(earlier_mask):
         earlier = price_series.loc[earlier_mask]
         val = earlier.iloc[-1]
         if pd.notna(val):
-            return float(val)
+            return Decimal(str(float(val)))
     # Fallback: nearest next trading day
     later_mask = [d > target_date for d in index_dates]
     if any(later_mask):
         later = price_series.loc[later_mask]
         val = later.iloc[0]
         if pd.notna(val):
-            return float(val)
+            return Decimal(str(float(val)))
     return None
 
 
@@ -153,7 +153,7 @@ def resolve_price_for_date(
     target_date: date,
     stock_fetcher=None,
     crypto_fetcher=None,
-) -> Optional[float]:
+) -> Optional[Decimal]:
     """
     Resolve missing transaction price using PriceRepository (DB + fetcher):
     closing price for the given symbol on the given date. Fetches several days
@@ -194,14 +194,15 @@ def update_user_asset(transaction):
     am = AssetManager()
     is_buy = transaction.transactionType == Transactions.transaction_type.BUY
     delta = transaction.quantity if is_buy else -transaction.quantity
-    new_quantity = max(0.0, (0.0 if created else user_product.quantity) + delta)
+    prev_qty = Decimal('0') if created else user_product.quantity
+    new_quantity = max(Decimal('0'), prev_qty + delta)
 
     tx_currency = (
         (transaction.currency or "").strip() or am._get_native_currency(transaction.product)
     )
 
     if new_quantity <= 0:
-        user_product.quantity = 0.0
+        user_product.quantity = Decimal('0')
         user_product.average_purchase_price = None
         user_product.currency = None
         user_product.save()
@@ -214,7 +215,7 @@ def update_user_asset(transaction):
             transaction.owner, transaction.product, new_quantity
         )
         if cost_basis is not None and cost_basis > 0:
-            user_product.average_purchase_price = cost_basis / Decimal(str(new_quantity))
+            user_product.average_purchase_price = cost_basis / new_quantity
             user_product.currency = tx_currency
         else:
             user_product.average_purchase_price = None
@@ -226,13 +227,12 @@ def update_user_asset(transaction):
     # Incremental update: BUY = weighted average, SELL = average unchanged
     if is_buy:
         if created or user_product.average_purchase_price is None or not existing_currency:
-            user_product.average_purchase_price = Decimal(str(transaction.price))
+            user_product.average_purchase_price = transaction.price
             user_product.currency = tx_currency or user_product.currency
         else:
             prev_avg = user_product.average_purchase_price
-            prev_qty = Decimal(str(user_product.quantity))
-            buy_qty = Decimal(str(transaction.quantity))
-            buy_cost = Decimal(str(transaction.price)) * buy_qty
+            buy_qty = transaction.quantity
+            buy_cost = transaction.price * buy_qty
             new_qty = prev_qty + buy_qty
             user_product.average_purchase_price = (prev_avg * prev_qty + buy_cost) / new_qty
     # SELL: average and currency unchanged, only quantity already reduced to new_quantity

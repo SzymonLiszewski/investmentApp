@@ -45,7 +45,7 @@ class AssetManager:
         self,
         user: User,
         asset: 'Asset',
-        current_quantity: float,
+        current_quantity: Decimal,
         *,
         as_of_date: Optional[date] = None,
     ) -> Optional[Decimal]:
@@ -68,8 +68,8 @@ class AssetManager:
         qty = Decimal('0')
         cost = Decimal('0')
         for tx in txs:
-            qty_tx = Decimal(str(tx.quantity))
-            price_tx = Decimal(str(tx.price)) if tx.price else Decimal('0')
+            qty_tx = tx.quantity
+            price_tx = tx.price if tx.price else Decimal('0')
             amount = qty_tx * price_tx
             tx_currency = getattr(tx, 'currency', None) or native_currency
             if tx_currency != native_currency and amount > 0:
@@ -90,12 +90,10 @@ class AssetManager:
                 qty = qty_after
         if qty <= 0:
             return None
-        # Scale cost to match current_quantity (in case of rounding)
-        current_q = Decimal(str(current_quantity))
-        if current_q <= 0:
+        if current_quantity <= 0:
             return None
-        if qty != current_q:
-            cost = cost * (current_q / qty) if qty > 0 else Decimal('0')
+        if qty != current_quantity:
+            cost = cost * (current_quantity / qty) if qty > 0 else Decimal('0')
         return cost
 
     def get_portfolio_composition(
@@ -187,27 +185,25 @@ class AssetManager:
             composition_by_type[asset_type] += current_value
 
             # Cost basis and profit (in target currency)
-            quantity_float = float(user_asset.quantity)
+            quantity = user_asset.quantity
             total_cost_dec = None
-            average_purchase_price = None
-            if quantity_float > 0 and user_asset.average_purchase_price is not None and user_asset.currency:
+            average_purchase_price_dec = None
+            if quantity > 0 and user_asset.average_purchase_price is not None and user_asset.currency:
                 # Use stored average and currency when available
-                cost_basis_stored = Decimal(str(user_asset.average_purchase_price)) * Decimal(str(quantity_float))
+                cost_basis_stored = user_asset.average_purchase_price * quantity
                 if user_asset.currency != currency:
                     total_cost_dec = self.currency_converter.convert(
                         cost_basis_stored, user_asset.currency, currency,
                     )
                 else:
                     total_cost_dec = cost_basis_stored
-                if total_cost_dec is not None and quantity_float:
-                    average_purchase_price = float(
-                        total_cost_dec / Decimal(str(quantity_float))
-                    )
+                if total_cost_dec is not None and quantity:
+                    average_purchase_price_dec = total_cost_dec / quantity
                 else:
-                    average_purchase_price = float(user_asset.average_purchase_price)
+                    average_purchase_price_dec = user_asset.average_purchase_price
             if total_cost_dec is None:
                 # Fallback: compute from transactions
-                cost_basis = self._get_cost_basis(user, asset, user_asset.quantity)
+                cost_basis = self._get_cost_basis(user, asset, quantity)
                 if cost_basis is not None and cost_basis > 0:
                     native_currency = self._get_native_currency(asset)
                     if native_currency != currency:
@@ -216,16 +212,13 @@ class AssetManager:
                         )
                     else:
                         total_cost_dec = cost_basis
-                    if quantity_float and total_cost_dec is not None:
-                        average_purchase_price = float(
-                            total_cost_dec / Decimal(str(quantity_float))
-                        )
-            total_cost_float = float(total_cost_dec) if total_cost_dec is not None else None
-            if average_purchase_price is None and total_cost_float and quantity_float:
-                average_purchase_price = total_cost_float / quantity_float
-            profit = (float(current_value) - total_cost_float) if total_cost_float is not None else None
+                    if quantity and total_cost_dec is not None:
+                        average_purchase_price_dec = total_cost_dec / quantity
+            if average_purchase_price_dec is None and total_cost_dec is not None and quantity:
+                average_purchase_price_dec = total_cost_dec / quantity
+            profit = (current_value - total_cost_dec) if total_cost_dec is not None else None
             profit_percentage = (
-                (profit / total_cost_float * 100) if total_cost_float and total_cost_float > 0 and profit is not None else None
+                (profit / total_cost_dec * 100) if total_cost_dec and total_cost_dec > 0 and profit is not None else None
             )
 
             asset_info = {
@@ -233,12 +226,12 @@ class AssetManager:
                 'symbol': asset.symbol,
                 'name': asset.name,
                 'asset_type': asset_type,
-                'quantity': quantity_float,
+                'quantity': float(quantity),
                 'current_value': float(current_value),
-                'average_purchase_price': round(average_purchase_price, 4) if average_purchase_price is not None else None,
-                'total_cost': round(total_cost_float, 2) if total_cost_float is not None else None,
-                'profit': round(profit, 2) if profit is not None else None,
-                'profit_percentage': round(profit_percentage, 2) if profit_percentage is not None else None,
+                'average_purchase_price': float(round(average_purchase_price_dec, 4)) if average_purchase_price_dec is not None else None,
+                'total_cost': float(round(total_cost_dec, 2)) if total_cost_dec is not None else None,
+                'profit': float(round(profit, 2)) if profit is not None else None,
+                'profit_percentage': float(round(profit_percentage, 2)) if profit_percentage is not None else None,
             }
             assets_data.append(asset_info)
             composition_by_asset.append(asset_info)
@@ -257,10 +250,10 @@ class AssetManager:
         if total_value > 0:
             for asset_info in composition_by_asset:
                 asset_value = Decimal(str(asset_info['current_value']))
-                percentage = (asset_value / total_value) * 100
+                percentage = float((asset_value / total_value) * 100)
                 composition_by_asset_percent.append({
                     **asset_info,
-                    'percentage': float(percentage),
+                    'percentage': percentage,
                 })
 
         return {
@@ -438,7 +431,7 @@ class AssetManager:
 
     # ---- Fallback valuation ----
 
-    def _get_value_from_last_transaction(self, user_asset: UserAsset) -> float:
+    def _get_value_from_last_transaction(self, user_asset: UserAsset) -> Decimal:
         """Fallback: value from last transaction price when calculator is unavailable."""
         try:
             last_tx = (
@@ -449,17 +442,17 @@ class AssetManager:
                 .order_by('-date', '-id')
                 .first()
             )
-            if last_tx and last_tx.price and float(last_tx.price) > 0:
-                return float(last_tx.price) * float(user_asset.quantity)
+            if last_tx and last_tx.price and last_tx.price > 0:
+                return last_tx.price * user_asset.quantity
         except Exception:
             pass
-        return 0.0
+        return Decimal('0')
 
     def get_asset_market_value(
         self,
         user_asset: UserAsset,
         target_currency: Optional[str] = None,
-    ) -> float:
+    ) -> Decimal:
         """
         Calculate current market value for a single UserAsset.
         Uses the same calculators as get_portfolio_composition.
@@ -506,7 +499,7 @@ class AssetManager:
         if current_value is None:
             return self._get_value_from_last_transaction(user_asset)
 
-        return float(current_value)
+        return current_value
 
     def _get_calculator_for_asset_type(self, asset_type: str) -> Optional[AssetCalculator]:
         """

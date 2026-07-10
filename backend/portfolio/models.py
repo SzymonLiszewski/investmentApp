@@ -12,7 +12,7 @@ class UserAsset(models.Model):
     """
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="ownedAssets")
     ownedAsset = models.ForeignKey(Asset, on_delete=models.CASCADE)
-    quantity = models.FloatField(default=0)
+    quantity = models.DecimalField(max_digits=18, decimal_places=8, default=Decimal('0'))
     average_purchase_price = models.DecimalField(
         max_digits=18,
         decimal_places=6,
@@ -42,8 +42,8 @@ class Transactions(models.Model):
         choices=transaction_type.choices,
         default=transaction_type.BUY
     )
-    quantity = models.FloatField(default=0.0)
-    price = models.FloatField(default=0.0)
+    quantity = models.DecimalField(max_digits=18, decimal_places=8, default=Decimal('0'))
+    price = models.DecimalField(max_digits=18, decimal_places=4, default=Decimal('0'))
     date = models.DateField(default='2024-01-01')
     currency = models.CharField(
         max_length=10,

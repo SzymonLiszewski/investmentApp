@@ -10,7 +10,7 @@ import logging
 from dataclasses import dataclass, field
 from datetime import date
 from decimal import Decimal
-from typing import List, Optional, Sequence, Tuple
+from typing import List, Optional, Sequence, Tuple, Union
 
 from django.contrib.auth.models import User
 from django.db import IntegrityError
@@ -100,20 +100,17 @@ def _finalize_price_and_currency(
     symbol: Optional[str],
     asset_type: Optional[str],
     trade_date: date,
-    price_value: Optional[float],
+    price_value: Optional[Union[float, Decimal]],
     stock_fetcher=None,
     crypto_fetcher=None,
-) -> Tuple[Optional[float], Optional[str]]:
+) -> Tuple[Optional[Decimal], Optional[str]]:
     """
     Match CreateTransaction: resolve missing price for stocks/crypto, optionally convert
     to the user's snapshot currency when the price came from market data.
     """
-    resolved: Optional[float] = None
-    if price_value is not None:
-        try:
-            resolved = float(price_value)
-        except (TypeError, ValueError):
-            resolved = None
+    resolved: Optional[Decimal] = (
+        Decimal(str(price_value)) if price_value is not None else None
+    )
 
     resolved_from_api = False
     if (resolved is None or resolved <= 0) and symbol and asset_type in (
@@ -142,7 +139,7 @@ def _finalize_price_and_currency(
                 Decimal(str(resolved)), native_currency, target_currency
             )
             if converted is not None:
-                resolved = float(converted)
+                resolved = converted
         tx_currency = target_currency
 
     return resolved, tx_currency
@@ -229,8 +226,8 @@ def _process_single_import_row(
             owner=user,
             product=asset,
             transactionType=tx_type,
-            quantity=float(row.quantity),
-            price=price_final if price_final is not None else 0.0,
+            quantity=Decimal(str(row.quantity)),
+            price=price_final if price_final is not None else Decimal('0'),
             date=row.trade_date,
             currency=save_currency,
             external_id=external_id,

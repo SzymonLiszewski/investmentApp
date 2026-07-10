@@ -1,7 +1,7 @@
 import logging
 from datetime import date, datetime
-
 from decimal import Decimal
+from typing import Optional
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 
@@ -70,11 +70,11 @@ class CreateTransaction(generics.ListCreateAPIView):
         if transaction_date is None:
             transaction_date = date.today()
 
-        price_value = None
+        price_value: Optional[Decimal] = None
         if price is not None and price != '':
             try:
-                price_value = float(price)
-            except (TypeError, ValueError):
+                price_value = Decimal(str(price))
+            except Exception:
                 pass
         resolved_from_api = False
         if (price_value is None or price_value <= 0) and symbol and asset_type in ('stocks', 'cryptocurrencies'):
@@ -91,15 +91,15 @@ class CreateTransaction(generics.ListCreateAPIView):
             native_currency = asset_manager._get_native_currency(asset)
             if native_currency != target_currency:
                 converter = CurrencyConverter()
-                converted = converter.convert(Decimal(str(price_value)), native_currency, target_currency)
+                converted = converter.convert(price_value, native_currency, target_currency)
                 if converted is not None:
-                    price_value = float(converted)
+                    price_value = converted
             transaction_currency = target_currency
 
         save_kwargs = {
             'owner': self.request.user,
             'product': asset,
-            'price': price_value if price_value is not None else 0.0,
+            'price': price_value if price_value is not None else Decimal('0'),
         }
         if transaction_currency is not None:
             save_kwargs['currency'] = transaction_currency

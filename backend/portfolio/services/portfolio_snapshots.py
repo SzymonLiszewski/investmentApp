@@ -107,7 +107,7 @@ class PortfolioSnapshotService:
             # Include any transactions on or before this day in total_invested
             while tx_index < len(transactions) and transactions[tx_index].date <= current:
                 tx = transactions[tx_index]
-                amount = Decimal(str(tx.price * tx.quantity))
+                amount = tx.price * tx.quantity
                 from_currency = tx.currency or self.asset_manager._get_native_currency(tx.product)
                 if from_currency != currency:
                     converted = self.asset_manager.currency_converter.convert(
@@ -210,7 +210,7 @@ class PortfolioSnapshotService:
                 break
             pid = tx.product_id
             if pid not in positions:
-                positions[pid] = [tx.product, 0.0, None]
+                positions[pid] = [tx.product, Decimal('0'), None]
 
             if tx.transactionType == "B":
                 positions[pid][1] += tx.quantity
