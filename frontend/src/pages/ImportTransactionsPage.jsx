@@ -24,6 +24,14 @@ function ImportTransactionsPage() {
     setFile(null);
   };
 
+  const chooseBinance = () => {
+    setSelectedBroker('binance');
+    setStep(STEPS.UPLOAD);
+    setError(null);
+    setResult(null);
+    setFile(null);
+  };
+
   const handleFileChange = (e) => {
     const f = e.target.files?.[0] ?? null;
     setFile(f);
@@ -67,6 +75,42 @@ function ImportTransactionsPage() {
     }
   };
 
+  const submitBinance = async () => {
+    if (!file) {
+      setError('Please choose an .xlsx file first.');
+      return;
+    }
+    if (!file.name.toLowerCase().endsWith('.xlsx')) {
+      setError('The file must be an Excel workbook (.xlsx).');
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const res = await apiClient.post('/api/portfolio/import/binance/', formData, {
+        transformRequest: [(data, headers) => {
+          if (data instanceof FormData) {
+            delete headers['Content-Type'];
+          }
+          return data;
+        }],
+      });
+      setResult(res.data);
+    } catch (err) {
+      const msg =
+        err.response?.data?.detail ??
+        err.response?.data?.message ??
+        err.message ??
+        'Upload failed.';
+      setError(typeof msg === 'string' ? msg : JSON.stringify(msg));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Fragment>
       <div className="importTxToolbar">
@@ -88,6 +132,14 @@ function ImportTransactionsPage() {
               >
                 <span className="importTxBrokerName" style={{ color: "#000" }}>XTB</span>
                 <span className="importTxBrokerDesc">Excel export · Cash Operations sheet</span>
+              </button>
+              <button
+                type="button"
+                className="importTxBrokerCard"
+                onClick={chooseBinance}
+              >
+                <span className="importTxBrokerName" style={{ color: "#000" }}>Binance</span>
+                <span className="importTxBrokerDesc">Excel export · Transaction History statement</span>
               </button>
             </div>
           </div>
@@ -136,6 +188,60 @@ function ImportTransactionsPage() {
               type="button"
               className="importTxPrimaryButton"
               onClick={submitXtb}
+              disabled={loading || !file}
+            >
+              {loading ? 'Importing…' : 'Upload and import'}
+            </button>
+          </div>
+        )}
+
+        {step === STEPS.UPLOAD && selectedBroker === 'binance' && (
+          <div className="importTxSection">
+            <button
+              type="button"
+              className="importTxGhostButton"
+              onClick={() => {
+                setStep(STEPS.BROKER);
+                setSelectedBroker(null);
+                setFile(null);
+                setError(null);
+                setResult(null);
+              }}
+            >
+              ← Change broker
+            </button>
+            <h2 className="importTxSubtitle">Binance</h2>
+            <div className="importTxInstructions">
+              <p>
+                Use the <strong>Transaction History</strong> statement from Binance exported as
+                {' '}<strong>.xlsx</strong> (Wallet → Transaction History → Export).
+              </p>
+              <p>
+                The file must contain the balance-change ledger with columns Time, Account,
+                Operation, Coin and Change. Imported as transactions: fiat and card purchases
+                (<code>Buy Crypto With Fiat</code>/<code>Card</code>), spot and margin trades
+                (<code>Transaction Buy</code>/<code>Sold</code>), and <code>Binance Convert</code>
+                {' '}swaps. Trades quoted in USDT or another stablecoin are priced in USD.
+              </p>
+              <p className="importTxHint">
+                Stablecoins themselves are treated as cash, not as holdings. Other ledger
+                entries (interest, rewards, fees, deposits, withdrawals, transfers, dust
+                conversions) are skipped automatically. Rows that were imported before are
+                skipped on re-upload.
+              </p>
+            </div>
+            <div className="importTxUploadRow">
+              <input
+                type="file"
+                accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                onChange={handleFileChange}
+                className="importTxFileInput"
+              />
+            </div>
+            <button
+              type="button"
+              className="importTxPrimaryButton"
+              onClick={submitBinance}
               disabled={loading || !file}
             >
               {loading ? 'Importing…' : 'Upload and import'}
