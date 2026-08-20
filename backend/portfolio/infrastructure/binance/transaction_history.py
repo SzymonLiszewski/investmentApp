@@ -504,6 +504,8 @@ def _rows_from_spot_trades(legs: List[_Leg]) -> List[NormalizedTransactionImport
                             moment=moment,
                             excel_row=first.excel_row,
                             id_suffix=id_suffix,
+                            account=account,
+                            operation=first.operation_key,
                         )
                     )
     return out
