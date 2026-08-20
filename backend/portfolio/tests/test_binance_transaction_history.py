@@ -46,7 +46,7 @@ class ParseBinanceTransactionHistoryTests(SimpleTestCase):
         self.assertAlmostEqual(row.quantity, 0.00419071)
         self.assertAlmostEqual(row.price, 990.86 / 0.00419071)
         self.assertEqual(row.currency, "PLN")
-        self.assertEqual(row.external_id, "binance:2026-06-13 20:18:34:BTC:0.00419071")
+        self.assertEqual(row.external_id, "binance:Spot:buy crypto with fiat:2026-06-13 20:18:34:BTC:0.00419071")
 
     def test_parses_sell_pair_into_single_sell_row(self):
         buf = _build_workbook(

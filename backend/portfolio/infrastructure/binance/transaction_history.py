@@ -302,6 +302,8 @@ def _make_row(
     moment: datetime,
     excel_row: int,
     id_suffix: str,
+    account: str,
+    operation: str,
 ) -> NormalizedTransactionImportRow:
     time_str = moment.strftime("%Y-%m-%d %H:%M:%S")
     return NormalizedTransactionImportRow(
@@ -313,7 +315,7 @@ def _make_row(
         symbol=coin,
         name=None,
         asset_type="cryptocurrencies",
-        external_id=f"binance:{time_str}:{coin}:{id_suffix}",
+        external_id=f"binance:{account}:{operation}:{time_str}:{coin}:{id_suffix}",
         currency=currency,
     )
 
@@ -393,6 +395,8 @@ def _rows_from_fiat_trades(legs: List[_Leg]) -> List[NormalizedTransactionImport
                     moment=crypto_leg.moment,
                     excel_row=crypto_leg.excel_row,
                     id_suffix=crypto_leg.raw_change,
+                    account=crypto_leg.account,
+                    operation=crypto_leg.operation_key,
                 )
             )
     return out
@@ -469,6 +473,8 @@ def _rows_from_spot_trades(legs: List[_Leg]) -> List[NormalizedTransactionImport
                     moment=moment,
                     excel_row=first.excel_row,
                     id_suffix=id_suffix,
+                    account=account,
+                    operation=first.operation_key,
                 )
             )
 
@@ -541,6 +547,8 @@ def _rows_from_converts(legs: List[_Leg]) -> List[NormalizedTransactionImportRow
                     moment=moment,
                     excel_row=pos.excel_row,
                     id_suffix=pos.raw_change,
+                    account=account,
+                    operation=pos.operation_key,
                 )
             )
         if neg_cash is None:
@@ -554,6 +562,8 @@ def _rows_from_converts(legs: List[_Leg]) -> List[NormalizedTransactionImportRow
                     moment=moment,
                     excel_row=neg.excel_row,
                     id_suffix=neg.raw_change,
+                    account=account,
+                    operation=neg.operation_key,
                 )
             )
     return out
