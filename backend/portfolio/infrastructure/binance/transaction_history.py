@@ -329,6 +329,11 @@ def _match_fiat_leg(
     for idx, fiat in enumerate(fiat_legs):
         if idx in used:
             continue
+        if (
+            fiat.account != crypto_leg.account
+            or fiat.operation_key != crypto_leg.operation_key
+        ):
+            continue
         delta = abs((fiat.moment - crypto_leg.moment).total_seconds())
         if delta > _PAIR_TOLERANCE_SECONDS:
             continue
