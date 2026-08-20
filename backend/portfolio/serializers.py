@@ -5,6 +5,9 @@ from decimal import Decimal
 
 
 class TransactionSerializer(serializers.ModelSerializer):
+    price    = serializers.DecimalField(max_digits=18, decimal_places=4, required=False, allow_null=True)
+    quantity = serializers.DecimalField(max_digits=18, decimal_places=8)
+
     # Optional fields for creating asset if it doesn't exist
     symbol = serializers.CharField(required=False, allow_null=True, allow_blank=True, write_only=True)
     name = serializers.CharField(required=False, allow_null=True, allow_blank=True, write_only=True)
@@ -31,7 +34,6 @@ class TransactionSerializer(serializers.ModelSerializer):
         ]
         extra_kwargs = {
             "owner": {"read_only": True},
-            "price": {"required": False, "allow_null": True},
             "currency": {"required": False, "allow_null": True},
             "external_id": {"required": False},
             "product": {"required": False}
