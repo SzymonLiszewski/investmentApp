@@ -476,7 +476,7 @@ def _rows_from_spot_trades(legs: List[_Leg]) -> List[NormalizedTransactionImport
         # is itself a portfolio asset being received/spent, so it needs its
         # own companion transaction on the opposite side — otherwise only
         # half of the trade would be imported.
-        if priced:
+        if priced and quote_legs:
             quote_coin = next(iter(quote_coins))
             if _cash_currency(quote_coin) is None:
                 quote_coin_legs = [l for l in quote_legs if l.coin == quote_coin]
