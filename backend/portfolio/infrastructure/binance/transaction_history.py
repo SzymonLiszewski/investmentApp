@@ -13,7 +13,10 @@ locates the header row automatically. Trades appear as *groups* of ledger legs:
   (-quote), and ``Transaction Sold`` (-base) with ``Transaction Revenue``
   (+quote). All legs of one trade share the exact timestamp and account;
   multi-fill orders appear as several legs at the same second and are
-  aggregated into a single row with the weighted-average price.
+  aggregated into a single row with the weighted-average price. When the
+  quote leg is itself a non-cash cryptocurrency, a companion transaction on
+  the opposite side is emitted for it too, so both legs of the trade are
+  imported.
 - ``Binance Convert``: one negative and one positive leg at the same timestamp,
   emitted as a SELL of the outgoing coin and/or a BUY of the incoming coin.
 
@@ -468,6 +471,35 @@ def _rows_from_spot_trades(legs: List[_Leg]) -> List[NormalizedTransactionImport
                     id_suffix=id_suffix,
                 )
             )
+
+        # A quote leg denominated in another cryptocurrency (rather than cash)
+        # is itself a portfolio asset being received/spent, so it needs its
+        # own companion transaction on the opposite side — otherwise only
+        # half of the trade would be imported.
+        if priced:
+            quote_coin = next(iter(quote_coins))
+            if _cash_currency(quote_coin) is None:
+                quote_coin_legs = [l for l in quote_legs if l.coin == quote_coin]
+                quantity = sum(abs(l.change) for l in quote_coin_legs)
+                if quantity > 0:
+                    first = min(quote_coin_legs, key=lambda l: l.excel_row)
+                    id_suffix = (
+                        first.raw_change
+                        if len(quote_coin_legs) == 1
+                        else f"{quantity:.8f}x{len(quote_coin_legs)}"
+                    )
+                    out.append(
+                        _make_row(
+                            side="SELL" if side == "BUY" else "BUY",
+                            coin=quote_coin,
+                            quantity=quantity,
+                            price=None,
+                            currency=None,
+                            moment=moment,
+                            excel_row=first.excel_row,
+                            id_suffix=id_suffix,
+                        )
+                    )
     return out
 
 

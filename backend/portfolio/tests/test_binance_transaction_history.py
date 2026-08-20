@@ -192,13 +192,18 @@ class ParseBinanceTransactionHistoryTests(SimpleTestCase):
             ]
         )
         rows = parse_binance_transaction_history_xlsx(buf)
-        self.assertEqual(len(rows), 1)
-        row = rows[0]
-        self.assertEqual(row.transaction_type, "SELL")
-        self.assertEqual(row.symbol, "BNB")
-        self.assertAlmostEqual(row.quantity, 0.015)
-        self.assertIsNone(row.price)
-        self.assertIsNone(row.currency)
+        self.assertEqual(len(rows), 2)
+        base_row = next(r for r in rows if r.symbol == "BNB")
+        self.assertEqual(base_row.transaction_type, "SELL")
+        self.assertAlmostEqual(base_row.quantity, 0.015)
+        self.assertIsNone(base_row.price)
+        self.assertIsNone(base_row.currency)
+
+        quote_row = next(r for r in rows if r.symbol == "BTC")
+        self.assertEqual(quote_row.transaction_type, "BUY")
+        self.assertAlmostEqual(quote_row.quantity, 0.00010681)
+        self.assertIsNone(quote_row.price)
+        self.assertIsNone(quote_row.currency)
 
     def test_spot_sell_priced_in_usd(self):
         buf = _build_workbook(
