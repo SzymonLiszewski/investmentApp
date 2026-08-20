@@ -7,6 +7,11 @@ urlpatterns = [
         views.XtbCashOperationsImportView.as_view(),
         name='portfolio_import_xtb',
     ),
+    path(
+        'import/binance/',
+        views.BinanceTransactionHistoryImportView.as_view(),
+        name='portfolio_import_binance',
+    ),
     path('transactions/', views.CreateTransaction.as_view(), name="transactions"),
     path('composition/', views.getUserAssetComposition, name='portfolio_composition'),
     path('indicators/', views.indicatorsView, name='portfolio_indicators'),
