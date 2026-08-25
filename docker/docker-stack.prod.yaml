@@ -21,6 +21,8 @@ secrets:
     external: true
   newsdata_api_key:
     external: true
+  grafana_admin_password:
+    external: true
 
 services:
   db:
@@ -241,7 +243,7 @@ services:
   grafana:
     image: grafana/grafana:11.1.0
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?Set GRAFANA_ADMIN_PASSWORD}
+      GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana_admin_password
       GF_SERVER_ROOT_URL: http://localhost:3000
     ports:
       - target: 3000
@@ -253,6 +255,8 @@ services:
         target: /etc/grafana/provisioning/datasources/prometheus.yml
       - source: grafana_dashboards_provider
         target: /etc/grafana/provisioning/dashboards/dashboards.yml
+    secrets:
+      - grafana_admin_password
     volumes:
       - grafana_data:/var/lib/grafana
     networks:

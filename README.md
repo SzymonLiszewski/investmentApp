@@ -95,7 +95,7 @@ Also starts `redis` + `celery-worker` + `celery-beat` for background jobs - nigh
 
 ### Production (Docker Swarm + CI/CD)
 
-The hosted demo (https://captrivio.com) runs on `docker/docker-stack.prod.yaml`, a Docker Swarm stack: `db`, `backend`, `redis` + `celery-worker` + `celery-beat` (nightly forecast-model retraining), `frontend`, `caddy` (reverse proxy, automatic HTTPS), plus the monitoring services below. Secrets (DB password, Django secret key, API keys) are Swarm secrets rather than plain env vars.
+The hosted demo (https://captrivio.com) runs on `docker/docker-stack.prod.yaml`, a Docker Swarm stack: `db`, `backend`, `redis` + `celery-worker` + `celery-beat` (nightly forecast-model retraining), `frontend`, `caddy` (reverse proxy, automatic HTTPS), plus the monitoring services below. Secrets (DB password, Django secret key, API keys, Grafana admin password) are Swarm secrets rather than plain env vars.
 
 **CI/CD** (`.github/workflows/pipeline.yml`): every push to `main` runs the backend/frontend test suites, builds and pushes the backend/frontend images to GHCR, then deploys the stack via `docker stack deploy` over SSH - so the live demo always reflects `main`.
 
@@ -109,7 +109,7 @@ The same stack includes **Prometheus** + **Grafana** for basic metrics:
   ```bash
   ssh -L 3000:localhost:3000 <user>@<host>
   ```
-  then open http://localhost:3000 and log in with the `GRAFANA_ADMIN_PASSWORD` secret. Prometheus, node-exporter, and cAdvisor have no published port at all - they're reachable only over the internal Docker network.
+  then open http://localhost:3000 and log in with the `grafana_admin_password` secret. Prometheus, node-exporter, and cAdvisor have no published port at all - they're reachable only over the internal Docker network.
 
 ---
 
