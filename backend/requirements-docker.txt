@@ -3,6 +3,7 @@
 Django
 gunicorn
 django-cors-headers
+django-prometheus
 djangorestframework
 djangorestframework-simplejwt
 PyJWT

@@ -5,6 +5,12 @@ version: "3.8"
 configs:
   caddyfile:
     file: ../caddy/Caddyfile.prod
+  prometheus_config:
+    file: ../docker/prometheus/prometheus.yml
+  grafana_datasource:
+    file: ../docker/grafana/provisioning/datasources/prometheus.yml
+  grafana_dashboards_provider:
+    file: ../docker/grafana/provisioning/dashboards/dashboards.yml
 
 secrets:
   postgres_password:
@@ -14,6 +20,8 @@ secrets:
   alphavantage_api_key:
     external: true
   newsdata_api_key:
+    external: true
+  grafana_admin_password:
     external: true
 
 services:
@@ -208,6 +216,85 @@ services:
         condition: any
         delay: 5s
 
+  # --- Monitoring (Prometheus + Grafana). Dashboards are SSH-tunnel-only:
+  # only grafana publishes a port, and even that must be firewalled off from
+  # the public internet on the host itself (Swarm has no bind-to-loopback
+  # option for published ports) — see docs/monitoring notes in the plan.
+  prometheus:
+    image: prom/prometheus:v2.53.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+    configs:
+      - source: prometheus_config
+        target: /etc/prometheus/prometheus.yml
+    volumes:
+      - prometheus_data:/prometheus
+    networks:
+      - app
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 5s
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana_admin_password
+      GF_SERVER_ROOT_URL: http://localhost:3000
+    ports:
+      - target: 3000
+        published: 3000
+        protocol: tcp
+        mode: host
+    configs:
+      - source: grafana_datasource
+        target: /etc/grafana/provisioning/datasources/prometheus.yml
+      - source: grafana_dashboards_provider
+        target: /etc/grafana/provisioning/dashboards/dashboards.yml
+    secrets:
+      - grafana_admin_password
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - app
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 5s
+
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - --path.procfs=/host/proc
+      - --path.sysfs=/host/sys
+      - --path.rootfs=/rootfs
+    networks:
+      - app
+    deploy:
+      mode: global
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+    networks:
+      - app
+    deploy:
+      mode: global
+
 networks:
   app:
     driver: overlay
@@ -217,4 +304,6 @@ volumes:
   postgres_data_prod:
   caddy_data:
   ml_models_prod:
+  prometheus_data:
+  grafana_data:
 

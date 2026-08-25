@@ -5,6 +5,8 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
+    path('', include('django_prometheus.urls')),   # exposes /metrics for internal Prometheus scraping
+
     path('admin/', admin.site.urls),
 
     # base: auth, assets, market data, news raw, calendar, bonds data
