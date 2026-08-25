@@ -135,6 +135,7 @@ jobs:
         env:
           DOMAIN: ${{ vars.PROD_DOMAIN }}
           ALLOWED_HOSTS: ${{ vars.PROD_ALLOWED_HOSTS != '' && vars.PROD_ALLOWED_HOSTS || format('localhost,127.0.0.1,backend,{0}', vars.PROD_DOMAIN) }}
+          GRAFANA_ADMIN_PASSWORD: ${{ secrets.GRAFANA_ADMIN_PASSWORD }}
         with:
           name: stocksense
           file: docker/docker-stack.prod.yaml
