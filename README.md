@@ -24,9 +24,10 @@ Runs the same stack as production using **pre-built images from GHCR**, with all
 docker compose -f docker/docker-compose.demo.yml --project-directory . up -d
 ```
 
-- **App:** http://localhost:80 (Nginx proxies to frontend and backend).
+- **App:** http://localhost:80 (Caddy proxies to frontend and backend).
 - Database is seeded with sample assets (stocks, crypto, bonds, economic data) and stored in volume `postgres_data_demo`.
 - Stock/crypto quotes and similar data come from the mock fetcher (deterministic test data), not live APIs.
+- No Redis/Celery here on purpose, to keep the demo zero-config - the forecast endpoints just fit a model on demand instead of using a nightly-trained one.
 
 
 ### Quick start (Docker)
@@ -42,6 +43,8 @@ docker compose -f docker/docker-compose.yml -f docker/docker-compose.dev.yml --p
 - **pgAdmin:** http://localhost:5050 (login: `admin@stocksense.local` / `admin`; add server: host `db`, user `stocksense`, password `stocksense`, database `stocksense`).
 
 Database and seed data are stored in volume `postgres_data_dev`.
+
+Also starts `redis` + `celery-worker` + `celery-beat` for background jobs - nightly retraining of the SARIMA/regression forecast models (schedule in `CELERY_BEAT_SCHEDULE`, `backend/backend/settings.py`). Trained model artifacts land in volume `ml_models`. Without these, forecast endpoints still work, just by fitting a model on demand instead of using a nightly-trained one.
 
 
 ### Running without Docker
@@ -75,24 +78,38 @@ Database and seed data are stored in volume `postgres_data_dev`.
    python manage.py runserver
    ```
 
-6. In a second terminal - frontend:
+6. (Optional) Background jobs - nightly retraining of the forecast models runs via Celery; skip this and forecast endpoints just fit a model on demand instead. Needs Redis running locally, then in two more terminals:
+   ```bash
+   celery -A backend worker -l info
+   celery -A backend beat -l info
+   ```
+
+7. In another terminal - frontend:
    ```bash
    cd frontend
    npm install
    npm run dev
    ```
 
-7. Open in browser: http://localhost:5173
+8. Open in browser: http://localhost:5173
 
-### Docker - production
+### Production (Docker Swarm + CI/CD)
 
-Copy `.env.example` to `.env` and set at least `POSTGRES_PASSWORD` and `SECRET_KEY`. To use live data for **news** and **economic calendar**, set `ALPHAVANTAGE_API_KEY` and `NEWSDATA_API_KEY` in `.env` as well (see `.env.example`).
+The hosted demo (https://captrivio.com) runs on `docker/docker-stack.prod.yaml`, a Docker Swarm stack: `db`, `backend`, `redis` + `celery-worker` + `celery-beat` (nightly forecast-model retraining), `frontend`, `caddy` (reverse proxy, automatic HTTPS), plus the monitoring services below. Secrets (DB password, Django secret key, API keys) are Swarm secrets rather than plain env vars.
 
-```bash
-docker compose -f docker/docker-compose.prod.yml up -d --build
-```
+**CI/CD** (`.github/workflows/pipeline.yml`): every push to `main` runs the backend/frontend test suites, builds and pushes the backend/frontend images to GHCR, then deploys the stack via `docker stack deploy` over SSH - so the live demo always reflects `main`.
 
-Nginx listens on port 80 and proxies `/api/`, `/admin/`, `/static/` to the backend and `/` to the frontend. Database is stored in volume `postgres_data_prod`. ML features (sentiment, LSTM) are disabled by default (`ENABLE_ML_FUNCTIONS=false`).
+### Monitoring
+
+The same stack includes **Prometheus** + **Grafana** for basic metrics:
+
+- **App metrics** - request counts/latency and DB query stats, exposed by the backend at `/metrics` (via `django-prometheus`) and scraped internally by Prometheus.
+- **Host/container metrics** - `node-exporter` (host CPU/memory/disk) and `cAdvisor` (per-container resource usage).
+- **Access is intentionally private** - no dashboard is exposed publicly. Reach Grafana over an SSH tunnel to the host:
+  ```bash
+  ssh -L 3000:localhost:3000 <user>@<host>
+  ```
+  then open http://localhost:3000 and log in with the `GRAFANA_ADMIN_PASSWORD` secret. Prometheus, node-exporter, and cAdvisor have no published port at all - they're reachable only over the internal Docker network.
 
 ---
 
@@ -103,6 +120,7 @@ Nginx listens on port 80 and proxies `/api/`, `/admin/`, `/static/` to the backe
 - **Frontend (React)** - SPA talking to the Django API over REST; JWT authentication (token + refresh).
 - **Backend (Django)** - REST API split into apps: `base`, `portfolio`, `analytics`.
 - **Database** -  PostgreSQL
+- **Background jobs (Celery)** - nightly retraining of the SARIMA/regression forecast models, Redis as the broker (optional - see "Running the app" above).
 - **External APIs** - Alpha Vantage, Yahoo Finance, newsdata.
 
 ### Backend apps (`base` / `portfolio` / `analytics`)
@@ -174,7 +192,9 @@ Routing is defined in `App.jsx` (React Router); pages fetch data via the `api` c
 | **Frontend**    | React, Vite |
 | **Database**    | PostgreSQL |
 | **External data** | Alpha Vantage, newsdata, marketstack |
-| **Deploy**      | Docker, Docker Compose, Nginx, Gunicorn |
+| **Background jobs** | Celery, Redis |
+| **Deploy**      | Docker, Docker Compose, Caddy, Gunicorn |
+| **Monitoring**  | Prometheus, Grafana, cAdvisor, node-exporter |
 
 **Requirements:** Python 3.8+, Node.js and npm for the frontend; optionally API keys (or `USE_MOCK_DATA_FETCHER=true`).
 
