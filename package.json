@@ -1,0 +1,25 @@
+{
+  "name": "investment_app",
+  "version": "1.0.0",
+  "description": "E2E testing setup for the investment portfolio tracking app.",
+  "main": "index.js",
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SzymonLiszewski/investmentApp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SzymonLiszewski/investmentApp/issues"
+  },
+  "homepage": "https://github.com/SzymonLiszewski/investmentApp#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.2"
+  }
+}
