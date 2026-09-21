@@ -21,7 +21,7 @@ Captrivio is an application for retail investors whose **main focus is portfolio
 Runs the same stack as production using **pre-built images from GHCR**, with all required environment variables set and **mock data fetcher** enabled - no `.env` or API keys needed. Useful for a quick try-out or demos. For real data, disable the mock fetcher and set the relevant provider options, provide API keys where required - see .env.example for examples
 
 ```bash
-docker compose -f docker/docker-compose.demo.yml --project-directory . up -d
+docker compose -f ./docker/docker-compose.demo.yml up
 ```
 
 - **App:** http://localhost:80 (Caddy proxies to frontend and backend).
@@ -35,7 +35,7 @@ docker compose -f docker/docker-compose.demo.yml --project-directory . up -d
 From the repository root:
 
 ```bash
-docker compose -f docker/docker-compose.yml -f docker/docker-compose.dev.yml --project-directory . up --build
+docker compose -f ./docker/docker-compose.dev.yml up --build
 ```
 
 - **App:** http://localhost:5173  

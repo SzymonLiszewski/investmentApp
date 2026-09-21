@@ -1,3 +1,7 @@
+# Unit tests gate for pull requests to main: Django tests (in-memory SQLite, no DB service needed)
+# and Vitest frontend tests. Same commands as the run-tests job in pipeline.yml.
+# E2E tests live in playwright.yml.
+
 name: Tests
 
 on:
