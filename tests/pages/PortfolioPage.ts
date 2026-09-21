@@ -2,6 +2,20 @@ import { Page, Locator, expect } from '@playwright/test';
 
 export type CurrencyCode = 'PLN' | 'USD' | 'EUR' | 'GBP' | 'CHF' | 'JPY' | 'CAD';
 
+/** Columns of the Active positions table, in DOM order. */
+const POSITION_COLUMNS = {
+  asset: 0,
+  symbol: 1,
+  type: 2,
+  quantity: 3,
+  avgPrice: 4,
+  totalCost: 5,
+  currentValue: 6,
+  profit: 7,
+  returnPct: 8,
+} as const;
+export type PositionColumn = keyof typeof POSITION_COLUMNS;
+
 export class PortfolioPage {
   readonly page: Page;
 
@@ -68,6 +82,22 @@ export class PortfolioPage {
   /** A row in the positions table for the given symbol (or asset name). */
   positionRow(symbolOrName: string): Locator {
     return this.positionsTable.getByRole('row').filter({ hasText: symbolOrName });
+  }
+
+  /** A single cell of a position's row, e.g. positionCell('AAPL', 'totalCost'). */
+  positionCell(symbolOrName: string, column: PositionColumn): Locator {
+    return this.positionRow(symbolOrName).getByRole('cell').nth(POSITION_COLUMNS[column]);
+  }
+
+  /**
+   * Opens the dashboard displayed in `code`. Waits for the initial (default
+   * currency) load to settle first, so a slow first response can't land after
+   * the switch and overwrite the newly selected currency.
+   */
+  async gotoInCurrency(code: CurrencyCode) {
+    await this.goto();
+    await this.waitForPositionsLoaded();
+    await this.selectCurrency(code);
   }
 
   async expectPosition(symbolOrName: string) {

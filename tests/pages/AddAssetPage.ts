@@ -81,9 +81,10 @@ export class AddAssetPage {
       .getByRole('combobox');
   }
 
-  private async choose(select: Locator, option: string) {
+  private async choose(select: Locator, option: string | RegExp) {
     await select.click();
-    await this.page.getByRole('option', { name: option, exact: true }).click();
+    const name = typeof option === 'string' ? { name: option, exact: true } : { name: option };
+    await this.page.getByRole('option', name).click();
   }
 
   async goto() {
@@ -120,6 +121,40 @@ export class AddAssetPage {
     await this.searchInput.fill(symbol);
     await this.symbolInput.fill(symbol);
     await this.nameInput.fill(name);
+  }
+
+  /**
+   * Bonds only: fills the "Enter Manually" form (fixed-rate bonds).
+   * `bondType` is the code, e.g. 'TOS' or 'ROS'.
+   */
+  async enterBondManually(bond: {
+    name: string;
+    bondType: string;
+    /** ISO date, e.g. '2035-12-31'. */
+    maturityDate: string;
+    interestRate: number | string;
+  }) {
+    await this.selectBondMode('Enter Manually');
+    await this.choose(this.bondTypeSelect, new RegExp(`^${bond.bondType} - `));
+    await this.nameInput.fill(bond.name);
+    await this.maturityDateInput.fill(bond.maturityDate);
+    await this.interestRateInput.fill(String(bond.interestRate));
+  }
+
+  /**
+   * Full flow for a stock or crypto: opens the form, enters the asset by hand,
+   * submits and waits for the success alert + redirect.
+   */
+  async addManualAsset(
+    type: 'Stocks' | 'Cryptocurrencies',
+    asset: { symbol: string; name: string },
+    tx: TransactionDetails
+  ) {
+    await this.goto();
+    if (type !== 'Stocks') await this.selectAssetType(type);
+    await this.enterAssetManually(asset.symbol, asset.name);
+    await this.fillTransaction(tx);
+    await this.expectSuccess();
   }
 
   async fillTransaction({ quantity, type, price, date }: TransactionDetails) {
