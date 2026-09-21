@@ -1,5 +1,12 @@
-# Deploy: ustaw Variables — PROD_DOMAIN; opcjonalnie PROD_ALLOWED_HOSTS (inaczej domyślna lista z domeną).
-# Sekrety Swarm (external) i SSH: bez zmian w repozytorium poza PROD_SSH_*.
+# Runs on every push to main: test -> build & push images to GHCR -> deploy to the Swarm host over SSH.
+#
+# Required in GitHub repo settings for the deploy job:
+#   Variables: PROD_DOMAIN (optional: PROD_ALLOWED_HOSTS, defaults to localhost,127.0.0.1,backend,<domain>)
+#   Secrets:   PROD_SSH_HOST, PROD_SSH_USER, PROD_SSH_PRIVATE_KEY (optional: PROD_SSH_PORT, defaults to 22)
+#
+# The app's own secrets (postgres_password, django_secret_key, alphavantage_api_key,
+# newsdata_api_key, grafana_admin_password) are not managed here. They must already exist
+# as Docker Swarm secrets on the host, see docker/docker-stack.prod.yaml.
 
 name: pipeline
 

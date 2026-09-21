@@ -1,3 +1,7 @@
+# End-to-end browser tests (Chromium, Firefox, WebKit) on push and PRs to main.
+# Playwright starts the Django API (backend.settings_e2e, seeded demo user) and the Vite dev server
+# itself in CI, see webServer in playwright.config.ts. The HTML report is uploaded as an artifact.
+
 name: Playwright Tests
 on:
   push:
